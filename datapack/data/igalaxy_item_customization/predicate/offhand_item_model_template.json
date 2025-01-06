@@ -1,0 +1,13 @@
+{
+	"condition": "minecraft:entity_properties",
+	"entity": "this",
+	"predicate": {
+		"slots": {
+			"weapon.offhand": {
+				"predicates": {
+					"minecraft:custom_data": "{\"igalaxy_item_customization:is_item_model_template\": 1b}"
+				}
+			}
+		}
+	}
+}

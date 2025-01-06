@@ -1,0 +1,8 @@
+scoreboard objectives add igy_itmcst_hold_template dummy
+scoreboard objectives add igy_itmcst_ingredient_count dummy
+
+scoreboard objectives add igy_itmcst_use_smithing_table minecraft.custom:minecraft.interact_with_smithing_table
+
+schedule function igalaxy_item_customization:clock 10t
+
+scoreboard players set igy_item_customization_setup igy_datapacks 1
