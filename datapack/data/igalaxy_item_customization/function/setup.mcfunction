@@ -1,5 +1,5 @@
-scoreboard objectives add igy_itmcst_hold_template dummy
 scoreboard objectives add igy_itmcst_ingredient_count dummy
+scoreboard objectives add igy_itmcst_offhand_count dummy
 
 scoreboard objectives add igy_itmcst_use_smithing_table minecraft.custom:minecraft.interact_with_smithing_table
 
