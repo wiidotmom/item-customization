@@ -1,0 +1,91 @@
+{
+	"type": "minecraft:archaeology",
+	"pools": [
+		{
+			"bonus_rolls": 0.0,
+			"entries": [
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:burn_pottery_sherd"
+				},
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:danger_pottery_sherd"
+				},
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:friend_pottery_sherd"
+				},
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:heart_pottery_sherd"
+				},
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:heartbreak_pottery_sherd"
+				},
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:howl_pottery_sherd"
+				},
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:sheaf_pottery_sherd"
+				},
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:wayfinder_armor_trim_smithing_template"
+				},
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:raiser_armor_trim_smithing_template"
+				},
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:shaper_armor_trim_smithing_template"
+				},
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:host_armor_trim_smithing_template"
+				},
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:command_block",
+					"functions": [
+						{
+							"function": "minecraft:set_components",
+							"components": {
+								"minecraft:custom_data": {
+									"igalaxy_item_customization:is_customization_template": 1
+								},
+								"minecraft:item_name": "\"Item Customization\"",
+								"minecraft:lore": [
+									"{\"color\":\"gray\",\"italic\":false,\"text\":\"Smithing Template\"}",
+									"\" \"",
+									"{\"color\":\"gray\",\"italic\":false,\"text\":\"Applies to:\"}",
+									"{\"color\":\"blue\",\"italic\":false,\"text\":\" Any\"}",
+									"{\"color\":\"gray\",\"italic\":false,\"text\":\"Ingredients:\"}",
+									"{\"color\":\"blue\",\"italic\":false,\"text\":\" Echo Shard\"}"
+								],
+								"minecraft:item_model": "igalaxy_item_customization:customization_template",
+								"minecraft:consumable": {
+									"animation": "none",
+									"sound": "minecraft:ui.button.click",
+									"has_consume_particles": false,
+									"consume_seconds": 9999
+								},
+								"minecraft:rarity": "uncommon"
+							}
+						}
+					]
+				},
+				{
+					"type": "minecraft:item",
+					"name": "minecraft:music_disc_relic"
+				}
+			],
+			"rolls": 1.0
+		}
+	],
+	"random_sequence": "minecraft:archaeology/trail_ruins_rare"
+}

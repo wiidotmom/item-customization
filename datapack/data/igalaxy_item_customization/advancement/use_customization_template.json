@@ -1,0 +1,30 @@
+{
+	"criteria": {
+		"use_customization_template": {
+			"trigger": "minecraft:using_item",
+			"conditions": {
+				"item": {
+					"predicates": {
+						"minecraft:custom_data": {
+							"igalaxy_item_customization:is_customization_template": 1
+						}
+					}
+				},
+				"player": [
+					{
+						"condition": "minecraft:entity_scores",
+						"entity": "this",
+						"scores": {
+							"igy_itmcst_use_template_cooldown": {
+								"max": 0
+							}
+						}
+					}
+				]
+			}
+		}
+	},
+	"rewards": {
+		"function": "igalaxy_item_customization:template/use_customization_template"
+	}
+}
