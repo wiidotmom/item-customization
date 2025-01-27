@@ -45,4 +45,7 @@ execute as @a if score @s igy_itmcst_tooltip_style matches 1.. run function igal
 
 # TODO: COPY/RESET
 
+execute as @a if score @s igy_itmcst_copy matches 1.. run data modify storage igalaxy_item_customization:storage item_settings set from entity @s Inventory[{Slot:-106b}].components.'minecraft:custom_data'.item_settings
+execute as @a if score @s igy_itmcst_copy matches 1.. run function igalaxy_item_customization:template/settings/copy with storage igalaxy_item_customization:storage
+
 schedule function igalaxy_item_customization:clock 10t

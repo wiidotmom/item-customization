@@ -2,8 +2,8 @@
 	"pack": {
 		"description": [
 			{ "color": "#ffacff", "text": "igalaxy's Item Customization" },
-			{ "color": "gray", "text": "\n1.0.0 for Minecraft 1.21.4 (data)" }
+			{ "color": "gray", "text": "\n1.0.0 for Minecraft 1.21.5 (data)" }
 		],
-		"pack_format": 61
+		"pack_format": 49
 	}
 }
