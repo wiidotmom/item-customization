@@ -25,9 +25,9 @@ scoreboard players enable @a item_customization_i_really_want_to_reset_for_real_
 execute as @a if score @s igy_itmcst_item_model matches 1.. run data modify storage igalaxy_item_customization:storage field_name set value "minecraft:item_model"
 execute as @a if score @s igy_itmcst_item_model matches 1.. run function igalaxy_item_customization:template/settings/get_string_input
 
-# TODO: CUSTOM MODEL DATA
+# TODO: CUSTOM MODEL DATA VALUES
 
-# TODO: EQUIPPABLE
+# TODO: EQUIPPABLE TEXTURE
 
 execute as @a if score @s igy_itmcst_note_block_sound matches 1.. run data modify storage igalaxy_item_customization:storage field_name set value "minecraft:note_block_sound"
 execute as @a if score @s igy_itmcst_note_block_sound matches 1.. run function igalaxy_item_customization:template/settings/get_string_input
@@ -41,7 +41,7 @@ execute as @a if score @s igy_itmcst_instrument matches 1.. run function igalaxy
 execute as @a if score @s igy_itmcst_tooltip_style matches 1.. run data modify storage igalaxy_item_customization:storage field_name set value "minecraft:tooltip_style"
 execute as @a if score @s igy_itmcst_tooltip_style matches 1.. run function igalaxy_item_customization:template/settings/get_string_input
 
-# TODO: TOOLTIP HIDE
+# TODO: TOOLTIP HIDE ADDITIONAl, HIDE COMPLETELY
 
 execute as @a if score @s igy_itmcst_copy matches 1.. run data modify storage igalaxy_item_customization:storage item_settings set from entity @s Inventory[{Slot:-106b}].components.'minecraft:custom_data'.item_settings
 execute as @a if score @s igy_itmcst_copy matches 1.. run function igalaxy_item_customization:template/settings/copy with storage igalaxy_item_customization:storage
