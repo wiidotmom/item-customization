@@ -43,9 +43,11 @@ execute as @a if score @s igy_itmcst_tooltip_style matches 1.. run function igal
 
 # TODO: TOOLTIP HIDE
 
-# TODO: COPY/RESET
-
 execute as @a if score @s igy_itmcst_copy matches 1.. run data modify storage igalaxy_item_customization:storage item_settings set from entity @s Inventory[{Slot:-106b}].components.'minecraft:custom_data'.item_settings
 execute as @a if score @s igy_itmcst_copy matches 1.. run function igalaxy_item_customization:template/settings/copy with storage igalaxy_item_customization:storage
+
+execute as @a if score @s igy_itmcst_reset matches 1.. run function igalaxy_item_customization:template/settings/reset/ask
+# TODO: does this actually reset? need to check
+execute as @a if score @s item_customization_i_really_want_to_reset_for_real_seriously matches 1.. run function igalaxy_item_customization:template/settings/reset/confirm
 
 schedule function igalaxy_item_customization:clock 10t

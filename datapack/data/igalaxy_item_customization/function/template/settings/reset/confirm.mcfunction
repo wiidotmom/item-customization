@@ -1,0 +1,2 @@
+item modify entity @s weapon.mainhand igalaxy_item_customization:reset_item_settings
+scoreboard players reset @s item_customization_i_really_want_to_reset_for_real_seriously
