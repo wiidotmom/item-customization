@@ -27,7 +27,7 @@ execute as @a if score @s igy_itmcst_item_model matches 1.. run function igalaxy
 
 # TODO: CUSTOM MODEL DATA VALUES
 
-# TODO: EQUIPPABLE TEXTURE
+execute as @a if score @s igy_itmcst_equipment_texture matches 1.. run function igalaxy_item_customization:template/settings/equippable/get_string_input
 
 execute as @a if score @s igy_itmcst_note_block_sound matches 1.. run data modify storage igalaxy_item_customization:storage field_name set value "minecraft:note_block_sound"
 execute as @a if score @s igy_itmcst_note_block_sound matches 1.. run function igalaxy_item_customization:template/settings/get_string_input
