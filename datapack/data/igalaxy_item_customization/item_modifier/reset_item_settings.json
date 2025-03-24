@@ -1,6 +1,8 @@
 {
 	"function": "minecraft:set_components",
 	"components": {
-		"minecraft:custom_data": "{\"item_settings\":{}}"
+		"minecraft:custom_data": {
+			"igalaxy_item_customization:item_settings": {}
+		}
 	}
 }

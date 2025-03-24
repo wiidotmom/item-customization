@@ -4,16 +4,16 @@
 		"minecraft:custom_data": {
 			"igalaxy_item_customization:is_customization_template": 1
 		},
-		"minecraft:item_name": "\"Item Customization\"",
+		"minecraft:item_name": "Item Customization",
 		"minecraft:lore": [
-			"{\"color\":\"gray\",\"italic\":false,\"text\":\"Smithing Template\"}",
-			"\" \"",
-			"{\"color\":\"gray\",\"italic\":false,\"text\":\"Applies to:\"}",
-			"{\"color\":\"blue\",\"italic\":false,\"text\":\" Any\"}",
-			"{\"color\":\"gray\",\"italic\":false,\"text\":\"Ingredients:\"}",
-			"{\"color\":\"blue\",\"italic\":false,\"text\":\" Echo Shard\"}"
+			{ "color": "gray", "italic": false, "text": "Smithing Template" },
+			{ "text": "" },
+			{ "color": "gray", "italic": false, "text": "Applies to:" },
+			{ "color": "blue", "italic": false, "text": " Any" },
+			{ "color": "gray", "italic": false, "text": "Ingredients:" },
+			{ "color": "blue", "italic": false, "text": " Echo Shard" }
 		],
-		"minecraft:item_model": "igalaxy_item_customization:customization_template",
+		"minecraft:item_model": "igalaxy_item_customization:item_customization_smithing_template",
 		"minecraft:consumable": {
 			"animation": "none",
 			"sound": "minecraft:ui.button.click",

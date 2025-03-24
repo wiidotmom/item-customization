@@ -1,0 +1,14 @@
+{
+	"op": "add",
+	"path": "/pools/0/entries/-",
+	"value": {
+		"type": "minecraft:item",
+		"name": "minecraft:command_block",
+		"functions": [
+			{
+				"function": "minecraft:reference",
+				"name": "igalaxy_item_customization:customization_template"
+			}
+		]
+	}
+}

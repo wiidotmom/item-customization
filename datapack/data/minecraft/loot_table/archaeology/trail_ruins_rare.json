@@ -53,29 +53,8 @@
 					"name": "minecraft:command_block",
 					"functions": [
 						{
-							"function": "minecraft:set_components",
-							"components": {
-								"minecraft:custom_data": {
-									"igalaxy_item_customization:is_customization_template": 1
-								},
-								"minecraft:item_name": "\"Item Customization\"",
-								"minecraft:lore": [
-									"{\"color\":\"gray\",\"italic\":false,\"text\":\"Smithing Template\"}",
-									"\" \"",
-									"{\"color\":\"gray\",\"italic\":false,\"text\":\"Applies to:\"}",
-									"{\"color\":\"blue\",\"italic\":false,\"text\":\" Any\"}",
-									"{\"color\":\"gray\",\"italic\":false,\"text\":\"Ingredients:\"}",
-									"{\"color\":\"blue\",\"italic\":false,\"text\":\" Echo Shard\"}"
-								],
-								"minecraft:item_model": "igalaxy_item_customization:customization_template",
-								"minecraft:consumable": {
-									"animation": "none",
-									"sound": "minecraft:ui.button.click",
-									"has_consume_particles": false,
-									"consume_seconds": 9999
-								},
-								"minecraft:rarity": "uncommon"
-							}
+							"function": "minecraft:reference",
+							"name": "igalaxy_item_customization:customization_template"
 						}
 					]
 				},

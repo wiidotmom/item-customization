@@ -1,4 +1,4 @@
-data modify storage igalaxy_item_customization:storage item_settings set from entity @s Inventory[{Slot:-106b}].components.'minecraft:custom_data'.item_settings
+data modify storage igalaxy_item_customization:storage item_settings set from entity @s Inventory[{Slot:-106b}].components.'minecraft:custom_data'.'igalaxy_item_customization:item_settings'
 
 execute store result score @s igy_itmcst_offhand_count run data get entity @s Inventory[{Slot:-106b}].count
 scoreboard players remove @s igy_itmcst_offhand_count 1
