@@ -3,9 +3,11 @@
 	"entity": "this",
 	"predicate": {
 		"slots": {
-			"weapon.offhand": {
+			"weapon.mainhand": {
 				"predicates": {
-					"minecraft:custom_data": "{\"igalaxy_item_customization:is_customization_template\": 1b}"
+					"minecraft:custom_data": {
+						"igalaxy_item_customization:is_customization_template": 1
+					}
 				}
 			}
 		}

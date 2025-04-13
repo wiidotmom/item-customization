@@ -1,1 +1,0 @@
-execute if predicate igalaxy_item_customization:offhand_customization_template run function igalaxy_item_customization:smithing/run_customization

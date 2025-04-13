@@ -1,0 +1,21 @@
+{
+	"condition": "minecraft:entity_properties",
+	"entity": "this",
+	"predicate": {
+		"slots": {
+			"weapon.offhand": {
+				"predicates": {
+					"minecraft:custom_data": {
+						"igalaxy_item_customization:is_customization_template": 1
+					}
+				}
+			},
+			"weapon.mainhand": {
+				"count": {
+					"min": 1,
+					"max": 1
+				}
+			}
+		}
+	}
+}
