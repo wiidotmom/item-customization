@@ -1,4 +1,6 @@
-# 🎨 Item Customization
+# 🎨 igalaxy's Item Customization
+
+Adds a Smithing Template to apply custom item models and other components in survival
 
 ### Dependencies
 
