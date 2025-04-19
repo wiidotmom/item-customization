@@ -11,7 +11,7 @@
 			{ "color": "gray", "italic": false, "text": "Applies to:" },
 			{ "color": "blue", "italic": false, "text": " Any" },
 			{ "color": "gray", "italic": false, "text": "Ingredients:" },
-			{ "color": "blue", "italic": false, "text": " Echo Shard" }
+			{ "color": "blue", "italic": false, "text": " Resin Clump" }
 		],
 		"minecraft:item_model": "igalaxy_item_customization:item_customization_smithing_template",
 		"minecraft:consumable": {
