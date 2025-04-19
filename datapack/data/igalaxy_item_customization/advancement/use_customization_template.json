@@ -3,13 +3,6 @@
 		"use_customization_template": {
 			"trigger": "minecraft:using_item",
 			"conditions": {
-				"item": {
-					"predicates": {
-						"minecraft:custom_data": {
-							"igalaxy_item_customization:is_customization_template": 1
-						}
-					}
-				},
 				"player": [
 					{
 						"condition": "minecraft:entity_scores",
@@ -19,6 +12,10 @@
 								"max": 0
 							}
 						}
+					},
+					{
+						"condition": "minecraft:reference",
+						"name": "igalaxy_item_customization:mainhand_customization_template"
 					}
 				]
 			}

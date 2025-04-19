@@ -2,7 +2,7 @@
 	"function": "minecraft:set_components",
 	"components": {
 		"minecraft:custom_data": {
-			"igalaxy_item_customization:item_settings": {}
+			"item_settings": {}
 		}
 	}
 }

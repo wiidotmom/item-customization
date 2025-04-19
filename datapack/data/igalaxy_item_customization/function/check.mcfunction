@@ -30,7 +30,7 @@ execute if score @s igy_itmcst_tooltip_style matches 1.. run function igalaxy_it
 
 execute if score @s igy_itmcst_hide_tooltip matches 1.. run function igalaxy_item_customization:template/settings/tooltip/hide_completely
 
-execute if score @s igy_itmcst_copy matches 1.. run data modify storage igalaxy_item_customization:storage item_settings set from entity @s equipment.offhand.components.'minecraft:custom_data'.'igalaxy_item_customization:item_settings'
+execute if score @s igy_itmcst_copy matches 1.. run data modify storage igalaxy_item_customization:storage item_settings set from entity @s equipment.offhand.components.'minecraft:custom_data'.item_settings
 execute if score @s igy_itmcst_copy matches 1.. run data modify storage igalaxy_item_customization:storage custom_model_data set from entity @s equipment.offhand.components.'minecraft:custom_model_data'
 execute if score @s igy_itmcst_copy matches 1.. run function igalaxy_item_customization:template/settings/copy with storage igalaxy_item_customization:storage
 
