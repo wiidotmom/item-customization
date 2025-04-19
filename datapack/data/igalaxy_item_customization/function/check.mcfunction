@@ -17,7 +17,7 @@ execute if score @s igy_itmcst_equipment_texture matches 1.. run function igalax
 execute if score @s igy_itmcst_note_block_sound matches 1.. run data modify storage igalaxy_item_customization:storage field_name set value "minecraft:note_block_sound"
 execute if score @s igy_itmcst_note_block_sound matches 1.. run function igalaxy_item_customization:template/settings/get_string_input
 
-execute if score @s igy_itmcst_jukebox_song matches 1.. run data modify storage igalaxy_item_customization:storage field_name set value "minecraft:jukebox_song"
+execute if score @s igy_itmcst_jukebox_song matches 1.. run data modify storage igalaxy_item_customization:storage field_name set value "minecraft:jukebox_playable"
 execute if score @s igy_itmcst_jukebox_song matches 1.. run function igalaxy_item_customization:template/settings/get_string_input
 
 execute if score @s igy_itmcst_instrument matches 1.. run data modify storage igalaxy_item_customization:storage field_name set value "minecraft:instrument"

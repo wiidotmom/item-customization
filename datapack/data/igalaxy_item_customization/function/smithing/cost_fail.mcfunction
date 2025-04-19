@@ -1,0 +1,2 @@
+tellraw @s [{"text":"Not enough Resin Clumps to apply smithing template! Needed: ", "color":"red"},{"score":{name:"@s",objective:"igy_itmcst_ingredient_cost"}}]
+execute at @s run playsound minecraft:item.shield.break master @s ~ ~ ~ 0.25 1

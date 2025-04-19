@@ -1,3 +1,4 @@
+scoreboard objectives add igy_itmcst_ingredient_cost dummy
 scoreboard objectives add igy_itmcst_ingredient_count dummy
 scoreboard objectives add igy_itmcst_offhand_count dummy
 scoreboard objectives add igy_itmcst_use_template_cooldown dummy
