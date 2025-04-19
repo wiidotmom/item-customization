@@ -1,4 +1,5 @@
-execute as @a[predicate=igalaxy_item_customization:can_apply_template] if score @s igy_itmcst_use_smithing_table matches 1.. run function igalaxy_item_customization:smithing/run_customization
+execute as @a if score @s igy_itmcst_use_smithing_table matches 1.. run function igalaxy_item_customization:smithing/check
+execute as @a if score @s igy_itmcst_use_crafting_table matches 1.. run function igalaxy_item_customization:craft/check
 
 execute as @a if score @s igy_itmcst_use_template_cooldown matches 1.. run scoreboard players remove @s igy_itmcst_use_template_cooldown 10
 execute as @a unless score @s igy_itmcst_use_template_cooldown matches 0.. run scoreboard players set @s igy_itmcst_use_template_cooldown 0

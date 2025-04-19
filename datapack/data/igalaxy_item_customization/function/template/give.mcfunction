@@ -1,0 +1,1 @@
+loot give @s loot {pools:[{rolls:{type:"minecraft:constant",value:1},entries:[{type:"item",name:"minecraft:command_block",functions:[{function:"minecraft:reference",name:"igalaxy_item_customization:customization_template"}]}]}]}

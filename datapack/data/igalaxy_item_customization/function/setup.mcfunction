@@ -21,6 +21,7 @@ scoreboard objectives add item_customization_i_really_want_to_reset_for_real_ser
 scoreboard objectives add igy_itmcst_copy trigger "Copy settings from offhand template"
 
 scoreboard objectives add igy_itmcst_use_smithing_table minecraft.custom:minecraft.interact_with_smithing_table
+scoreboard objectives add igy_itmcst_use_crafting_table minecraft.custom:minecraft.interact_with_crafting_table
 
 schedule function igalaxy_item_customization:clock 10t
 

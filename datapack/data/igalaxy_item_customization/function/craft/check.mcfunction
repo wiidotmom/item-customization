@@ -1,0 +1,2 @@
+execute if predicate igalaxy_item_customization:mainhand_customization_template unless function igalaxy_item_customization:craft/cost run scoreboard players reset @s igy_itmcst_use_crafting_table
+execute unless predicate igalaxy_item_customization:mainhand_customization_template run scoreboard players reset @s igy_itmcst_use_crafting_table
