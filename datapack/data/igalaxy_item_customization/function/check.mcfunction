@@ -14,6 +14,8 @@ execute if score @s custom_model_data_float matches 1.. run function igalaxy_ite
 
 execute if score @s igy_itmcst_equipment_texture matches 1.. run function igalaxy_item_customization:template/settings/equippable/get_string_input
 
+execute if score @s igy_itmcst_camera_overlay matches 1.. run function igalaxy_item_customization:template/settings/equippable/camera_overlay/get_string_input
+
 execute if score @s igy_itmcst_note_block_sound matches 1.. run data modify storage igalaxy_item_customization:storage field_name set value "minecraft:note_block_sound"
 execute if score @s igy_itmcst_note_block_sound matches 1.. run function igalaxy_item_customization:template/settings/get_string_input
 

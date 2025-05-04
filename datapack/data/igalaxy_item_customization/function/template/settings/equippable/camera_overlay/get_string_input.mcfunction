@@ -1,0 +1,2 @@
+data modify storage igalaxy_item_customization:storage string_input set string entity @s equipment.offhand.components.'minecraft:custom_name' 1 -1
+function igalaxy_item_customization:template/settings/equippable/camera_overlay/apply_string_input with storage igalaxy_item_customization:storage
