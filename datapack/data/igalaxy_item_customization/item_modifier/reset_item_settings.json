@@ -1,9 +1,0 @@
-{
-	"function": "minecraft:set_components",
-	"components": {
-		"minecraft:custom_data": {
-			"item_settings": {},
-			"igalaxy_item_customization:is_customization_template": 1
-		}
-	}
-}

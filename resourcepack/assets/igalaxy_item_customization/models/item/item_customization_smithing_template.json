@@ -1,6 +1,0 @@
-{
-	"parent": "minecraft:item/generated",
-	"textures": {
-		"layer0": "igalaxy_item_customization:item/item_customization_smithing_template"
-	}
-}

@@ -1,3 +1,0 @@
-scoreboard players reset @s igy_itmcst_use_smithing_table
-execute if predicate igalaxy_item_customization:can_apply_template run function igalaxy_item_customization:smithing/check_cost
-execute unless predicate igalaxy_item_customization:can_apply_template run scoreboard players reset @s igy_itmcst_use_smithing_table
