@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"id": "item-customization",
+	"id": "igalaxy_item_customization",
 	"version": "${version}",
 	"name": "Item Customization",
 	"description": "This is an example description! Tell everyone what your mod is about!",
@@ -12,7 +12,7 @@
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
 	},
 	"license": "CC0-1.0",
-	"icon": "assets/item-customization/icon.png",
+	"icon": "assets/igalaxy_item_customization/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
@@ -20,7 +20,7 @@
 		]
 	},
 	"mixins": [
-		"item-customization.mixins.json"
+		"igalaxy_item_customization.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.16.14",
