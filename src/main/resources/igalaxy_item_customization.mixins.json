@@ -3,7 +3,7 @@
 	"package": "mom.wii.itemcustomization.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"ExampleMixin"
+		"ServerCommonNetworkHandlerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

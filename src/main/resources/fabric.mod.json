@@ -12,7 +12,7 @@
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
 	},
 	"license": "CC0-1.0",
-	"environment": "*",
+	"environment": "server",
 	"entrypoints": {
 		"main": [
 			"mom.wii.itemcustomization.ItemCustomization"
@@ -25,7 +25,10 @@
 		"fabricloader": ">=0.16.14",
 		"minecraft": "~1.21.8",
 		"java": ">=21",
-		"fabric-api": "*"
+		"fabric-api": "*",
+		"patched": ">=7.0.0",
+		"polymer-core": ">=0.13.0",
+		"polymer-resource-pack": ">=0.13.0"
 	},
 	"suggests": {
 		"another-mod": "*"
