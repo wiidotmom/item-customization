@@ -1,6 +1,7 @@
 package mom.wii.itemcustomization;
 
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
+import mom.wii.itemcustomization.dialog.DialogManager;
 import mom.wii.itemcustomization.util.IdentifierIndex;
 import net.fabricmc.api.ModInitializer;
 
@@ -15,6 +16,7 @@ import net.minecraft.dialog.DialogButtonData;
 import net.minecraft.dialog.DialogCommonData;
 import net.minecraft.dialog.action.DynamicCustomDialogAction;
 import net.minecraft.dialog.action.SimpleDialogAction;
+import net.minecraft.dialog.type.Dialog;
 import net.minecraft.dialog.type.DialogInput;
 import net.minecraft.dialog.type.MultiActionDialog;
 import net.minecraft.dialog.type.NoticeDialog;
@@ -47,6 +49,7 @@ public class ItemCustomization implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static final Path RESOURCE_PACK_PATH = PolymerResourcePackUtils.getMainPath().toAbsolutePath().normalize();
 	private static IdentifierIndex models = new IdentifierIndex();
+	public static DialogManager DIALOG_MANAGER = new DialogManager();
 
 	@Override
 	public void onInitialize() {
@@ -91,10 +94,14 @@ public class ItemCustomization implements ModInitializer {
 				namespaces.forEach(namespace -> {
 					buttons.add(new DialogActionButtonData(
 							new DialogButtonData(Text.of(namespace), 150),
-							Optional.of(new SimpleDialogAction(new ClickEvent.Custom(
-									Identifier.of(MOD_ID, "template/item_model/namespace"),
-									Optional.of(NbtString.of(namespace))
-							)))
+							Optional.of(
+									new DialogManager.SimpleDialogCustomClickEventHandler(Identifier.of(MOD_ID, "template/item_model/namespace")) {
+										@Override
+										public Dialog getDialog(CustomClickActionC2SPacket customClickActionC2SPacket, ServerPlayerEntity serverPlayerEntity) {
+											return super.getDialog(customClickActionC2SPacket, serverPlayerEntity);
+										}
+									}.register().getAction(Optional.of(NbtString.of(namespace)))
+							)
 					));
 				});
 

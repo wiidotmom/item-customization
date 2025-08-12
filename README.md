@@ -5,3 +5,4 @@ Adds a Smithing Template to apply custom item models and other components in sur
 ### Dependencies
 
 - [Patched](https://modrinth.com/mod/patched)
+- polymer-resource-pack (Available via [Polymer](https://modrinth.com/mod/polymer))
