@@ -5,8 +5,44 @@
     "fallback": "Item Customization"
   },
   "exit_action": {
-    "label": { "translate": "gui.back" }
+    "label": { "translate": "gui.done" },
+    "width": 200
   },
+  "body": [
+    {
+      "type": "minecraft:plain_message",
+      "contents": {
+        "translate": "gui.igalaxy_item_customization.preview",
+        "fallback": "Preview"
+      }
+    },
+    {
+      "type": "minecraft:item",
+      "item": {
+        "id": "minecraft:egg",
+        "components": {
+          "item_model": "igalaxy_item_customization:preview_slot"
+        }
+      },
+      "height": 1,
+      "show_tooltip": false
+    },
+    {
+      "type": "minecraft:item",
+      "item": {
+        "id": "minecraft:paper"
+      },
+      "height": 24,
+      "show_tooltip": true
+    },
+    {
+      "type": "minecraft:plain_message",
+      "contents": {
+        "translate": "gui.igalaxy_item_customization.settings",
+        "fallback": "Settings"
+      }
+    }
+  ],
   "actions": [
     {
       "label": {
@@ -17,7 +53,7 @@
         "type": "custom",
         "id": "igalaxy_item_customization:item_model"
       },
-      "width": 150
+      "width": 125
     },
     {
       "label": {
@@ -28,7 +64,7 @@
         "type": "custom",
         "id": "igalaxy_item_customization:custom_model_data"
       },
-      "width": 150
+      "width": 125
     },
     {
       "label": {
@@ -39,7 +75,7 @@
         "type": "custom",
         "id": "igalaxy_item_customization:equipment"
       },
-      "width": 150
+      "width": 125
     },
     {
       "label": {
@@ -50,7 +86,7 @@
         "type": "custom",
         "id": "igalaxy_item_customization:sounds_and_songs"
       },
-      "width": 150
+      "width": 125
     },
     {
       "label": {
@@ -61,7 +97,7 @@
         "type": "custom",
         "id": "igalaxy_item_customization:tooltip"
       },
-      "width": 150
+      "width": 125
     },
     {
       "label": {
@@ -72,7 +108,7 @@
         "type": "custom",
         "id": "igalaxy_item_customization:misc"
       },
-      "width": 150
+      "width": 125
     }
   ]
 }

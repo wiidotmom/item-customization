@@ -51,7 +51,7 @@ public abstract class ServerCommonNetworkHandlerMixin {
                                     false,
                                     AfterAction.CLOSE,
                                     List.of(
-                                            new PlainMessageDialogBody(Text.of("Dialog not found"), 200)
+                                            new PlainMessageDialogBody(Text.of(packet.id() + " not found"), 200)
                                     ),
                                     List.of()
                             ),
