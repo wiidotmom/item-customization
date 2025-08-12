@@ -18,7 +18,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.common.CustomClickActionC2SPacket;
 import net.minecraft.network.packet.s2c.common.ShowDialogS2CPacket;
+import net.minecraft.registry.*;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -37,11 +39,15 @@ public class ItemCustomization implements ModInitializer {
 	public static final String MOD_ID = "igalaxy_item_customization";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static final ItemCustomizationConfig CONFIG = ItemCustomizationConfig.createToml(
-			FabricLoader.getInstance().getConfigDir(), "", "item-customization", ItemCustomizationConfig.class
+			FabricLoader.getInstance().getConfigDir(), "", MOD_ID, ItemCustomizationConfig.class
 	);
 	public static final Path RESOURCE_PACK_PATH = PolymerResourcePackUtils.getMainPath().toAbsolutePath().normalize();
 	private static final IdentifierIndex models = new IdentifierIndex();
 	public static DialogManager DIALOG_MANAGER = new DialogManager();
+
+	public static boolean isItemCustomizationTemplate(ItemStack itemStack) {
+		return itemStack.hasChangedComponent(DataComponentTypes.CUSTOM_DATA) && Objects.requireNonNull(itemStack.get(DataComponentTypes.CUSTOM_DATA)).contains("igalaxy_item_customization:is_customization_template");
+	}
 
 	@Override
 	public void onInitialize() {
@@ -75,8 +81,8 @@ public class ItemCustomization implements ModInitializer {
 
 		UseItemCallback.EVENT.register(((playerEntity, world, hand) -> {
 			ItemStack itemStack = playerEntity.getStackInHand(hand);
-			if (itemStack.hasChangedComponent(DataComponentTypes.CUSTOM_DATA) && Objects.requireNonNull(itemStack.get(DataComponentTypes.CUSTOM_DATA)).contains("igalaxy_item_customization:is_customization_template")) {
-				ServerPlayerEntity serverPlayerEntity = world.getServer().getPlayerManager().getPlayer(playerEntity.getUuid());
+			if (isItemCustomizationTemplate(itemStack)) {
+				ServerPlayerEntity player = world.getServer().getPlayerManager().getPlayer(playerEntity.getUuid());
 
 				ArrayList<DialogActionButtonData> buttons = new ArrayList<>();
 				HashSet<String> namespaces = new HashSet<>();
@@ -96,19 +102,11 @@ public class ItemCustomization implements ModInitializer {
 							)
 					));
 				});
-
-				ShowDialogS2CPacket dialogS2CPacket = new ShowDialogS2CPacket(
-						RegistryEntry.of(new MultiActionDialog(
-								new DialogCommonData(
-										itemStack.getName(), Optional.empty(), true, false, AfterAction.CLOSE, List.of(), List.of()
-								),
-								buttons,
-								Optional.empty(),
-								2
-						))
-				);
-
-				serverPlayerEntity.networkHandler.sendPacket(dialogS2CPacket);
+//				ShowDialogS2CPacket dialogS2CPacket = new ShowDialogS2CPacket(
+//						getRegisteredDialog(Identifier.of(MOD_ID, "root"))
+//				);
+//
+//				player.networkHandler.sendPacket(dialogS2CPacket);
 			}
 			return ActionResult.PASS;
 		}));

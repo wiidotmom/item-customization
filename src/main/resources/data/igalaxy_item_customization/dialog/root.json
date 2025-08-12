@@ -1,0 +1,78 @@
+{
+  "type": "minecraft:multi_action",
+  "title": {
+    "translate": "gui.igalaxy_item_customization.root.title",
+    "fallback": "Item Customization"
+  },
+  "exit_action": {
+    "label": { "translate": "gui.back" }
+  },
+  "actions": [
+    {
+      "label": {
+        "translate": "gui.igalaxy_item_customization.item_model.external_title",
+        "fallback": "Item Model..."
+      },
+      "action": {
+        "type": "custom",
+        "id": "igalaxy_item_customization:item_model"
+      },
+      "width": 150
+    },
+    {
+      "label": {
+        "translate": "gui.igalaxy_item_customization.custom_model_data.external_title",
+        "fallback": "Custom Model Data..."
+      },
+      "action": {
+        "type": "custom",
+        "id": "igalaxy_item_customization:custom_model_data"
+      },
+      "width": 150
+    },
+    {
+      "label": {
+        "translate": "gui.igalaxy_item_customization.equipment.external_title",
+        "fallback": "Equipment..."
+      },
+      "action": {
+        "type": "custom",
+        "id": "igalaxy_item_customization:equipment"
+      },
+      "width": 150
+    },
+    {
+      "label": {
+        "translate": "gui.igalaxy_item_customization.sounds_and_songs.external_title",
+        "fallback": "Sounds & Songs..."
+      },
+      "action": {
+        "type": "custom",
+        "id": "igalaxy_item_customization:sounds_and_songs"
+      },
+      "width": 150
+    },
+    {
+      "label": {
+        "translate": "gui.igalaxy_item_customization.tooltip.external_title",
+        "fallback": "Tooltip..."
+      },
+      "action": {
+        "type": "custom",
+        "id": "igalaxy_item_customization:tooltip"
+      },
+      "width": 150
+    },
+    {
+      "label": {
+        "translate": "gui.igalaxy_item_customization.misc.external_title",
+        "fallback": "Miscellaneous..."
+      },
+      "action": {
+        "type": "custom",
+        "id": "igalaxy_item_customization:misc"
+      },
+      "width": 150
+    }
+  ]
+}
