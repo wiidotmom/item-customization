@@ -5,38 +5,27 @@ import mom.wii.itemcustomization.dialog.DialogManager;
 import mom.wii.itemcustomization.util.IdentifierIndex;
 import net.fabricmc.api.ModInitializer;
 
-import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
-import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.dialog.AfterAction;
 import net.minecraft.dialog.DialogActionButtonData;
 import net.minecraft.dialog.DialogButtonData;
 import net.minecraft.dialog.DialogCommonData;
-import net.minecraft.dialog.action.DynamicCustomDialogAction;
-import net.minecraft.dialog.action.SimpleDialogAction;
 import net.minecraft.dialog.type.Dialog;
-import net.minecraft.dialog.type.DialogInput;
 import net.minecraft.dialog.type.MultiActionDialog;
-import net.minecraft.dialog.type.NoticeDialog;
 import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootPool;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.network.packet.PlayPackets;
 import net.minecraft.network.packet.c2s.common.CustomClickActionC2SPacket;
 import net.minecraft.network.packet.s2c.common.ShowDialogS2CPacket;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -47,8 +36,11 @@ import java.util.zip.ZipFile;
 public class ItemCustomization implements ModInitializer {
 	public static final String MOD_ID = "igalaxy_item_customization";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+	public static final ItemCustomizationConfig CONFIG = ItemCustomizationConfig.createToml(
+			FabricLoader.getInstance().getConfigDir(), "", "item-customization", ItemCustomizationConfig.class
+	);
 	public static final Path RESOURCE_PACK_PATH = PolymerResourcePackUtils.getMainPath().toAbsolutePath().normalize();
-	private static IdentifierIndex models = new IdentifierIndex();
+	private static final IdentifierIndex models = new IdentifierIndex();
 	public static DialogManager DIALOG_MANAGER = new DialogManager();
 
 	@Override
@@ -67,7 +59,7 @@ public class ItemCustomization implements ModInitializer {
 					if (entry.getName().matches("^assets/([^/]+)/items/.+\\.json$")) {
 						Matcher matcher = namespacePattern.matcher(entry.getName());
 						while (matcher.find()) {
-							if (!matcher.group(1).equals(MOD_ID))
+							if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(matcher.group(1))))
 								models.add(Identifier.of(matcher.group(1), matcher.group(2)));
 						}
 					}

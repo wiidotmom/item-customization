@@ -10,7 +10,6 @@ import net.minecraft.dialog.body.PlainMessageDialogBody;
 import net.minecraft.dialog.type.Dialog;
 import net.minecraft.dialog.type.NoticeDialog;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.common.CustomClickActionC2SPacket;
 import net.minecraft.network.packet.s2c.common.ShowDialogS2CPacket;
 import net.minecraft.registry.entry.RegistryEntry;
