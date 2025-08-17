@@ -70,23 +70,12 @@
     },
     {
       "label": {
-        "translate": "gui.igalaxy_item_customization.custom_model_data.external_title",
-        "fallback": "Custom Model Data..."
+        "translate": "gui.igalaxy_item_customization.equipment_model.external_title",
+        "fallback": "Equipment Model..."
       },
       "action": {
         "type": "custom",
-        "id": "igalaxy_item_customization:custom_model_data"
-      },
-      "width": 125
-    },
-    {
-      "label": {
-        "translate": "gui.igalaxy_item_customization.equipment.external_title",
-        "fallback": "Equipment..."
-      },
-      "action": {
-        "type": "custom",
-        "id": "igalaxy_item_customization:equipment"
+        "id": "igalaxy_item_customization:equipment_model"
       },
       "width": 125
     },
@@ -109,17 +98,6 @@
       "action": {
         "type": "custom",
         "id": "igalaxy_item_customization:tooltip"
-      },
-      "width": 125
-    },
-    {
-      "label": {
-        "translate": "gui.igalaxy_item_customization.misc.external_title",
-        "fallback": "Miscellaneous..."
-      },
-      "action": {
-        "type": "custom",
-        "id": "igalaxy_item_customization:misc"
       },
       "width": 125
     }
