@@ -1,26 +1,21 @@
 package mom.wii.itemcustomization;
 
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
+import mom.wii.itemcustomization.config.Config;
 import mom.wii.itemcustomization.dialog.DialogManager;
+import mom.wii.itemcustomization.item.Items;
 import mom.wii.itemcustomization.util.IdentifierIndex;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.dialog.AfterAction;
 import net.minecraft.dialog.DialogActionButtonData;
 import net.minecraft.dialog.DialogButtonData;
-import net.minecraft.dialog.DialogCommonData;
 import net.minecraft.dialog.type.Dialog;
-import net.minecraft.dialog.type.MultiActionDialog;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.common.CustomClickActionC2SPacket;
-import net.minecraft.network.packet.s2c.common.ShowDialogS2CPacket;
-import net.minecraft.registry.*;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -38,8 +33,8 @@ import java.util.zip.ZipFile;
 public class ItemCustomization implements ModInitializer {
 	public static final String MOD_ID = "igalaxy_item_customization";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-	public static final ItemCustomizationConfig CONFIG = ItemCustomizationConfig.createToml(
-			FabricLoader.getInstance().getConfigDir(), "", MOD_ID, ItemCustomizationConfig.class
+	public static final Config CONFIG = Config.createToml(
+			FabricLoader.getInstance().getConfigDir(), "", MOD_ID, Config.class
 	);
 	public static final Path RESOURCE_PACK_PATH = PolymerResourcePackUtils.getMainPath().toAbsolutePath().normalize();
 	private static final IdentifierIndex models = new IdentifierIndex();
@@ -52,6 +47,8 @@ public class ItemCustomization implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		PolymerResourcePackUtils.addModAssets(MOD_ID);
+
+		Items.register();
 
 		PolymerResourcePackUtils.RESOURCE_PACK_FINISHED_EVENT.register(() -> {
 			Pattern namespacePattern = Pattern.compile("^assets/([^/]+)/items/([^/]+)\\.json$");

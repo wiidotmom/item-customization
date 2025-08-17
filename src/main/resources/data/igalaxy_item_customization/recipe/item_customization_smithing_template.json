@@ -1,0 +1,45 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": "minecraft:gold_ingot",
+    "T": "minecraft:terracotta",
+    "S": {
+      "fabric:type": "fabric:components",
+      "base": "minecraft:command_block",
+      "components": {
+        "minecraft:custom_data": {
+          "igalaxy_item_customization:is_customization_template": 1
+        },
+        "minecraft:item_name": "Item Customization",
+        "minecraft:item_model": "igalaxy_item_customization:item_customization_smithing_template",
+        "minecraft:rarity": "uncommon"
+      }
+    }
+  },
+  "pattern": [
+    "#S#",
+    "#T#",
+    "###"
+  ],
+  "result": {
+    "count": 2,
+    "id": "minecraft:command_block",
+    "components": {
+      "minecraft:custom_data": {
+        "igalaxy_item_customization:is_customization_template": 1
+      },
+      "minecraft:item_name": "Item Customization",
+      "minecraft:lore": [
+        { "color": "gray", "italic": false, "text": "Smithing Template" },
+        { "text": "" },
+        { "color": "gray", "italic": false, "text": "Applies to:" },
+        { "color": "blue", "italic": false, "text": " Any" },
+        { "color": "gray", "italic": false, "text": "Ingredients:" },
+        { "color": "blue", "italic": false, "text": " Resin Clump" }
+      ],
+      "minecraft:item_model": "igalaxy_item_customization:item_customization_smithing_template",
+      "minecraft:rarity": "uncommon"
+    }
+  }
+}
