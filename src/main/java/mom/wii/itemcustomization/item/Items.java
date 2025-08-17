@@ -3,7 +3,7 @@ package mom.wii.itemcustomization.item;
 import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
 import eu.pb4.polymer.core.api.item.PolymerItemUtils;
 import mom.wii.itemcustomization.ItemCustomization;
-import mom.wii.itemcustomization.template.ItemCustomizationSmithingTemplate;
+import mom.wii.itemcustomization.template.SmithingTemplate;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
@@ -23,14 +23,6 @@ import java.util.List;
 
 public class Items {
     public static final ItemStack ITEM_CUSTOMIZATION_SMITHING_TEMPLATE;
-    public static final List<Text> ITEM_CUSTOMIZATION_SMITHING_TEMPLATE_TOOLTIP = List.of(
-            Text.of("Smithing Template").copy().styled(style -> style.withColor(Formatting.GRAY).withItalic(false)),
-            Text.empty(),
-            Text.of("Applies to:").copy().styled(style -> style.withColor(Formatting.GRAY).withItalic(false)),
-            Text.of(" Any").copy().styled(style -> style.withColor(Formatting.BLUE).withItalic(false)),
-            Text.of("Ingredients:").copy().styled(style -> style.withColor(Formatting.GRAY).withItalic(false)),
-            Text.of(" Resin Clump").copy().styled(style -> style.withColor(Formatting.BLUE).withItalic(false))
-    );
     public static final ItemGroup ITEM_GROUP;
 
     static {
@@ -42,7 +34,7 @@ public class Items {
                 .add(DataComponentTypes.ITEM_MODEL, Identifier.of(ItemCustomization.MOD_ID, "item_customization_smithing_template"))
                 .add(DataComponentTypes.ITEM_NAME, Text.of("Item Customization"))
                 .add(DataComponentTypes.RARITY, Rarity.UNCOMMON)
-                .add(DataComponentTypes.LORE, new LoreComponent(ITEM_CUSTOMIZATION_SMITHING_TEMPLATE_TOOLTIP))
+                .add(DataComponentTypes.LORE, new LoreComponent(List.of(Text.of("Smithing Template").copy().formatted(Formatting.GRAY))))
                 .build();
         commandBlock.applyComponentsFrom(componentMap);
         ITEM_CUSTOMIZATION_SMITHING_TEMPLATE = commandBlock;
@@ -60,11 +52,12 @@ public class Items {
         PolymerItemGroupUtils.registerPolymerItemGroup(ItemGroups.INGREDIENTS, Registries.ITEM_GROUP.get(ItemGroups.INGREDIENTS));
         PolymerItemGroupUtils.registerPolymerItemGroup(Identifier.of(ItemCustomization.MOD_ID, "item_group"), ITEM_GROUP);
 
-        PolymerItemUtils.ITEM_CHECK.register(ItemCustomizationSmithingTemplate::isItemCustomizationSmithingTemplate);
+        PolymerItemUtils.ITEM_CHECK.register(SmithingTemplate::isItemCustomizationSmithingTemplate);
         PolymerItemUtils.ITEM_MODIFICATION_EVENT.register(
                 (original, client, context) -> {
-                    if (ItemCustomizationSmithingTemplate.isItemCustomizationSmithingTemplate(original)) {
-                        client.set(DataComponentTypes.LORE, new LoreComponent(Items.ITEM_CUSTOMIZATION_SMITHING_TEMPLATE_TOOLTIP));
+                    if (SmithingTemplate.isItemCustomizationSmithingTemplate(original)) {
+                        SmithingTemplate template = SmithingTemplate.from(original);
+                        client.set(DataComponentTypes.LORE, new LoreComponent(template.getTooltip()));
                     }
                     return client;
                 }

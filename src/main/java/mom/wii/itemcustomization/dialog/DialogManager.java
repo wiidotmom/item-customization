@@ -26,6 +26,59 @@ import java.util.Optional;
 public class DialogManager {
     public HashMap<Identifier, BiConsumer<CustomClickActionC2SPacket, ServerPlayerEntity>> customClickEvents = new HashMap<>();
 
+    public BiConsumer<CustomClickActionC2SPacket, ServerPlayerEntity> register(Identifier identifier, BiConsumer<CustomClickActionC2SPacket, ServerPlayerEntity> handler) {
+        return this.customClickEvents.put(identifier, handler);
+    }
+
+    public static NoticeDialog simpleNoticeDialog(Text message) {
+        return new NoticeDialog(
+                new DialogCommonData(
+                        Text.empty(),
+                        Optional.empty(),
+                        true,
+                        true,
+                        AfterAction.CLOSE,
+                        List.of(
+                                new PlainMessageDialogBody(message, 200)
+                        ),
+                        List.of()
+                ),
+                new DialogActionButtonData(
+                        new DialogButtonData(
+                                Text.translatable("gui.ok"),
+                                Optional.empty(),
+                                150
+                        ),
+                        Optional.empty()
+                )
+        );
+    }
+
+    public static DialogActionButtonData simpleTranslatableMenuButton(String translation, String fallback, String action) {
+        return new DialogActionButtonData(
+                new DialogButtonData(
+                        Text.translatableWithFallback("gui.igalaxy_item_customization." + translation, fallback),
+                        125
+                ),
+                Optional.of(new SimpleDialogAction(
+                        new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, action), Optional.empty())
+                ))
+        );
+    }
+
+    public static DialogActionButtonData translatableMenuButtonWithTooltip(String labelTranslation, String labelFallback, String tooltipTranslation, String tooltipFallback, String action) {
+        return new DialogActionButtonData(
+                new DialogButtonData(
+                        Text.translatableWithFallback("gui.igalaxy_item_customization." + labelTranslation, labelFallback),
+                        Optional.of(Text.translatableWithFallback("gui.igalaxy_item_customization." + tooltipTranslation, tooltipFallback)),
+                        125
+                ),
+                Optional.of(new SimpleDialogAction(
+                        new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, action), Optional.empty())
+                ))
+        );
+    }
+
     public static class SimpleDialogCustomClickEventHandler implements BiConsumer<CustomClickActionC2SPacket, ServerPlayerEntity> {
         private Identifier id;
 

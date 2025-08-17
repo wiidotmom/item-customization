@@ -6,12 +6,7 @@
     },
     "minecraft:item_name": "Item Customization",
     "minecraft:lore": [
-      { "color": "gray", "italic": false, "text": "Smithing Template" },
-      { "text": "" },
-      { "color": "gray", "italic": false, "text": "Applies to:" },
-      { "color": "blue", "italic": false, "text": " Any" },
-      { "color": "gray", "italic": false, "text": "Ingredients:" },
-      { "color": "blue", "italic": false, "text": " Resin Clump" }
+      { "color": "gray", "italic": false, "text": "Smithing Template" }
     ],
     "minecraft:item_model": "igalaxy_item_customization:item_customization_smithing_template",
     "minecraft:rarity": "uncommon"

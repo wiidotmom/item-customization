@@ -3,11 +3,13 @@ package mom.wii.itemcustomization;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import mom.wii.itemcustomization.config.Config;
 import mom.wii.itemcustomization.dialog.DialogManager;
+import mom.wii.itemcustomization.dialog.Dialogs;
 import mom.wii.itemcustomization.item.Items;
-import mom.wii.itemcustomization.template.ItemCustomizationSmithingTemplate;
+import mom.wii.itemcustomization.template.SmithingTemplate;
 import mom.wii.itemcustomization.util.IdentifierIndex;
 import net.fabricmc.api.ModInitializer;
 
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.ItemStack;
@@ -24,7 +26,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import static mom.wii.itemcustomization.template.ItemCustomizationSmithingTemplate.isItemCustomizationSmithingTemplate;
+import static mom.wii.itemcustomization.template.SmithingTemplate.isItemCustomizationSmithingTemplate;
 
 public class ItemCustomization implements ModInitializer {
 	public static final String MOD_ID = "igalaxy_item_customization";
@@ -33,7 +35,8 @@ public class ItemCustomization implements ModInitializer {
 			FabricLoader.getInstance().getConfigDir(), "", MOD_ID, Config.class
 	);
 	public static final Path RESOURCE_PACK_PATH = PolymerResourcePackUtils.getMainPath().toAbsolutePath().normalize();
-	private static final IdentifierIndex models = new IdentifierIndex();
+	public static final IdentifierIndex ITEM_MODEL_INDEX = new IdentifierIndex();
+	public static final IdentifierIndex EQUIPMENT_MODEL_INDEX = new IdentifierIndex();
 	public static DialogManager DIALOG_MANAGER = new DialogManager();
 
 	@Override
@@ -41,9 +44,11 @@ public class ItemCustomization implements ModInitializer {
 		PolymerResourcePackUtils.addModAssets(MOD_ID);
 
 		Items.register();
+		Dialogs.register();
 
 		PolymerResourcePackUtils.RESOURCE_PACK_FINISHED_EVENT.register(() -> {
-			Pattern namespacePattern = Pattern.compile("^assets/([^/]+)/items/([^/]+)\\.json$");
+			Pattern itemNamespacePattern = Pattern.compile("^assets/([^/]+)/items/([^/]+)\\.json$");
+			Pattern equipmentNamespacePattern = Pattern.compile("^assets/([^/]+)/equipment/([^/]+)\\.json$");
             try {
                 ZipFile zipFile = new ZipFile(RESOURCE_PACK_PATH.toFile());
 
@@ -51,52 +56,42 @@ public class ItemCustomization implements ModInitializer {
 
 				while (entries.hasMoreElements()) {
 					ZipEntry entry = entries.nextElement();
-					if (entry.getName().matches("^assets/([^/]+)/items/.+\\.json$")) {
-						Matcher matcher = namespacePattern.matcher(entry.getName());
+					if (entry.getName().matches(itemNamespacePattern.pattern())) {
+						Matcher matcher = itemNamespacePattern.matcher(entry.getName());
 						while (matcher.find()) {
 							if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(matcher.group(1))))
-								models.add(Identifier.of(matcher.group(1), matcher.group(2)));
+								ITEM_MODEL_INDEX.add(Identifier.of(matcher.group(1), matcher.group(2)));
+						}
+					} else if (entry.getName().matches(equipmentNamespacePattern.pattern())) {
+						Matcher matcher = equipmentNamespacePattern.matcher(entry.getName());
+						while (matcher.find()) {
+							if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(matcher.group(1))))
+								EQUIPMENT_MODEL_INDEX.add(Identifier.of(matcher.group(1), matcher.group(2)));
 						}
 					}
 				}
 
-				LOGGER.info(models.set.toString());
-
+                LOGGER.info("ITEM_MODEL_INDEX: {}", ITEM_MODEL_INDEX.identifiers);
+                LOGGER.info("EQUIPMENT_MODEL_INDEX: {}", EQUIPMENT_MODEL_INDEX.identifiers);
 				zipFile.close();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
 
+		UseBlockCallback.EVENT.register(((playerEntity, world, hand, blockHitResult) -> {
+			ItemStack itemStack = playerEntity.getStackInHand(hand);
+			if (isItemCustomizationSmithingTemplate(itemStack)) {
+				SmithingTemplate.from(itemStack).openDialog((ServerPlayerEntity) playerEntity);
+				return ActionResult.FAIL;
+			}
+			return ActionResult.PASS;
+		}));
+
 		UseItemCallback.EVENT.register(((playerEntity, world, hand) -> {
 			ItemStack itemStack = playerEntity.getStackInHand(hand);
 			if (isItemCustomizationSmithingTemplate(itemStack)) {
-				ItemCustomizationSmithingTemplate.from(itemStack).showRootDialog((ServerPlayerEntity) playerEntity);
-//				ServerPlayerEntity player = world.getServer().getPlayerManager().getPlayer(playerEntity.getUuid());
-//
-//				ArrayList<DialogActionButtonData> buttons = new ArrayList<>();
-//				HashSet<String> namespaces = new HashSet<>();
-//				models.set.forEach(identifier -> {
-//					namespaces.add(identifier.getNamespace());
-//				});
-//				namespaces.forEach(namespace -> {
-//					buttons.add(new DialogActionButtonData(
-//							new DialogButtonData(Text.of(namespace), 150),
-//							Optional.of(
-//									new DialogManager.SimpleDialogCustomClickEventHandler(Identifier.of(MOD_ID, "template/item_model/namespace")) {
-//										@Override
-//										public Dialog getDialog(CustomClickActionC2SPacket customClickActionC2SPacket, ServerPlayerEntity serverPlayerEntity) {
-//											return super.getDialog(customClickActionC2SPacket, serverPlayerEntity);
-//										}
-//									}.register().getAction(Optional.of(NbtString.of(namespace)))
-//							)
-//					));
-//				});
-//				ShowDialogS2CPacket dialogS2CPacket = new ShowDialogS2CPacket(
-//						getRegisteredDialog(Identifier.of(MOD_ID, "root"))
-//				);
-//
-//				player.networkHandler.sendPacket(dialogS2CPacket);
+				SmithingTemplate.from(itemStack).openDialog((ServerPlayerEntity) playerEntity);
 			}
 			return ActionResult.PASS;
 		}));

@@ -3,6 +3,10 @@
     {
       "type": "minecraft:single",
       "resource": "minecraft:gui/sprites/container/slot"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:gui/sprites/icon/search"
     }
   ]
 }

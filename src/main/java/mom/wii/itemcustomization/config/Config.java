@@ -10,4 +10,7 @@ import java.util.List;
 public class Config extends WrappedConfig {
     @Comment("A list of namespaces to exclude from available options")
     public List<String> excludedNamespaces = ValueList.create("", "minecraft", ItemCustomization.MOD_ID);
+
+    @Comment("The item to use as the Smithing Table ingredient for Item Customization Smithing Templates")
+    public String smithingIngredient = "minecraft:resin_clump";
 }

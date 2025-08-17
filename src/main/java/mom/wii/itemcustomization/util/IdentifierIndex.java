@@ -3,23 +3,35 @@ package mom.wii.itemcustomization.util;
 import net.minecraft.util.Identifier;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class IdentifierIndex {
-    public HashSet<Identifier> set;
+    public HashSet<Identifier> identifiers;
+    public HashSet<String> namespaces;
 
     public IdentifierIndex() {
-        set = new HashSet<>();
+        identifiers = new HashSet<>();
+        namespaces = new HashSet<>();
     }
 
     public boolean add(Identifier identifier) {
-        return set.add(identifier);
+        return identifiers.add(identifier) && namespaces.add(identifier.getNamespace());
+    }
+
+    public List<Identifier> getIdentifiersOfNamespace(String namespace) {
+        return identifiers.stream().filter(x -> x.getNamespace().equals(namespace)).collect(Collectors.toList());
     }
 
     public boolean remove(Identifier identifier) {
-        return set.remove(identifier);
+        boolean result = identifiers.remove(identifier);
+        if (identifiers.stream().noneMatch(x -> x.getNamespace().equals(identifier.getNamespace()))) {
+            namespaces.remove(identifier.getNamespace());
+        }
+        return result;
     }
 
     public boolean contains(Identifier identifier) {
-        return set.contains(identifier);
+        return identifiers.contains(identifier);
     }
 }
