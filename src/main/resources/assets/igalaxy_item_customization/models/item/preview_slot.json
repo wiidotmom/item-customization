@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "minecraft:gui/sprites/container/slot"
+  },
+  "display": {
+    "gui": {
+      "scale": [1.125, 1.125, 1.0],
+      "translation": [0, -11, 0]
+    }
+  }
+}

@@ -36,6 +36,19 @@
       "show_tooltip": true
     },
     {
+      "type": "minecraft:item",
+      "item": {
+        "id": "minecraft:resin_clump",
+        "count": 7
+      },
+      "description": {
+        "translate": "gui.igalaxy_item_customization.to_apply",
+        "fallback": " to apply"
+      },
+      "show_decoration": true,
+      "show_tooltip": true
+    },
+    {
       "type": "minecraft:plain_message",
       "contents": {
         "translate": "gui.igalaxy_item_customization.settings",
