@@ -4,10 +4,7 @@
     "translate": "gui.igalaxy_item_customization.root.title",
     "fallback": "Item Customization"
   },
-  "exit_action": {
-    "label": { "translate": "gui.done" },
-    "width": 200
-  },
+  "after_action": "wait_for_response",
   "body": [
     {
       "type": "minecraft:plain_message",
