@@ -78,12 +78,12 @@
     },
     {
       "label": {
-        "translate": "gui.igalaxy_item_customization.sounds_and_songs.external_title",
-        "fallback": "Sounds & Songs..."
+        "translate": "gui.igalaxy_item_customization.music_and_sounds.external_title",
+        "fallback": "Music & Sounds..."
       },
       "action": {
         "type": "custom",
-        "id": "igalaxy_item_customization:sounds_and_songs"
+        "id": "igalaxy_item_customization:music_and_sounds"
       },
       "width": 125
     },

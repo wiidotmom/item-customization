@@ -3,6 +3,7 @@ package mom.wii.itemcustomization.item;
 import eu.pb4.polymer.core.api.item.PolymerItemGroupUtils;
 import eu.pb4.polymer.core.api.item.PolymerItemUtils;
 import mom.wii.itemcustomization.ItemCustomization;
+import mom.wii.itemcustomization.template.ItemCustomizationSmithingTemplate;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
@@ -59,10 +60,10 @@ public class Items {
         PolymerItemGroupUtils.registerPolymerItemGroup(ItemGroups.INGREDIENTS, Registries.ITEM_GROUP.get(ItemGroups.INGREDIENTS));
         PolymerItemGroupUtils.registerPolymerItemGroup(Identifier.of(ItemCustomization.MOD_ID, "item_group"), ITEM_GROUP);
 
-        PolymerItemUtils.ITEM_CHECK.register(ItemCustomization::isItemCustomizationTemplate);
+        PolymerItemUtils.ITEM_CHECK.register(ItemCustomizationSmithingTemplate::isItemCustomizationSmithingTemplate);
         PolymerItemUtils.ITEM_MODIFICATION_EVENT.register(
                 (original, client, context) -> {
-                    if (ItemCustomization.isItemCustomizationTemplate(original)) {
+                    if (ItemCustomizationSmithingTemplate.isItemCustomizationSmithingTemplate(original)) {
                         client.set(DataComponentTypes.LORE, new LoreComponent(Items.ITEM_CUSTOMIZATION_SMITHING_TEMPLATE_TOOLTIP));
                     }
                     return client;

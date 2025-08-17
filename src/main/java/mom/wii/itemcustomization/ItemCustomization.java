@@ -4,20 +4,14 @@ import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import mom.wii.itemcustomization.config.Config;
 import mom.wii.itemcustomization.dialog.DialogManager;
 import mom.wii.itemcustomization.item.Items;
+import mom.wii.itemcustomization.template.ItemCustomizationSmithingTemplate;
 import mom.wii.itemcustomization.util.IdentifierIndex;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.dialog.DialogActionButtonData;
-import net.minecraft.dialog.DialogButtonData;
-import net.minecraft.dialog.type.Dialog;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.network.packet.c2s.common.CustomClickActionC2SPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
@@ -30,6 +24,8 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import static mom.wii.itemcustomization.template.ItemCustomizationSmithingTemplate.isItemCustomizationSmithingTemplate;
+
 public class ItemCustomization implements ModInitializer {
 	public static final String MOD_ID = "igalaxy_item_customization";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
@@ -39,10 +35,6 @@ public class ItemCustomization implements ModInitializer {
 	public static final Path RESOURCE_PACK_PATH = PolymerResourcePackUtils.getMainPath().toAbsolutePath().normalize();
 	private static final IdentifierIndex models = new IdentifierIndex();
 	public static DialogManager DIALOG_MANAGER = new DialogManager();
-
-	public static boolean isItemCustomizationTemplate(ItemStack itemStack) {
-		return itemStack.hasChangedComponent(DataComponentTypes.CUSTOM_DATA) && Objects.requireNonNull(itemStack.get(DataComponentTypes.CUSTOM_DATA)).contains("igalaxy_item_customization:is_customization_template");
-	}
 
 	@Override
 	public void onInitialize() {
@@ -78,27 +70,28 @@ public class ItemCustomization implements ModInitializer {
 
 		UseItemCallback.EVENT.register(((playerEntity, world, hand) -> {
 			ItemStack itemStack = playerEntity.getStackInHand(hand);
-			if (isItemCustomizationTemplate(itemStack)) {
-				ServerPlayerEntity player = world.getServer().getPlayerManager().getPlayer(playerEntity.getUuid());
-
-				ArrayList<DialogActionButtonData> buttons = new ArrayList<>();
-				HashSet<String> namespaces = new HashSet<>();
-				models.set.forEach(identifier -> {
-					namespaces.add(identifier.getNamespace());
-				});
-				namespaces.forEach(namespace -> {
-					buttons.add(new DialogActionButtonData(
-							new DialogButtonData(Text.of(namespace), 150),
-							Optional.of(
-									new DialogManager.SimpleDialogCustomClickEventHandler(Identifier.of(MOD_ID, "template/item_model/namespace")) {
-										@Override
-										public Dialog getDialog(CustomClickActionC2SPacket customClickActionC2SPacket, ServerPlayerEntity serverPlayerEntity) {
-											return super.getDialog(customClickActionC2SPacket, serverPlayerEntity);
-										}
-									}.register().getAction(Optional.of(NbtString.of(namespace)))
-							)
-					));
-				});
+			if (isItemCustomizationSmithingTemplate(itemStack)) {
+				ItemCustomizationSmithingTemplate.from(itemStack).showRootDialog((ServerPlayerEntity) playerEntity);
+//				ServerPlayerEntity player = world.getServer().getPlayerManager().getPlayer(playerEntity.getUuid());
+//
+//				ArrayList<DialogActionButtonData> buttons = new ArrayList<>();
+//				HashSet<String> namespaces = new HashSet<>();
+//				models.set.forEach(identifier -> {
+//					namespaces.add(identifier.getNamespace());
+//				});
+//				namespaces.forEach(namespace -> {
+//					buttons.add(new DialogActionButtonData(
+//							new DialogButtonData(Text.of(namespace), 150),
+//							Optional.of(
+//									new DialogManager.SimpleDialogCustomClickEventHandler(Identifier.of(MOD_ID, "template/item_model/namespace")) {
+//										@Override
+//										public Dialog getDialog(CustomClickActionC2SPacket customClickActionC2SPacket, ServerPlayerEntity serverPlayerEntity) {
+//											return super.getDialog(customClickActionC2SPacket, serverPlayerEntity);
+//										}
+//									}.register().getAction(Optional.of(NbtString.of(namespace)))
+//							)
+//					));
+//				});
 //				ShowDialogS2CPacket dialogS2CPacket = new ShowDialogS2CPacket(
 //						getRegisteredDialog(Identifier.of(MOD_ID, "root"))
 //				);
