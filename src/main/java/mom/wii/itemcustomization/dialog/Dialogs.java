@@ -39,9 +39,15 @@ public class Dialogs {
         ItemCustomization.DIALOG_MANAGER.register(
                 Identifier.of(MOD_ID, "item_model"),
                 (packet, player) -> {
-                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack()) && !ItemCustomization.ITEM_MODEL_INDEX.isEmpty()) {
                         ItemModelSettings.openRootDialog(player);
+                        return;
                     }
+                    player.openDialog(
+                            RegistryEntry.of(
+                                    DialogManager.simpleNoticeDialog(Text.of("No usable item models present in resource pack"))
+                            )
+                    );
                 }
         );
         ItemCustomization.DIALOG_MANAGER.register(
@@ -100,9 +106,15 @@ public class Dialogs {
         ItemCustomization.DIALOG_MANAGER.register(
                 Identifier.of(MOD_ID, "equipment_model"),
                 (packet, player) -> {
-                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())  && !ItemCustomization.ITEM_MODEL_INDEX.isEmpty()) {
                         EquipmentModelSettings.openRootDialog(player);
+                        return;
                     }
+                    player.openDialog(
+                            RegistryEntry.of(
+                                    DialogManager.simpleNoticeDialog(Text.of("No usable equipment models present in resource pack"))
+                            )
+                    );
                 }
         );
         ItemCustomization.DIALOG_MANAGER.register(
@@ -145,7 +157,7 @@ public class Dialogs {
                     }
                     player.openDialog(
                             RegistryEntry.of(
-                                    DialogManager.simpleNoticeDialog(Text.of("Invalid item model selected"))
+                                    DialogManager.simpleNoticeDialog(Text.of("Invalid equipment model selected"))
                             )
                     );
                 }

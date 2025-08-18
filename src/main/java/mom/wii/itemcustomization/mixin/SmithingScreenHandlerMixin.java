@@ -52,6 +52,7 @@ public abstract class SmithingScreenHandlerMixin implements ForgingScreenHandler
                 ItemStack ingredient = this.getInput().getStack(2);
                 if (ingredient.isOf(SmithingTemplate.ingredient) && ingredient.getCount() >= template.getCost()) {
                     ItemStack output = base.copy();
+                    output.setCount(1);
                     template.applySettings(output);
                     this.getOutput().setStack(0, output);
                     ci.cancel();

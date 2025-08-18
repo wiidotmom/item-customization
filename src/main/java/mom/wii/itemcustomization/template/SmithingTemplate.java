@@ -46,8 +46,7 @@ public class SmithingTemplate {
             ),
             simpleTranslatableMenuButton("custom_model_data.external_title", "Custom Model Data...", "custom_model_data"),
             simpleTranslatableMenuButton("tooltip.external_title", "Tooltip...", "tooltip"),
-            simpleTranslatableMenuButton("music_and_sounds.external_title", "Music & Sounds...", "music_and_sounds"),
-            simpleTranslatableMenuButton("preview_settings.external_title", "Preview Settings...", "preview_settings")
+            simpleTranslatableMenuButton("music_and_sounds.external_title", "Music & Sounds...", "music_and_sounds")
     );
     private ItemStack itemStack;
     public static final Item ingredient;

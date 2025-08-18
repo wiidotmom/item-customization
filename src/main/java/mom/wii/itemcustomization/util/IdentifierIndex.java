@@ -34,4 +34,8 @@ public class IdentifierIndex {
     public boolean contains(Identifier identifier) {
         return identifiers.contains(identifier);
     }
+
+    public boolean isEmpty() {
+        return identifiers.isEmpty();
+    }
 }

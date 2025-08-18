@@ -38,8 +38,10 @@ public class ItemCustomization implements ModInitializer {
 			FabricLoader.getInstance().getConfigDir(), "", MOD_ID, Config.class
 	);
 	public static final Path RESOURCE_PACK_PATH = PolymerResourcePackUtils.getMainPath().toAbsolutePath().normalize();
+	public static final IdentifierIndex TEXTURE_INDEX = new IdentifierIndex();
 	public static final IdentifierIndex ITEM_MODEL_INDEX = new IdentifierIndex();
 	public static final IdentifierIndex EQUIPMENT_MODEL_INDEX = new IdentifierIndex();
+	public static final IdentifierIndex TOOLTIP_STYLE_INDEX = new IdentifierIndex();
 	public static DialogManager DIALOG_MANAGER = new DialogManager();
 
 	@Override
@@ -50,8 +52,10 @@ public class ItemCustomization implements ModInitializer {
 		Dialogs.register();
 
 		PolymerResourcePackUtils.RESOURCE_PACK_FINISHED_EVENT.register(() -> {
-			Pattern itemNamespacePattern = Pattern.compile("^assets/([^/]+)/items/([^/]+)\\.json$");
-			Pattern equipmentNamespacePattern = Pattern.compile("^assets/([^/]+)/equipment/([^/]+)\\.json$");
+			Pattern textureNamespacePattern = Pattern.compile("^assets/([^/]+)/textures/(.+)\\.png$");
+			Pattern itemNamespacePattern = Pattern.compile("^assets/([^/]+)/items/(.+)\\.json$");
+			Pattern equipmentNamespacePattern = Pattern.compile("^assets/([^/]+)/equipment/(.+)\\.json$");
+			Pattern tooltipNamespacePattern = Pattern.compile("^assets/([^/]+)/textures/gui/sprites/tooltip/(.+)_frame\\.png$");
             try {
                 ZipFile zipFile = new ZipFile(RESOURCE_PACK_PATH.toFile());
 
@@ -59,23 +63,40 @@ public class ItemCustomization implements ModInitializer {
 
 				while (entries.hasMoreElements()) {
 					ZipEntry entry = entries.nextElement();
+					if (entry.getName().matches(textureNamespacePattern.pattern())) {
+						Matcher matcher = textureNamespacePattern.matcher(entry.getName());
+						while (matcher.find()) {
+							if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(matcher.group(1))))
+								TEXTURE_INDEX.add(Identifier.of(matcher.group(1), matcher.group(2)));
+						}
+					}
 					if (entry.getName().matches(itemNamespacePattern.pattern())) {
 						Matcher matcher = itemNamespacePattern.matcher(entry.getName());
 						while (matcher.find()) {
 							if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(matcher.group(1))))
 								ITEM_MODEL_INDEX.add(Identifier.of(matcher.group(1), matcher.group(2)));
 						}
-					} else if (entry.getName().matches(equipmentNamespacePattern.pattern())) {
+					}
+					if (entry.getName().matches(equipmentNamespacePattern.pattern())) {
 						Matcher matcher = equipmentNamespacePattern.matcher(entry.getName());
 						while (matcher.find()) {
 							if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(matcher.group(1))))
 								EQUIPMENT_MODEL_INDEX.add(Identifier.of(matcher.group(1), matcher.group(2)));
 						}
 					}
+					if (entry.getName().matches(tooltipNamespacePattern.pattern())) {
+						Matcher matcher = tooltipNamespacePattern.matcher(entry.getName());
+						while (matcher.find()) {
+							if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(matcher.group(1))))
+								TOOLTIP_STYLE_INDEX.add(Identifier.of(matcher.group(1), matcher.group(2)));
+						}
+					}
 				}
 
+				LOGGER.info("TEXTURE_INDEX: {}", TEXTURE_INDEX.identifiers);
                 LOGGER.info("ITEM_MODEL_INDEX: {}", ITEM_MODEL_INDEX.identifiers);
                 LOGGER.info("EQUIPMENT_MODEL_INDEX: {}", EQUIPMENT_MODEL_INDEX.identifiers);
+				LOGGER.info("TOOLTIP_STYLE_INDEX: {}", TOOLTIP_STYLE_INDEX.identifiers);
 				zipFile.close();
             } catch (Exception e) {
                 throw new RuntimeException(e);
