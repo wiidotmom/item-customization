@@ -50,7 +50,7 @@ public abstract class SmithingScreenHandlerMixin implements ForgingScreenHandler
             if (template.hasSettings()) {
                 ItemStack base = this.getInput().getStack(1);
                 ItemStack ingredient = this.getInput().getStack(2);
-                if (ingredient.isOf(SmithingTemplate.ingredient) && ingredient.getCount() >= template.getCost()) {
+                if (ingredient.isOf(SmithingTemplate.ingredient) && template.canApplyToStack(base) && ingredient.getCount() >= template.getCost()) {
                     ItemStack output = base.copy();
                     output.setCount(1);
                     template.applySettings(output);
@@ -75,8 +75,9 @@ public abstract class SmithingScreenHandlerMixin implements ForgingScreenHandler
         if (SmithingTemplate.isItemCustomizationSmithingTemplate(this.getInput().getStack(0))) {
             SmithingTemplate template =  SmithingTemplate.from(this.getInput().getStack(0));
             ItemStack ingredient = this.getInput().getStack(2);
-            int cost = template.getCost();
-            if (ingredient.isOf(SmithingTemplate.ingredient) && ingredient.getCount() >= cost && template.hasSettings()) {
+            ItemStack base = this.getInput().getStack(1);
+            int cost;
+            if (ingredient.isOf(SmithingTemplate.ingredient) && template.hasSettings() && template.canApplyToStack(base) && ingredient.getCount() >= (cost = template.getCost())) {
                 stack.onCraftByPlayer(player, stack.getCount());
                 this.getOutput().unlockLastRecipe(player, this.getInputStacks());
                 this.callDecrementStack(0);

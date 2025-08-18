@@ -12,6 +12,7 @@ import net.minecraft.dialog.body.DialogBody;
 import net.minecraft.dialog.body.ItemDialogBody;
 import net.minecraft.dialog.body.PlainMessageDialogBody;
 import net.minecraft.dialog.type.MultiActionDialog;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -27,27 +28,25 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static mom.wii.itemcustomization.dialog.DialogManager.simpleTranslatableMenuButton;
-import static mom.wii.itemcustomization.dialog.DialogManager.translatableMenuButtonWithTooltip;
 
 public class SmithingTemplate {
     private static final ItemStack PREVIEW_SLOT_ITEMSTACK;
     private static final List<DialogActionButtonData> ROOT_MENU_BUTTONS = List.of(
             simpleTranslatableMenuButton("item_model.external_title", "Item Model...", "item_model"),
-            translatableMenuButtonWithTooltip(
-                    "equipment.external_title", "Equipment...",
-                    "equipment.tooltip", "Only applies to already equippable items, such as armor or Carved Pumpkins",
-                    "equipment"
-            ),
+            simpleTranslatableMenuButton("equipment.external_title", "Equipment...", "equipment"),
             simpleTranslatableMenuButton("custom_model_data.external_title", "Custom Model Data...", "custom_model_data"),
             simpleTranslatableMenuButton("tooltip.external_title", "Tooltip...", "tooltip"),
             simpleTranslatableMenuButton("music_and_sounds.external_title", "Music & Sounds...", "music_and_sounds")
     );
+    public static final HashMap<String, Integer> COST_MAP = new HashMap<>() {{
+        put("item_model", 1);
+        put("equipment_model", 6);
+        put("camera_overlay", 2);
+    }};
     private ItemStack itemStack;
     public static final Item ingredient;
 
@@ -125,6 +124,11 @@ public class SmithingTemplate {
                 tooltip.add(Text.literal(" Equipment Model").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
                 tooltip.add(Text.literal("  " + equipmentModel).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
             }
+            if (this.hasSetting("camera_overlay")) {
+                String cameraOverlay = ((NbtString) this.getSetting("camera_overlay")).value();
+                tooltip.add(Text.literal(" Camera Overlay").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
+                tooltip.add(Text.literal("  " + cameraOverlay).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
+            }
         }
         return tooltip;
     }
@@ -195,37 +199,52 @@ public class SmithingTemplate {
             stack.set(DataComponentTypes.ITEM_MODEL, id);
         }
         if (this.hasSetting("equipment_model")) {
-            Identifier id =  Identifier.of(((NbtString) this.getSetting("equipment_model")).value());
+            Identifier id = Identifier.of(((NbtString) this.getSetting("equipment_model")).value());
             if (stack.getDefaultComponents().contains(DataComponentTypes.EQUIPPABLE)) {
-                EquippableComponent equippableComponent = stack.get(DataComponentTypes.EQUIPPABLE);
-                if (equippableComponent.assetId().isPresent()) {
-                    RegistryKey<EquipmentAsset> equipmentAsset = RegistryKey.of(RegistryKey.ofRegistry(Identifier.ofVanilla("equipment_asset")), id);
-                    EquippableComponent newEquippableComponent = new EquippableComponent(
-                            equippableComponent.slot(),
-                            equippableComponent.equipSound(),
-                            Optional.of(equipmentAsset),
-                            equippableComponent.cameraOverlay(),
-                            equippableComponent.allowedEntities(),
-                            equippableComponent.dispensable(),
-                            equippableComponent.swappable(),
-                            equippableComponent.damageOnHurt(),
-                            equippableComponent.equipOnInteract(),
-                            equippableComponent.canBeSheared(),
-                            equippableComponent.shearingSound()
-                    );
-                    stack.set(DataComponentTypes.EQUIPPABLE, newEquippableComponent);
-                }
+                EquippableComponent ec = stack.get(DataComponentTypes.EQUIPPABLE);
+                RegistryKey<EquipmentAsset> equipmentAsset = RegistryKey.of(RegistryKey.ofRegistry(Identifier.ofVanilla("equipment_asset")), id);
+                EquippableComponent newEquippableComponent = new EquippableComponent(
+                        ec.slot(), ec.equipSound(),
+                        Optional.of(equipmentAsset),
+                        ec.cameraOverlay(), ec.allowedEntities(), ec.dispensable(), ec.swappable(), ec.damageOnHurt(), ec.equipOnInteract(), ec.canBeSheared(), ec.shearingSound()
+                );
+                stack.set(DataComponentTypes.EQUIPPABLE, newEquippableComponent);
+            }
+        }
+        if (this.hasSetting("camera_overlay")) {
+            Identifier id = Identifier.of(((NbtString) this.getSetting("camera_overlay")).value());
+            if (stack.getDefaultComponents().contains(DataComponentTypes.EQUIPPABLE) && stack.getDefaultComponents().get(DataComponentTypes.EQUIPPABLE).slot().equals(EquipmentSlot.HEAD)) {
+                EquippableComponent ec = stack.get(DataComponentTypes.EQUIPPABLE);
+                EquippableComponent newEquippableComponent = new EquippableComponent(
+                        ec.slot(), ec.equipSound(), ec.assetId(),
+                        Optional.of(id),
+                        ec.allowedEntities(), ec.dispensable(), ec.swappable(), ec.damageOnHurt(), ec.equipOnInteract(), ec.canBeSheared(), ec.shearingSound()
+                );
+                stack.set(DataComponentTypes.EQUIPPABLE, newEquippableComponent);
             }
         }
     }
 
     public int getCost() {
-        int cost = 0;
-        if (this.hasSetting("item_model"))
-            cost++;
-        if (this.hasSetting("equipment_model"))
-            cost += 6;
-        return cost;
+        AtomicInteger cost = new AtomicInteger();
+        COST_MAP.forEach((key, value) -> {
+            if (this.hasSetting(key))
+                cost.addAndGet(value);
+        });
+        return cost.get();
+    }
+
+    public boolean canApplyToStack(ItemStack stack) {
+        boolean canApply = true;
+        ComponentMap def = stack.getDefaultComponents();
+        if (this.hasSetting("equipment_model") && !def.contains(DataComponentTypes.EQUIPPABLE))
+            canApply = false;
+        if (
+                this.hasSetting("camera_overlay") &&
+                        (!def.contains(DataComponentTypes.EQUIPPABLE) || (def.contains(DataComponentTypes.EQUIPPABLE) && !def.get(DataComponentTypes.EQUIPPABLE).slot().equals(EquipmentSlot.HEAD)))
+        )
+            canApply = false;
+        return canApply;
     }
 
     private DialogBody getCostDialogBody() {

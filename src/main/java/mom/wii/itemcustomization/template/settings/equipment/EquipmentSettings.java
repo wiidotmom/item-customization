@@ -6,17 +6,20 @@ import net.minecraft.dialog.DialogActionButtonData;
 import net.minecraft.dialog.DialogButtonData;
 import net.minecraft.dialog.DialogCommonData;
 import net.minecraft.dialog.action.SimpleDialogAction;
+import net.minecraft.dialog.body.PlainMessageDialogBody;
 import net.minecraft.dialog.type.MultiActionDialog;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
 import java.util.List;
 import java.util.Optional;
 
 import static mom.wii.itemcustomization.dialog.DialogManager.simpleTranslatableMenuButton;
+import static mom.wii.itemcustomization.dialog.DialogManager.translatableMenuButtonWithTooltip;
 
 public class EquipmentSettings {
     public static void openRootDialog(ServerPlayerEntity player) {
@@ -31,8 +34,8 @@ public class EquipmentSettings {
                         List.of()
                 ),
                 List.of(
-                        simpleTranslatableMenuButton("equipment_model.external_title", "Equipment Model...", "equipment_model"),
-                        simpleTranslatableMenuButton("camera_overlay.external_title", "Camera Overlay...", "camera_overlay")
+                        translatableMenuButtonWithTooltip("equipment_model.external_title", "Equipment Model...", "equipment_model.tooltip", "Only applies to already equippable items, such as armor, saddles, or Carved Pumpkins", "equipment_model"),
+                        translatableMenuButtonWithTooltip("camera_overlay.external_title", "Camera Overlay...", "camera_overlay.tooltip", "Only applies to head-equippable items, such as helmets, mob/player heads, or Carved Pumpkins", "camera_overlay")
                 ),
                 Optional.of(
                         new DialogActionButtonData(

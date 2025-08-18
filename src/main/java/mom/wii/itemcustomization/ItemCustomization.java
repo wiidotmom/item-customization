@@ -11,12 +11,15 @@ import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
+import net.fabricmc.fabric.api.event.registry.DynamicRegistrySetupCallback;
+import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.block.Blocks;
+import net.minecraft.block.jukebox.JukeboxSong;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
@@ -38,10 +41,11 @@ public class ItemCustomization implements ModInitializer {
 			FabricLoader.getInstance().getConfigDir(), "", MOD_ID, Config.class
 	);
 	public static final Path RESOURCE_PACK_PATH = PolymerResourcePackUtils.getMainPath().toAbsolutePath().normalize();
-	public static final IdentifierIndex TEXTURE_INDEX = new IdentifierIndex();
 	public static final IdentifierIndex ITEM_MODEL_INDEX = new IdentifierIndex();
 	public static final IdentifierIndex EQUIPMENT_MODEL_INDEX = new IdentifierIndex();
+	public static final IdentifierIndex CAMERA_OVERLAY_INDEX = new IdentifierIndex();
 	public static final IdentifierIndex TOOLTIP_STYLE_INDEX = new IdentifierIndex();
+	public static final IdentifierIndex JUKEBOX_SONG_INDEX = new IdentifierIndex();
 	public static DialogManager DIALOG_MANAGER = new DialogManager();
 
 	@Override
@@ -52,10 +56,12 @@ public class ItemCustomization implements ModInitializer {
 		Dialogs.register();
 
 		PolymerResourcePackUtils.RESOURCE_PACK_FINISHED_EVENT.register(() -> {
-			Pattern textureNamespacePattern = Pattern.compile("^assets/([^/]+)/textures/(.+)\\.png$");
-			Pattern itemNamespacePattern = Pattern.compile("^assets/([^/]+)/items/(.+)\\.json$");
-			Pattern equipmentNamespacePattern = Pattern.compile("^assets/([^/]+)/equipment/(.+)\\.json$");
-			Pattern tooltipNamespacePattern = Pattern.compile("^assets/([^/]+)/textures/gui/sprites/tooltip/(.+)_frame\\.png$");
+			HashMap<Pattern, IdentifierIndex> PATTERN_TO_INDEX = new HashMap<>() {{
+				put(Pattern.compile("^assets/([^/]+)/items/(.+)\\.json$"), ITEM_MODEL_INDEX);
+				put(Pattern.compile("^assets/([^/]+)/equipment/(.+)\\.json$"), EQUIPMENT_MODEL_INDEX);
+				put(Pattern.compile("^assets/([^/]+)/textures/misc/(.+)\\.png$"), CAMERA_OVERLAY_INDEX);
+				put(Pattern.compile("^assets/([^/]+)/textures/gui/sprites/tooltip/(.+)_frame\\.png$"), TOOLTIP_STYLE_INDEX);
+            }};
             try {
                 ZipFile zipFile = new ZipFile(RESOURCE_PACK_PATH.toFile());
 
@@ -63,40 +69,18 @@ public class ItemCustomization implements ModInitializer {
 
 				while (entries.hasMoreElements()) {
 					ZipEntry entry = entries.nextElement();
-					if (entry.getName().matches(textureNamespacePattern.pattern())) {
-						Matcher matcher = textureNamespacePattern.matcher(entry.getName());
-						while (matcher.find()) {
-							if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(matcher.group(1))))
-								TEXTURE_INDEX.add(Identifier.of(matcher.group(1), matcher.group(2)));
+					PATTERN_TO_INDEX.forEach((pattern, index) -> {
+						if (entry.getName().matches(pattern.pattern())) {
+							Matcher matcher = pattern.matcher(entry.getName());
+							while (matcher.find()) {
+								if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(matcher.group(1)))) {
+									index.add(Identifier.of(matcher.group(1), matcher.group(2)));
+								}
+							}
 						}
-					}
-					if (entry.getName().matches(itemNamespacePattern.pattern())) {
-						Matcher matcher = itemNamespacePattern.matcher(entry.getName());
-						while (matcher.find()) {
-							if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(matcher.group(1))))
-								ITEM_MODEL_INDEX.add(Identifier.of(matcher.group(1), matcher.group(2)));
-						}
-					}
-					if (entry.getName().matches(equipmentNamespacePattern.pattern())) {
-						Matcher matcher = equipmentNamespacePattern.matcher(entry.getName());
-						while (matcher.find()) {
-							if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(matcher.group(1))))
-								EQUIPMENT_MODEL_INDEX.add(Identifier.of(matcher.group(1), matcher.group(2)));
-						}
-					}
-					if (entry.getName().matches(tooltipNamespacePattern.pattern())) {
-						Matcher matcher = tooltipNamespacePattern.matcher(entry.getName());
-						while (matcher.find()) {
-							if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(matcher.group(1))))
-								TOOLTIP_STYLE_INDEX.add(Identifier.of(matcher.group(1), matcher.group(2)));
-						}
-					}
+					});
 				}
 
-				LOGGER.info("TEXTURE_INDEX: {}", TEXTURE_INDEX.identifiers);
-                LOGGER.info("ITEM_MODEL_INDEX: {}", ITEM_MODEL_INDEX.identifiers);
-                LOGGER.info("EQUIPMENT_MODEL_INDEX: {}", EQUIPMENT_MODEL_INDEX.identifiers);
-				LOGGER.info("TOOLTIP_STYLE_INDEX: {}", TOOLTIP_STYLE_INDEX.identifiers);
 				zipFile.close();
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -119,5 +103,13 @@ public class ItemCustomization implements ModInitializer {
 			}
 			return ActionResult.PASS;
 		}));
+
+		DynamicRegistrySetupCallback.EVENT.register(view -> {
+			view.registerEntryAdded(RegistryKeys.JUKEBOX_SONG, (i, id, song) -> {
+				if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(id.getNamespace()))) {
+					JUKEBOX_SONG_INDEX.add(id);
+				}
+			});
+		});
 	}
 }
