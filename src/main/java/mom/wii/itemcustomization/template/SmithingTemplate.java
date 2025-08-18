@@ -118,8 +118,8 @@ public class SmithingTemplate {
                 String itemModel = ((NbtString) this.getSetting("item_model")).value();
                 tooltip.add(
                         Text.literal(" ")
-                                .append(Text.literal(itemModel).styled(style -> style.withItalic(true).withColor(Formatting.YELLOW)))
-                                .append(Text.literal(" Item Model").styled(style -> style.withColor(Formatting.YELLOW).withItalic(false)))
+                                .append(Text.literal(itemModel).styled(style -> style.withItalic(true).withColor(Formatting.GOLD)))
+                                .append(Text.literal(" Item Model").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)))
                 );
             }
         }
