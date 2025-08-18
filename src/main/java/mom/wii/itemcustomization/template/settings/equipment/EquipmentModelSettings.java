@@ -1,4 +1,4 @@
-package mom.wii.itemcustomization.template.settings;
+package mom.wii.itemcustomization.template.settings.equipment;
 
 import mom.wii.itemcustomization.ItemCustomization;
 import net.minecraft.dialog.AfterAction;
@@ -23,24 +23,24 @@ import java.util.Optional;
 
 import static mom.wii.itemcustomization.dialog.Dialogs.SEARCH_ICON;
 
-public class ItemModelSettings {
+public class EquipmentModelSettings {
     public static void openRootDialog(ServerPlayerEntity player) {
         ArrayList<DialogActionButtonData> buttons = new ArrayList<>();
-        ItemCustomization.ITEM_MODEL_INDEX.namespaces.forEach(namespace -> {
+        ItemCustomization.EQUIPMENT_MODEL_INDEX.namespaces.forEach(namespace -> {
             buttons.add(new DialogActionButtonData(
                     new DialogButtonData(
                             Text.of(namespace),
                             125
                     ),
                     Optional.of(new SimpleDialogAction(
-                            new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "item_model/namespace"), Optional.of(NbtString.of(namespace)))
+                            new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "equipment_model/namespace"), Optional.of(NbtString.of(namespace)))
                     ))
             ));
         });
 
         MultiActionDialog dialog = new MultiActionDialog(
                 new DialogCommonData(
-                        Text.translatableWithFallback("gui.igalaxy_item_customization.item_model.title", "Item Model"),
+                        Text.translatableWithFallback("gui.igalaxy_item_customization.equipment_model.title", "Equipment Model"),
                         Optional.empty(),
                         true,
                         true,
@@ -56,7 +56,7 @@ public class ItemModelSettings {
                         new DialogActionButtonData(
                                 new DialogButtonData(Text.translatable("gui.back"), 200),
                                 Optional.of(new SimpleDialogAction(
-                                        new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "root"), Optional.empty())
+                                        new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "equipment"), Optional.empty())
                                 ))
                         )
                 ),
@@ -68,28 +68,28 @@ public class ItemModelSettings {
 
     public static void openDialogForNamespace(ServerPlayerEntity player, String namespace) {
         ArrayList<DialogActionButtonData> buttons = new ArrayList<>();
-        ItemCustomization.ITEM_MODEL_INDEX.getIdentifiersOfNamespace(namespace).forEach(identifier -> {
+        ItemCustomization.EQUIPMENT_MODEL_INDEX.getIdentifiersOfNamespace(namespace).forEach(identifier -> {
             buttons.add(new DialogActionButtonData(
                     new DialogButtonData(
                             Text.literal(identifier.getPath()).append(Text.literal(".json").formatted(Formatting.GRAY)),
                             125
                     ),
                     Optional.of(new SimpleDialogAction(
-                            new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "item_model/set"), Optional.of(NbtString.of(identifier.toString())))
+                            new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "equipment_model/set"), Optional.of(NbtString.of(identifier.toString())))
                     ))
             ));
         });
 
         MultiActionDialog dialog = new MultiActionDialog(
                 new DialogCommonData(
-                        Text.translatableWithFallback("gui.igalaxy_item_customization.item_model.title", "Item Model"),
+                        Text.translatableWithFallback("gui.igalaxy_item_customization.equipment_model.title", "Equipment Model"),
                         Optional.empty(),
                         true,
                         true,
                         AfterAction.WAIT_FOR_RESPONSE,
                         List.of(
-                                new ItemDialogBody(SEARCH_ICON, Optional.of(new PlainMessageDialogBody(Text.translatableWithFallback("gui.igalaxy_item_customization.item_model.select_model", "Select an item model"), 200)), false, false, 16, 16),
-                                new PlainMessageDialogBody(Text.literal("/assets/").formatted(Formatting.GRAY).append(Text.literal(namespace).formatted(Formatting.WHITE).append(Text.literal("/items/").formatted(Formatting.GRAY))), 200)
+                                new ItemDialogBody(SEARCH_ICON, Optional.of(new PlainMessageDialogBody(Text.translatableWithFallback("gui.igalaxy_item_customization.equipment_model.select_model", "Select an equipment model"), 200)), false, false, 16, 16),
+                                new PlainMessageDialogBody(Text.literal("/assets/").formatted(Formatting.GRAY).append(Text.literal(namespace).formatted(Formatting.WHITE).append(Text.literal("/equipment/").formatted(Formatting.GRAY))), 200)
                         ),
                         List.of()
                 ),
@@ -98,7 +98,7 @@ public class ItemModelSettings {
                         new DialogActionButtonData(
                                 new DialogButtonData(Text.translatable("gui.back"), 200),
                                 Optional.of(new SimpleDialogAction(
-                                        new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "item_model"), Optional.empty())
+                                        new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "equipment_model"), Optional.empty())
                                 ))
                         )
                 ),

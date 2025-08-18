@@ -3,6 +3,7 @@ package mom.wii.itemcustomization.template;
 import mom.wii.itemcustomization.ItemCustomization;
 import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.EquippableComponent;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.dialog.AfterAction;
 import net.minecraft.dialog.DialogActionButtonData;
@@ -14,10 +15,11 @@ import net.minecraft.dialog.type.MultiActionDialog;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.equipment.EquipmentAsset;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.registry.Registries;
+import net.minecraft.registry.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -119,6 +121,11 @@ public class SmithingTemplate {
                 tooltip.add(Text.literal(" Item Model").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
                 tooltip.add(Text.literal("  " + itemModel).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
             }
+            if (this.hasSetting("equipment_model")) {
+                String equipmentModel = ((NbtString) this.getSetting("equipment_model")).value();
+                tooltip.add(Text.literal(" Equipment Model").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
+                tooltip.add(Text.literal("  " + equipmentModel).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
+            }
         }
         return tooltip;
     }
@@ -188,12 +195,37 @@ public class SmithingTemplate {
             Identifier id = Identifier.of(((NbtString) this.getSetting("item_model")).value());
             stack.set(DataComponentTypes.ITEM_MODEL, id);
         }
+        if (this.hasSetting("equipment_model")) {
+            Identifier id =  Identifier.of(((NbtString) this.getSetting("equipment_model")).value());
+            if (stack.getDefaultComponents().contains(DataComponentTypes.EQUIPPABLE)) {
+                EquippableComponent equippableComponent = stack.get(DataComponentTypes.EQUIPPABLE);
+                if (equippableComponent.assetId().isPresent()) {
+                    RegistryKey<EquipmentAsset> equipmentAsset = RegistryKey.of(RegistryKey.ofRegistry(Identifier.ofVanilla("equipment_asset")), id);
+                    EquippableComponent newEquippableComponent = new EquippableComponent(
+                            equippableComponent.slot(),
+                            equippableComponent.equipSound(),
+                            Optional.of(equipmentAsset),
+                            equippableComponent.cameraOverlay(),
+                            equippableComponent.allowedEntities(),
+                            equippableComponent.dispensable(),
+                            equippableComponent.swappable(),
+                            equippableComponent.damageOnHurt(),
+                            equippableComponent.equipOnInteract(),
+                            equippableComponent.canBeSheared(),
+                            equippableComponent.shearingSound()
+                    );
+                    stack.set(DataComponentTypes.EQUIPPABLE, newEquippableComponent);
+                }
+            }
+        }
     }
 
     public int getCost() {
         int cost = 0;
         if (this.hasSetting("item_model"))
             cost++;
+        if (this.hasSetting("equipment_model"))
+            cost += 6;
         return cost;
     }
 
@@ -204,7 +236,7 @@ public class SmithingTemplate {
                     Optional.of(new PlainMessageDialogBody(
                             Text.translatableWithFallback("gui.igalaxy_item_customization.to_apply", " to apply"), 200
                     )),
-                    false, true, 16, 16
+                    true, true, 16, 16
             );
         }
         return new PlainMessageDialogBody(
