@@ -4,5 +4,9 @@ Adds a Smithing Template to apply custom item models and other components in sur
 
 ### Dependencies
 
-- [Patched](https://modrinth.com/mod/patched)
-- polymer-resource-pack (Available via [Polymer](https://modrinth.com/mod/polymer))
+- [Patched](https://modrinth.com/mod/patched) by EnderTurret
+- polymer-resource-pack (Available via [Polymer](https://modrinth.com/mod/polymer) by Patbox)
+
+### Recommended
+
+- [Name Formatting Station](https://modrinth.com/datapack/name-formatting-station-datapack) by MukiTanuki
