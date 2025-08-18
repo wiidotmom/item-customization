@@ -116,11 +116,8 @@ public class SmithingTemplate {
             tooltip.add(Text.translatable("potion.whenDrank").styled(style -> style.withItalic(false).withColor(Formatting.GRAY)));
             if (this.hasSetting("item_model")) {
                 String itemModel = ((NbtString) this.getSetting("item_model")).value();
-                tooltip.add(
-                        Text.literal(" ")
-                                .append(Text.literal(itemModel).styled(style -> style.withItalic(true).withColor(Formatting.GOLD)))
-                                .append(Text.literal(" Item Model").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)))
-                );
+                tooltip.add(Text.literal(" Item Model").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
+                tooltip.add(Text.literal("  " + itemModel).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
             }
         }
         return tooltip;
@@ -193,7 +190,7 @@ public class SmithingTemplate {
         }
     }
 
-    private int getCost() {
+    public int getCost() {
         int cost = 0;
         if (this.hasSetting("item_model"))
             cost++;
