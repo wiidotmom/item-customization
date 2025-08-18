@@ -64,7 +64,7 @@ public class ItemModelSettings {
                         AfterAction.WAIT_FOR_RESPONSE,
                         List.of(
                                 new ItemDialogBody(SEARCH_ICON, Optional.of(new PlainMessageDialogBody(Text.translatableWithFallback("gui.igalaxy_item_customization.item_model.select_namespace", "Select a namespace to browse"), 200)), false, false, 16, 16),
-                                new PlainMessageDialogBody(Text.of("/assets/").copy().formatted(Formatting.GRAY), 200)
+                                new PlainMessageDialogBody(Text.literal("/assets/").formatted(Formatting.GRAY), 200)
                         ),
                         List.of()
                 ),
@@ -88,7 +88,7 @@ public class ItemModelSettings {
         ItemCustomization.ITEM_MODEL_INDEX.getIdentifiersOfNamespace(namespace).forEach(identifier -> {
             buttons.add(new DialogActionButtonData(
                     new DialogButtonData(
-                            Text.of(identifier.getPath()).copy().append(Text.of(".json").copy().formatted(Formatting.GRAY)),
+                            Text.literal(identifier.getPath()).append(Text.literal(".json").formatted(Formatting.GRAY)),
                             125
                     ),
                     Optional.of(new SimpleDialogAction(
@@ -106,7 +106,7 @@ public class ItemModelSettings {
                         AfterAction.WAIT_FOR_RESPONSE,
                         List.of(
                                 new ItemDialogBody(SEARCH_ICON, Optional.of(new PlainMessageDialogBody(Text.translatableWithFallback("gui.igalaxy_item_customization.item_model.select_model", "Select an item model"), 200)), false, false, 16, 16),
-                                new PlainMessageDialogBody(Text.of("/assets/").copy().formatted(Formatting.GRAY).append(Text.of(namespace).copy().formatted(Formatting.WHITE).append(Text.of("/items/").copy().formatted(Formatting.GRAY))), 200)
+                                new PlainMessageDialogBody(Text.literal("/assets/").formatted(Formatting.GRAY).append(Text.literal(namespace).formatted(Formatting.WHITE).append(Text.literal("/items/").formatted(Formatting.GRAY))), 200)
                         ),
                         List.of()
                 ),

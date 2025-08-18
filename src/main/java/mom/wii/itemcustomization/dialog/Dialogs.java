@@ -60,7 +60,9 @@ public class Dialogs {
                         DataResult<Identifier> validated = Identifier.validate(payload.value());
                         if (validated.isSuccess()) {
                             Identifier itemModel = validated.getOrThrow();
-                            player.openDialog(RegistryEntry.of(DialogManager.simpleNoticeDialog(Text.of("Item model received and validated: " + itemModel.toString()))));
+                            SmithingTemplate template = SmithingTemplate.from(player.getMainHandStack());
+                            template.setSetting("item_model", NbtString.of(itemModel.toString()));
+                            template.openDialog(player);
                             return;
                         }
                     }

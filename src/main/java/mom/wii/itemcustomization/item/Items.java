@@ -34,7 +34,7 @@ public class Items {
                 .add(DataComponentTypes.ITEM_MODEL, Identifier.of(ItemCustomization.MOD_ID, "item_customization_smithing_template"))
                 .add(DataComponentTypes.ITEM_NAME, Text.of("Item Customization"))
                 .add(DataComponentTypes.RARITY, Rarity.UNCOMMON)
-                .add(DataComponentTypes.LORE, new LoreComponent(List.of(Text.of("Smithing Template").copy().formatted(Formatting.GRAY))))
+                .add(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("item.minecraft.smithing_template").formatted(Formatting.GRAY))))
                 .build();
         commandBlock.applyComponentsFrom(componentMap);
         ITEM_CUSTOMIZATION_SMITHING_TEMPLATE = commandBlock;
@@ -58,6 +58,8 @@ public class Items {
                     if (SmithingTemplate.isItemCustomizationSmithingTemplate(original)) {
                         SmithingTemplate template = SmithingTemplate.from(original);
                         client.set(DataComponentTypes.LORE, new LoreComponent(template.getTooltip()));
+                        client.set(DataComponentTypes.MAX_DAMAGE, 1);
+                        client.set(DataComponentTypes.DAMAGE, 0);
                     }
                     return client;
                 }

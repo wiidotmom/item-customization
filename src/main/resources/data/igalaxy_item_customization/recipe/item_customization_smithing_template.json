@@ -10,10 +10,7 @@
       "components": {
         "minecraft:custom_data": {
           "igalaxy_item_customization:is_customization_template": 1
-        },
-        "minecraft:item_name": "Item Customization",
-        "minecraft:item_model": "igalaxy_item_customization:item_customization_smithing_template",
-        "minecraft:rarity": "uncommon"
+        }
       }
     }
   },

@@ -1,14 +1,16 @@
 {
-	"required": true,
-	"package": "mom.wii.itemcustomization.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-		"ServerCommonNetworkHandlerMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"overwrites": {
-		"requireAnnotations": true
+  "required": true,
+  "package": "mom.wii.itemcustomization.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "GrindstoneScreenHandlerMixin",
+    "ItemStackMixin",
+    "ServerCommonNetworkHandlerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
 	}
 }
