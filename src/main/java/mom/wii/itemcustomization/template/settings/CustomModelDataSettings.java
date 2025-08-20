@@ -13,7 +13,9 @@ import net.minecraft.dialog.input.TextInputControl;
 import net.minecraft.dialog.type.ConfirmationDialog;
 import net.minecraft.dialog.type.DialogInput;
 import net.minecraft.dialog.type.MultiActionDialog;
+import net.minecraft.dialog.type.NoticeDialog;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.nbt.visitor.StringNbtWriter;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -68,7 +70,7 @@ public class CustomModelDataSettings {
         player.openDialog(RegistryEntry.of(dialog));
     }
 
-    public static void openAddFloatDialog(ServerPlayerEntity player) {
+    public static void openAddNewDialog(ServerPlayerEntity player, String id, String fallback, boolean multiline) {
         ConfirmationDialog dialog = new ConfirmationDialog(
                 new DialogCommonData(
                         Text.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.add_new", "Add New"),
@@ -78,20 +80,23 @@ public class CustomModelDataSettings {
                         AfterAction.WAIT_FOR_RESPONSE,
                         List.of(),
                         List.of(
-                                new DialogInput("float", new TextInputControl(
-                                        200,
-                                        Text.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.float", "Float"),
+                                new DialogInput(id, new TextInputControl(
+                                        multiline ? 200 : 100,
+                                        Text.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data." + id, fallback),
                                         true,
                                         "",
                                         32,
-                                        Optional.empty()
+                                        Optional.ofNullable(multiline ? new TextInputControl.Multiline(
+                                                Optional.empty(),
+                                                Optional.of(32)
+                                        ) : null)
                                 ))
                         )
                 ),
                 new DialogActionButtonData(
                         new DialogButtonData(Text.translatableWithFallback("gui.submit", "Submit"), 150),
                         Optional.of(new DynamicCustomDialogAction(
-                                Identifier.of(ItemCustomization.MOD_ID, "custom_model_data/float/add"), Optional.empty()
+                                Identifier.of(ItemCustomization.MOD_ID, "custom_model_data/" + id + "/add"), Optional.empty()
                         ))
                 ),
                 new DialogActionButtonData(
@@ -100,6 +105,47 @@ public class CustomModelDataSettings {
                                 new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "custom_model_data"), Optional.empty())
                         ))
                 )
+        );
+
+        player.openDialog(RegistryEntry.of(dialog));
+    }
+
+    public static void openAddNewFlagDialog(ServerPlayerEntity player) {
+        MultiActionDialog dialog = new MultiActionDialog(
+                new DialogCommonData(
+                        Text.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.add_new", "Add New"),
+                        Optional.empty(),
+                        true,
+                        true,
+                        AfterAction.WAIT_FOR_RESPONSE,
+                        List.of(
+                                new PlainMessageDialogBody(Text.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.flag", "Flag"), 200)
+                        ),
+                        List.of()
+                ),
+                List.of(
+                        new DialogActionButtonData(
+                                new DialogButtonData(Text.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.flag.true", "true (1b)"), 75),
+                                Optional.of(new SimpleDialogAction(
+                                        new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "custom_model_data/flag/add"), Optional.of(NbtString.of("true")))
+                                ))
+                        ),
+                        new DialogActionButtonData(
+                                new DialogButtonData(Text.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.flag.false", "false (0b)"), 75),
+                                Optional.of(new SimpleDialogAction(
+                                        new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "custom_model_data/flag/add"), Optional.of(NbtString.of("false")))
+                                ))
+                        )
+                ),
+                Optional.of(
+                        new DialogActionButtonData(
+                                new DialogButtonData(Text.translatable("gui.back"), 200),
+                                Optional.of(new SimpleDialogAction(
+                                        new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "custom_model_data"), Optional.empty())
+                                ))
+                        )
+                ),
+                1
         );
 
         player.openDialog(RegistryEntry.of(dialog));

@@ -13,10 +13,7 @@ import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtFloat;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
+import net.minecraft.nbt.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -151,7 +148,7 @@ public class Dialogs {
                 Identifier.of(MOD_ID, "custom_model_data/float"),
                 (packet, player) -> {
                     if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
-                        CustomModelDataSettings.openAddFloatDialog(player);
+                        CustomModelDataSettings.openAddNewDialog(player, "float", "Float", false);
                     }
                 }
         );
@@ -177,6 +174,99 @@ public class Dialogs {
                     player.openDialog(
                             RegistryEntry.of(
                                     DialogManager.simpleNoticeDialog(Text.of("Invalid float"))
+                            )
+                    );
+                }
+        );
+        DIALOG_MANAGER.register(
+                Identifier.of(MOD_ID, "custom_model_data/flag"),
+                (packet, player) -> {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
+                        CustomModelDataSettings.openAddNewFlagDialog(player);
+                    }
+                }
+        );
+        DIALOG_MANAGER.register(
+                Identifier.of(MOD_ID, "custom_model_data/flag/add"),
+                (packet, player) -> {
+                    if (packet.payload().isPresent() && packet.payload().get() instanceof NbtString) {
+                        boolean f = Boolean.parseBoolean(((NbtString) packet.payload().get()).value());
+                        SmithingTemplate template = SmithingTemplate.from(player.getMainHandStack());
+                        NbtCompound newCustomModelData = ((NbtCompound) template.getSettingOrElse("custom_model_data", NbtCompound::new)).copy();
+                        NbtList flags = newCustomModelData.getListOrEmpty("flags");
+                        flags.add(NbtByte.of(f));
+                        newCustomModelData.put("flags", flags);
+                        template.setSetting("custom_model_data", newCustomModelData);
+                        CustomModelDataSettings.openRootDialog(player, template);
+                        return;
+                    }
+                    player.openDialog(
+                            RegistryEntry.of(
+                                    DialogManager.simpleNoticeDialog(Text.of("Invalid flag"))
+                            )
+                    );
+                }
+        );
+        DIALOG_MANAGER.register(
+                Identifier.of(MOD_ID, "custom_model_data/string"),
+                (packet, player) -> {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
+                        CustomModelDataSettings.openAddNewDialog(player, "string", "String", true);
+                    }
+                }
+        );
+        DIALOG_MANAGER.register(
+                Identifier.of(MOD_ID, "custom_model_data/string/add"),
+                (packet, player) -> {
+                    if (packet.payload().isPresent() && packet.payload().get() instanceof NbtCompound) {
+                        NbtCompound payload = (NbtCompound) packet.payload().get();
+                        if (payload.contains("string") && payload.getString("string").isPresent()) {
+                            String s = payload.getString("string").get();
+                            SmithingTemplate template = SmithingTemplate.from(player.getMainHandStack());
+                            NbtCompound newCustomModelData = ((NbtCompound) template.getSettingOrElse("custom_model_data", NbtCompound::new)).copy();
+                            NbtList strings = newCustomModelData.getListOrEmpty("strings");
+                            strings.add(NbtString.of(s));
+                            newCustomModelData.put("strings", strings);
+                            template.setSetting("custom_model_data", newCustomModelData);
+                            CustomModelDataSettings.openRootDialog(player, template);
+                            return;
+                        }
+                    }
+                    player.openDialog(
+                            RegistryEntry.of(
+                                    DialogManager.simpleNoticeDialog(Text.of("Invalid string"))
+                            )
+                    );
+                }
+        );
+        DIALOG_MANAGER.register(
+                Identifier.of(MOD_ID, "custom_model_data/color"),
+                (packet, player) -> {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
+                        CustomModelDataSettings.openAddNewDialog(player, "color", "Color (Decimal)", false);
+                    }
+                }
+        );
+        DIALOG_MANAGER.register(
+                Identifier.of(MOD_ID, "custom_model_data/color/add"),
+                (packet, player) -> {
+                    if (packet.payload().isPresent() && packet.payload().get() instanceof NbtCompound) {
+                        NbtCompound payload = (NbtCompound) packet.payload().get();
+                        if (payload.contains("color") && payload.getString("color").isPresent()) {
+                            int c = Integer.parseInt(payload.getString("color").get());
+                            SmithingTemplate template = SmithingTemplate.from(player.getMainHandStack());
+                            NbtCompound newCustomModelData = ((NbtCompound) template.getSettingOrElse("custom_model_data", NbtCompound::new)).copy();
+                            NbtList colors = newCustomModelData.getListOrEmpty("colors");
+                            colors.add(NbtInt.of(c));
+                            newCustomModelData.put("colors", colors);
+                            template.setSetting("custom_model_data", newCustomModelData);
+                            CustomModelDataSettings.openRootDialog(player, template);
+                            return;
+                        }
+                    }
+                    player.openDialog(
+                            RegistryEntry.of(
+                                    DialogManager.simpleNoticeDialog(Text.of("Invalid color"))
                             )
                     );
                 }

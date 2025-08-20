@@ -3,6 +3,7 @@ package mom.wii.itemcustomization.template;
 import mom.wii.itemcustomization.ItemCustomization;
 import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.CustomModelDataComponent;
 import net.minecraft.component.type.EquippableComponent;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.dialog.AfterAction;
@@ -31,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static mom.wii.itemcustomization.dialog.DialogManager.simpleTranslatableMenuButton;
 
@@ -231,6 +233,15 @@ public class SmithingTemplate {
                 );
                 stack.set(DataComponentTypes.EQUIPPABLE, newEquippableComponent);
             }
+        }
+        if (this.hasSetting("custom_model_data")) {
+            NbtCompound data = (NbtCompound) this.getSetting("custom_model_data");
+            List<Float> floats = data.getListOrEmpty("floats").stream().map(x -> x.asFloat().orElseThrow()).toList();
+            List<Boolean> flags = data.getListOrEmpty("flags").stream().map(x -> x.asBoolean().orElseThrow()).toList();
+            List<String> strings = data.getListOrEmpty("strings").stream().map(x -> x.asString().orElseThrow()).toList();
+            List<Integer> colors = data.getListOrEmpty("colors").stream().map(x -> x.asInt().orElseThrow()).toList();
+            CustomModelDataComponent customModelDataComponent = new CustomModelDataComponent(floats, flags, strings, colors);
+            stack.set(DataComponentTypes.CUSTOM_MODEL_DATA, customModelDataComponent);
         }
     }
 
