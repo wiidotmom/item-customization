@@ -30,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 import static mom.wii.itemcustomization.dialog.DialogManager.simpleTranslatableMenuButton;
 
@@ -158,6 +159,14 @@ public class SmithingTemplate {
             return settings.get(key);
         }
         return null;
+    }
+
+    public @Nullable NbtElement getSettingOrElse(String key, Supplier<NbtElement> defaultValue) {
+        NbtElement setting = this.getSetting(key);
+        if (setting == null) {
+            return defaultValue.get();
+        }
+        return setting;
     }
 
     public NbtComponent setSetting(String key, NbtElement value) {

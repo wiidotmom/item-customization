@@ -18,6 +18,7 @@ import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.util.BiConsumer;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -55,10 +56,14 @@ public class DialogManager {
     }
 
     public static DialogActionButtonData simpleTranslatableMenuButton(String translation, String fallback, String action) {
+        return simpleTranslatableMenuButton(translation, fallback, action, 125);
+    }
+
+    public static DialogActionButtonData simpleTranslatableMenuButton(String translation, String fallback, String action, int width) {
         return new DialogActionButtonData(
                 new DialogButtonData(
                         Text.translatableWithFallback("gui.igalaxy_item_customization." + translation, fallback),
-                        125
+                        width
                 ),
                 Optional.of(new SimpleDialogAction(
                         new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, action), Optional.empty())

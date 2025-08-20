@@ -22,6 +22,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,12 +57,12 @@ public class ItemCustomization implements ModInitializer {
 		Dialogs.register();
 
 		PolymerResourcePackUtils.RESOURCE_PACK_FINISHED_EVENT.register(() -> {
-			HashMap<Pattern, IdentifierIndex> PATTERN_TO_INDEX = new HashMap<>() {{
-				put(Pattern.compile("^assets/([^/]+)/items/(.+)\\.json$"), ITEM_MODEL_INDEX);
-				put(Pattern.compile("^assets/([^/]+)/equipment/(.+)\\.json$"), EQUIPMENT_MODEL_INDEX);
-				put(Pattern.compile("^assets/([^/]+)/textures/misc/(.+)\\.png$"), CAMERA_OVERLAY_INDEX);
-				put(Pattern.compile("^assets/([^/]+)/textures/gui/sprites/tooltip/(.+)_frame\\.png$"), TOOLTIP_STYLE_INDEX);
-            }};
+			Set<Pair<Pattern, IdentifierIndex>> PATTERN_TO_INDEX = Set.of(
+					new Pair<>(Pattern.compile("^assets/([^/]+)/items/(.+)\\.json$"), ITEM_MODEL_INDEX),
+					new Pair<>(Pattern.compile("^assets/([^/]+)/equipment/(.+)\\.json$"), EQUIPMENT_MODEL_INDEX),
+					new Pair<>(Pattern.compile("^assets/([^/]+)/textures/misc/(.+)\\.png$"), CAMERA_OVERLAY_INDEX),
+					new Pair<>(Pattern.compile("^assets/([^/]+)/textures/gui/sprites/tooltip/(.+)_frame\\.png$"), TOOLTIP_STYLE_INDEX)
+			);
             try {
                 ZipFile zipFile = new ZipFile(RESOURCE_PACK_PATH.toFile());
 
@@ -69,7 +70,9 @@ public class ItemCustomization implements ModInitializer {
 
 				while (entries.hasMoreElements()) {
 					ZipEntry entry = entries.nextElement();
-					PATTERN_TO_INDEX.forEach((pattern, index) -> {
+					PATTERN_TO_INDEX.forEach(pair -> {
+						Pattern pattern = pair.getLeft();
+						IdentifierIndex index = pair.getRight();
 						if (entry.getName().matches(pattern.pattern())) {
 							Matcher matcher = pattern.matcher(entry.getName());
 							while (matcher.find()) {

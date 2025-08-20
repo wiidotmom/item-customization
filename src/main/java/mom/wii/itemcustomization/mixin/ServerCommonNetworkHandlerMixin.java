@@ -27,7 +27,7 @@ public abstract class ServerCommonNetworkHandlerMixin {
 
     @Shadow @Final protected ClientConnection connection;
 
-    @Inject(method = "onCustomClickAction", at = @At("HEAD"))
+    @Inject(method = "onCustomClickAction", at = @At("TAIL"))
     private void itemcustomization$onCustomClickAction(CustomClickActionC2SPacket packet, CallbackInfo ci) {
         if (ItemCustomization.DIALOG_MANAGER.customClickEvents.containsKey(packet.id())) {
             try {

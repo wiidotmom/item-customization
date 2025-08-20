@@ -1,7 +1,9 @@
 package mom.wii.itemcustomization.dialog;
 
+import com.google.common.primitives.Floats;
 import com.mojang.serialization.DataResult;
 import mom.wii.itemcustomization.template.SmithingTemplate;
+import mom.wii.itemcustomization.template.settings.CustomModelDataSettings;
 import mom.wii.itemcustomization.template.settings.equipment.CameraOverlaySettings;
 import mom.wii.itemcustomization.template.settings.equipment.EquipmentModelSettings;
 import mom.wii.itemcustomization.template.settings.equipment.EquipmentSettings;
@@ -11,6 +13,9 @@ import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtFloat;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -131,5 +136,50 @@ public class Dialogs {
         registerIndexRootAction("camera_overlay", CAMERA_OVERLAY_INDEX, CameraOverlaySettings::openRootDialog, "No usable misc textures present in resource pack");
         registerIndexNamespaceAction("camera_overlay", CAMERA_OVERLAY_INDEX, CameraOverlaySettings::openDialogForNamespace);
         registerIndexSetAction("camera_overlay", CAMERA_OVERLAY_INDEX, id -> id.getNamespace() + ":misc/" + id.getPath(), "Invalid camera overlay texture selected");
+
+
+        DIALOG_MANAGER.register(
+                Identifier.of(MOD_ID, "custom_model_data"),
+                (packet, player) -> {
+                    ItemStack stack = player.getMainHandStack();
+                    if (isItemCustomizationSmithingTemplate(stack)) {
+                        CustomModelDataSettings.openRootDialog(player, SmithingTemplate.from(stack));
+                    }
+                }
+        );
+        DIALOG_MANAGER.register(
+                Identifier.of(MOD_ID, "custom_model_data/float"),
+                (packet, player) -> {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
+                        CustomModelDataSettings.openAddFloatDialog(player);
+                    }
+                }
+        );
+        DIALOG_MANAGER.register(
+                Identifier.of(MOD_ID, "custom_model_data/float/add"),
+                (packet, player) -> {
+                    if (packet.payload().isPresent() && packet.payload().get() instanceof NbtCompound) {
+                        NbtCompound payload = (NbtCompound) packet.payload().get();
+                        if (payload.contains("float") && payload.getString("float").isPresent()) {
+                            Float f = Floats.tryParse(payload.getString("float").get());
+                            if (f != null) {
+                                SmithingTemplate template = SmithingTemplate.from(player.getMainHandStack());
+                                NbtCompound newCustomModelData = ((NbtCompound) template.getSettingOrElse("custom_model_data", NbtCompound::new)).copy();
+                                NbtList floats = newCustomModelData.getListOrEmpty("floats");
+                                floats.add(NbtFloat.of(f));
+                                newCustomModelData.put("floats", floats);
+                                template.setSetting("custom_model_data", newCustomModelData);
+                                CustomModelDataSettings.openRootDialog(player, template);
+                                return;
+                            }
+                        }
+                    }
+                    player.openDialog(
+                            RegistryEntry.of(
+                                    DialogManager.simpleNoticeDialog(Text.of("Invalid float"))
+                            )
+                    );
+                }
+        );
     }
 }
