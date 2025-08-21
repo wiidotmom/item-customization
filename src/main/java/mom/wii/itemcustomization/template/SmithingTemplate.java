@@ -21,6 +21,7 @@ import net.minecraft.item.equipment.EquipmentAsset;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.nbt.visitor.StringNbtWriter;
 import net.minecraft.registry.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -49,6 +50,7 @@ public class SmithingTemplate {
         put("item_model", 1);
         put("equipment_model", 6);
         put("camera_overlay", 2);
+        put("tooltip_style", 2);
     }};
     private ItemStack itemStack;
     public static final Item ingredient;
@@ -131,6 +133,18 @@ public class SmithingTemplate {
                 String cameraOverlay = ((NbtString) this.getSetting("camera_overlay")).value();
                 tooltip.add(Text.literal(" Camera Overlay").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
                 tooltip.add(Text.literal("  " + cameraOverlay).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
+            }
+            if (this.hasSetting("custom_model_data")) {
+                NbtCompound customModelData = ((NbtCompound) this.getSetting("custom_model_data"));
+                StringNbtWriter writer = new StringNbtWriter();
+                writer.visitCompound(customModelData);
+                tooltip.add(Text.literal(" Custom Model Data").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
+                tooltip.add(Text.literal("  " + writer.getString()).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
+            }
+            if (this.hasSetting("tooltip_style")) {
+                String tooltipStyle = ((NbtString) this.getSetting("tooltip_style")).value();
+                tooltip.add(Text.literal(" Tooltip Style").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
+                tooltip.add(Text.literal("  " + tooltipStyle).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
             }
         }
         return tooltip;
@@ -242,6 +256,10 @@ public class SmithingTemplate {
             List<Integer> colors = data.getListOrEmpty("colors").stream().map(x -> x.asInt().orElseThrow()).toList();
             CustomModelDataComponent customModelDataComponent = new CustomModelDataComponent(floats, flags, strings, colors);
             stack.set(DataComponentTypes.CUSTOM_MODEL_DATA, customModelDataComponent);
+        }
+        if (this.hasSetting("tooltip_style")) {
+            String style = ((NbtString) this.getSetting("tooltip_style")).value();
+            stack.set(DataComponentTypes.TOOLTIP_STYLE, Identifier.of(style));
         }
     }
 

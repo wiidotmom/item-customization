@@ -8,6 +8,9 @@ import mom.wii.itemcustomization.template.settings.equipment.CameraOverlaySettin
 import mom.wii.itemcustomization.template.settings.equipment.EquipmentModelSettings;
 import mom.wii.itemcustomization.template.settings.equipment.EquipmentSettings;
 import mom.wii.itemcustomization.template.settings.ItemModelSettings;
+import mom.wii.itemcustomization.template.settings.music_and_sounds.MusicAndSoundsSettings;
+import mom.wii.itemcustomization.template.settings.tooltip.TooltipSettings;
+import mom.wii.itemcustomization.template.settings.tooltip.TooltipStyleSettings;
 import mom.wii.itemcustomization.util.IdentifierIndex;
 import net.minecraft.component.ComponentMap;
 import net.minecraft.component.DataComponentTypes;
@@ -155,19 +158,22 @@ public class Dialogs {
         DIALOG_MANAGER.register(
                 Identifier.of(MOD_ID, "custom_model_data/float/add"),
                 (packet, player) -> {
-                    if (packet.payload().isPresent() && packet.payload().get() instanceof NbtCompound) {
-                        NbtCompound payload = (NbtCompound) packet.payload().get();
-                        if (payload.contains("float") && payload.getString("float").isPresent()) {
-                            Float f = Floats.tryParse(payload.getString("float").get());
-                            if (f != null) {
-                                SmithingTemplate template = SmithingTemplate.from(player.getMainHandStack());
-                                NbtCompound newCustomModelData = ((NbtCompound) template.getSettingOrElse("custom_model_data", NbtCompound::new)).copy();
-                                NbtList floats = newCustomModelData.getListOrEmpty("floats");
-                                floats.add(NbtFloat.of(f));
-                                newCustomModelData.put("floats", floats);
-                                template.setSetting("custom_model_data", newCustomModelData);
-                                CustomModelDataSettings.openRootDialog(player, template);
-                                return;
+                    ItemStack stack = player.getMainHandStack();
+                    if (isItemCustomizationSmithingTemplate(stack)) {
+                        if (packet.payload().isPresent() && packet.payload().get() instanceof NbtCompound) {
+                            NbtCompound payload = (NbtCompound) packet.payload().get();
+                            if (payload.contains("float") && payload.getString("float").isPresent()) {
+                                Float f = Floats.tryParse(payload.getString("float").get());
+                                if (f != null) {
+                                    SmithingTemplate template = SmithingTemplate.from(stack);
+                                    NbtCompound newCustomModelData = ((NbtCompound) template.getSettingOrElse("custom_model_data", NbtCompound::new)).copy();
+                                    NbtList floats = newCustomModelData.getListOrEmpty("floats");
+                                    floats.add(NbtFloat.of(f));
+                                    newCustomModelData.put("floats", floats);
+                                    template.setSetting("custom_model_data", newCustomModelData);
+                                    CustomModelDataSettings.openRootDialog(player, template);
+                                    return;
+                                }
                             }
                         }
                     }
@@ -189,16 +195,19 @@ public class Dialogs {
         DIALOG_MANAGER.register(
                 Identifier.of(MOD_ID, "custom_model_data/flag/add"),
                 (packet, player) -> {
-                    if (packet.payload().isPresent() && packet.payload().get() instanceof NbtString) {
-                        boolean f = Boolean.parseBoolean(((NbtString) packet.payload().get()).value());
-                        SmithingTemplate template = SmithingTemplate.from(player.getMainHandStack());
-                        NbtCompound newCustomModelData = ((NbtCompound) template.getSettingOrElse("custom_model_data", NbtCompound::new)).copy();
-                        NbtList flags = newCustomModelData.getListOrEmpty("flags");
-                        flags.add(NbtByte.of(f));
-                        newCustomModelData.put("flags", flags);
-                        template.setSetting("custom_model_data", newCustomModelData);
-                        CustomModelDataSettings.openRootDialog(player, template);
-                        return;
+                    ItemStack stack = player.getMainHandStack();
+                    if (isItemCustomizationSmithingTemplate(stack)) {
+                        if (packet.payload().isPresent() && packet.payload().get() instanceof NbtString) {
+                            boolean f = Boolean.parseBoolean(((NbtString) packet.payload().get()).value());
+                            SmithingTemplate template = SmithingTemplate.from(stack);
+                            NbtCompound newCustomModelData = ((NbtCompound) template.getSettingOrElse("custom_model_data", NbtCompound::new)).copy();
+                            NbtList flags = newCustomModelData.getListOrEmpty("flags");
+                            flags.add(NbtByte.of(f));
+                            newCustomModelData.put("flags", flags);
+                            template.setSetting("custom_model_data", newCustomModelData);
+                            CustomModelDataSettings.openRootDialog(player, template);
+                            return;
+                        }
                     }
                     player.openDialog(
                             RegistryEntry.of(
@@ -218,18 +227,21 @@ public class Dialogs {
         DIALOG_MANAGER.register(
                 Identifier.of(MOD_ID, "custom_model_data/string/add"),
                 (packet, player) -> {
-                    if (packet.payload().isPresent() && packet.payload().get() instanceof NbtCompound) {
-                        NbtCompound payload = (NbtCompound) packet.payload().get();
-                        if (payload.contains("string") && payload.getString("string").isPresent()) {
-                            String s = payload.getString("string").get();
-                            SmithingTemplate template = SmithingTemplate.from(player.getMainHandStack());
-                            NbtCompound newCustomModelData = ((NbtCompound) template.getSettingOrElse("custom_model_data", NbtCompound::new)).copy();
-                            NbtList strings = newCustomModelData.getListOrEmpty("strings");
-                            strings.add(NbtString.of(s));
-                            newCustomModelData.put("strings", strings);
-                            template.setSetting("custom_model_data", newCustomModelData);
-                            CustomModelDataSettings.openRootDialog(player, template);
-                            return;
+                    ItemStack stack = player.getMainHandStack();
+                    if (isItemCustomizationSmithingTemplate(stack)) {
+                        if (packet.payload().isPresent() && packet.payload().get() instanceof NbtCompound) {
+                            NbtCompound payload = (NbtCompound) packet.payload().get();
+                            if (payload.contains("string") && payload.getString("string").isPresent()) {
+                                String s = payload.getString("string").get();
+                                SmithingTemplate template = SmithingTemplate.from(stack);
+                                NbtCompound newCustomModelData = ((NbtCompound) template.getSettingOrElse("custom_model_data", NbtCompound::new)).copy();
+                                NbtList strings = newCustomModelData.getListOrEmpty("strings");
+                                strings.add(NbtString.of(s));
+                                newCustomModelData.put("strings", strings);
+                                template.setSetting("custom_model_data", newCustomModelData);
+                                CustomModelDataSettings.openRootDialog(player, template);
+                                return;
+                            }
                         }
                     }
                     player.openDialog(
@@ -250,18 +262,21 @@ public class Dialogs {
         DIALOG_MANAGER.register(
                 Identifier.of(MOD_ID, "custom_model_data/color/add"),
                 (packet, player) -> {
-                    if (packet.payload().isPresent() && packet.payload().get() instanceof NbtCompound) {
-                        NbtCompound payload = (NbtCompound) packet.payload().get();
-                        if (payload.contains("color") && payload.getString("color").isPresent()) {
-                            int c = Integer.parseInt(payload.getString("color").get());
-                            SmithingTemplate template = SmithingTemplate.from(player.getMainHandStack());
-                            NbtCompound newCustomModelData = ((NbtCompound) template.getSettingOrElse("custom_model_data", NbtCompound::new)).copy();
-                            NbtList colors = newCustomModelData.getListOrEmpty("colors");
-                            colors.add(NbtInt.of(c));
-                            newCustomModelData.put("colors", colors);
-                            template.setSetting("custom_model_data", newCustomModelData);
-                            CustomModelDataSettings.openRootDialog(player, template);
-                            return;
+                    ItemStack stack = player.getMainHandStack();
+                    if (isItemCustomizationSmithingTemplate(stack)) {
+                        if (packet.payload().isPresent() && packet.payload().get() instanceof NbtCompound) {
+                            NbtCompound payload = (NbtCompound) packet.payload().get();
+                            if (payload.contains("color") && payload.getString("color").isPresent()) {
+                                int c = Integer.parseInt(payload.getString("color").get());
+                                SmithingTemplate template = SmithingTemplate.from(stack);
+                                NbtCompound newCustomModelData = ((NbtCompound) template.getSettingOrElse("custom_model_data", NbtCompound::new)).copy();
+                                NbtList colors = newCustomModelData.getListOrEmpty("colors");
+                                colors.add(NbtInt.of(c));
+                                newCustomModelData.put("colors", colors);
+                                template.setSetting("custom_model_data", newCustomModelData);
+                                CustomModelDataSettings.openRootDialog(player, template);
+                                return;
+                            }
                         }
                     }
                     player.openDialog(
@@ -269,6 +284,28 @@ public class Dialogs {
                                     DialogManager.simpleNoticeDialog(Text.of("Invalid color"))
                             )
                     );
+                }
+        );
+
+        DIALOG_MANAGER.register(
+                Identifier.of(MOD_ID, "tooltip"),
+                (packet, player) -> {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
+                        TooltipSettings.openRootDialog(player);
+                    }
+                }
+        );
+
+        registerIndexRootAction("tooltip_style", TOOLTIP_STYLE_INDEX, TooltipStyleSettings::openRootDialog, "No useable tooltip styles present in resource pack");
+        registerIndexNamespaceAction("tooltip_style", TOOLTIP_STYLE_INDEX, TooltipStyleSettings::openDialogForNamespace);
+        registerIndexSetAction("tooltip_style", TOOLTIP_STYLE_INDEX, Identifier::toString, "Invalid tooltip style");
+
+        DIALOG_MANAGER.register(
+                Identifier.of(MOD_ID, "music_and_sounds"),
+                (packet, player) -> {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
+                        MusicAndSoundsSettings.openRootDialog(player);
+                    }
                 }
         );
     }

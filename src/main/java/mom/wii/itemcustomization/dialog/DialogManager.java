@@ -18,7 +18,6 @@ import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.util.BiConsumer;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +47,7 @@ public class DialogManager {
                         new DialogButtonData(
                                 Text.translatable("gui.ok"),
                                 Optional.empty(),
-                                150
+                                200
                         ),
                         Optional.empty()
                 )
