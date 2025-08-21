@@ -16,7 +16,6 @@ import net.minecraft.util.Identifier;
 import java.util.List;
 import java.util.Optional;
 
-import static mom.wii.itemcustomization.dialog.DialogManager.simpleTranslatableMenuButton;
 import static mom.wii.itemcustomization.dialog.DialogManager.translatableMenuButtonWithTooltip;
 
 public class MusicAndSoundsSettings {

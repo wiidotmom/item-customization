@@ -7,7 +7,6 @@ import net.minecraft.component.type.CustomModelDataComponent;
 import net.minecraft.component.type.EquippableComponent;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.dialog.AfterAction;
-import net.minecraft.dialog.DialogActionButtonData;
 import net.minecraft.dialog.DialogCommonData;
 import net.minecraft.dialog.body.DialogBody;
 import net.minecraft.dialog.body.ItemDialogBody;

@@ -6,19 +6,16 @@ import net.minecraft.dialog.DialogActionButtonData;
 import net.minecraft.dialog.DialogButtonData;
 import net.minecraft.dialog.DialogCommonData;
 import net.minecraft.dialog.action.SimpleDialogAction;
-import net.minecraft.dialog.body.PlainMessageDialogBody;
 import net.minecraft.dialog.type.MultiActionDialog;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
 import java.util.List;
 import java.util.Optional;
 
-import static mom.wii.itemcustomization.dialog.DialogManager.simpleTranslatableMenuButton;
 import static mom.wii.itemcustomization.dialog.DialogManager.translatableMenuButtonWithTooltip;
 
 public class EquipmentSettings {

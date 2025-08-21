@@ -11,18 +11,13 @@ import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
-import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistrySetupCallback;
-import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.block.jukebox.JukeboxSong;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import net.minecraft.text.Text;
+import net.minecraft.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,8 +88,12 @@ public class ItemCustomization implements ModInitializer {
 		UseBlockCallback.EVENT.register(((playerEntity, world, hand, blockHitResult) -> {
 			ItemStack itemStack = playerEntity.getStackInHand(hand);
 			if (isItemCustomizationSmithingTemplate(itemStack)) {
-				SmithingTemplate.from(itemStack).openDialog((ServerPlayerEntity) playerEntity);
-				return ActionResult.FAIL;
+				if (hand.equals(Hand.MAIN_HAND)) {
+					SmithingTemplate.from(itemStack).openDialog((ServerPlayerEntity) playerEntity);
+					return ActionResult.FAIL;
+				} else {
+					playerEntity.sendMessage(Text.translatableWithFallback("igalaxy_item_customization.main_hand_error", "Item Customization Smithing Template can only be used with your Main Hand").formatted(Formatting.RED), true);
+				}
 			}
 			return ActionResult.PASS;
 		}));
@@ -102,7 +101,11 @@ public class ItemCustomization implements ModInitializer {
 		UseItemCallback.EVENT.register(((playerEntity, world, hand) -> {
 			ItemStack itemStack = playerEntity.getStackInHand(hand);
 			if (isItemCustomizationSmithingTemplate(itemStack)) {
-				SmithingTemplate.from(itemStack).openDialog((ServerPlayerEntity) playerEntity);
+				if (hand.equals(Hand.MAIN_HAND)) {
+					SmithingTemplate.from(itemStack).openDialog((ServerPlayerEntity) playerEntity);
+				} else {
+					playerEntity.sendMessage(Text.translatableWithFallback("igalaxy_item_customization.main_hand_error", "Item Customization Smithing Template can only be used with your Main Hand").formatted(Formatting.RED), true);
+				}
 			}
 			return ActionResult.PASS;
 		}));
