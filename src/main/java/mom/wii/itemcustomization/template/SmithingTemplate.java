@@ -33,19 +33,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static mom.wii.itemcustomization.dialog.DialogManager.simpleTranslatableMenuButton;
 
 public class SmithingTemplate {
     private static final ItemStack PREVIEW_SLOT_ITEMSTACK;
-    private static final List<DialogActionButtonData> ROOT_MENU_BUTTONS = List.of(
-            simpleTranslatableMenuButton("item_model.external_title", "Item Model...", "item_model"),
-            simpleTranslatableMenuButton("equipment.external_title", "Equipment...", "equipment"),
-            simpleTranslatableMenuButton("custom_model_data.external_title", "Custom Model Data...", "custom_model_data"),
-            simpleTranslatableMenuButton("tooltip.external_title", "Tooltip...", "tooltip"),
-            simpleTranslatableMenuButton("music_and_sounds.external_title", "Music & Sounds...", "music_and_sounds")
-    );
     public static final HashMap<String, Integer> COST_MAP = new HashMap<>() {{
         put("item_model", 1);
         put("equipment_model", 6);
@@ -99,7 +91,13 @@ public class SmithingTemplate {
                     ),
                     List.of()
                 ),
-                ROOT_MENU_BUTTONS,
+                List.of(
+                        simpleTranslatableMenuButton("item_model.external_title", "Item Model...", "item_model"),
+                        simpleTranslatableMenuButton("equipment.external_title", "Equipment...", "equipment"),
+                        simpleTranslatableMenuButton("custom_model_data.external_title", "Custom Model Data...", "custom_model_data"),
+                        simpleTranslatableMenuButton("tooltip.external_title", "Tooltip...", "tooltip"),
+                        simpleTranslatableMenuButton("music_and_sounds.external_title", "Music & Sounds...", "music_and_sounds")
+                ),
                 Optional.empty(),
                 2
         );

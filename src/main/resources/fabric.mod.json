@@ -3,15 +3,14 @@
 	"id": "igalaxy_item_customization",
 	"version": "${version}",
 	"name": "Item Customization",
-	"description": "This is an example description! Tell everyone what your mod is about!",
 	"authors": [
-		"Me!"
+		"igalaxy"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://codeberg.org/igalaxy/item-customization",
+		"sources": "https://codeberg.org/igalaxy/item-customization"
 	},
-	"license": "CC0-1.0",
+	"license": "CC-BY-NC-SA-4.0",
 	"environment": "server",
 	"entrypoints": {
 		"main": [
@@ -30,7 +29,5 @@
 		"polymer-core": ">=0.13.0",
 		"polymer-resource-pack": ">=0.13.0"
 	},
-	"suggests": {
-		"another-mod": "*"
-	}
+	"suggests": {}
 }
