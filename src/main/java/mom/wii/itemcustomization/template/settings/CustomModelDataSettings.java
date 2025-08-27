@@ -43,7 +43,7 @@ public class CustomModelDataSettings {
                         true,
                         AfterAction.WAIT_FOR_RESPONSE,
                         List.of(
-                                new PlainMessageDialogBody(Text.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.add", "Preview"), 200),
+                                new PlainMessageDialogBody(Text.translatableWithFallback("gui.igalaxy_item_customization.preview", "Preview"), 200),
                                 new PlainMessageDialogBody(Text.literal(previewString).formatted(Formatting.GRAY), 200),
                                 new PlainMessageDialogBody(Text.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.add_new", "Add New"), 200)
                         ),

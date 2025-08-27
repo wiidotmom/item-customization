@@ -9,19 +9,24 @@ import mom.wii.itemcustomization.template.settings.equipment.EquipmentModelSetti
 import mom.wii.itemcustomization.template.settings.equipment.EquipmentSettings;
 import mom.wii.itemcustomization.template.settings.ItemModelSettings;
 import mom.wii.itemcustomization.template.settings.music_and_sounds.MusicAndSoundsSettings;
+import mom.wii.itemcustomization.template.settings.tooltip.HiddenComponentSettings;
 import mom.wii.itemcustomization.template.settings.tooltip.TooltipSettings;
 import mom.wii.itemcustomization.template.settings.tooltip.TooltipStyleSettings;
 import mom.wii.itemcustomization.util.IdentifierIndex;
 import net.minecraft.component.ComponentMap;
+import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.*;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
+import java.util.LinkedHashSet;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -299,6 +304,63 @@ public class Dialogs {
         registerIndexRootAction("tooltip_style", TOOLTIP_STYLE_INDEX, TooltipStyleSettings::openRootDialog, "No useable tooltip styles present in resource pack");
         registerIndexNamespaceAction("tooltip_style", TOOLTIP_STYLE_INDEX, TooltipStyleSettings::openDialogForNamespace);
         registerIndexSetAction("tooltip_style", TOOLTIP_STYLE_INDEX, Identifier::toString, "Invalid tooltip style");
+
+        DIALOG_MANAGER.register(
+                Identifier.of(MOD_ID, "hidden_components"),
+                (packet, player) -> {
+                    ItemStack stack = player.getMainHandStack();
+                    if (isItemCustomizationSmithingTemplate(stack)) {
+                        HiddenComponentSettings.openRootDialog(player, SmithingTemplate.from(stack));
+                    }
+                }
+        );
+        DIALOG_MANAGER.register(
+                Identifier.of(MOD_ID, "hidden_components/add_component"),
+                (packet, player) -> {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
+                        HiddenComponentSettings.openAddComponentDialog(player);
+                    }
+                }
+        );
+        DIALOG_MANAGER.register(
+                Identifier.of(MOD_ID, "hidden_components/add_component/add"),
+                (packet, player) -> {
+                    ItemStack stack = player.getMainHandStack();
+                    if (isItemCustomizationSmithingTemplate(stack)) {
+                        if (packet.payload().isPresent() && packet.payload().get() instanceof NbtCompound) {
+                            NbtCompound payload = (NbtCompound) packet.payload().get();
+                            if (payload.getString("component").isPresent()) {
+                                SmithingTemplate template = SmithingTemplate.from(stack);
+                                String c = payload.getString("component").get().toLowerCase();
+                                DataResult<Identifier> validated = Identifier.validate(c);
+                                if (validated.isSuccess()) {
+                                    if (Registries.DATA_COMPONENT_TYPE.containsId(validated.getOrThrow())) {
+                                        TooltipDisplayComponent oldComponent = stack.getOrDefault(
+                                                DataComponentTypes.TOOLTIP_DISPLAY, new TooltipDisplayComponent(
+                                                        false,
+                                                        new LinkedHashSet<>()
+                                                )
+                                        );
+                                        LinkedHashSet<ComponentType<?>> set = new LinkedHashSet(oldComponent.hiddenComponents());
+                                        ComponentType<?> componentType = Registries.DATA_COMPONENT_TYPE.get(validated.getOrThrow());
+                                        set.add(componentType);
+                                        stack.set(DataComponentTypes.TOOLTIP_DISPLAY, new TooltipDisplayComponent(
+                                                oldComponent.hideTooltip(),
+                                                set
+                                        ));
+                                        HiddenComponentSettings.openRootDialog(player, template);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    player.openDialog(
+                            RegistryEntry.of(
+                                    DialogManager.simpleNoticeDialog(Text.of("Invalid component"))
+                            )
+                    );
+                }
+        );
 
         DIALOG_MANAGER.register(
                 Identifier.of(MOD_ID, "music_and_sounds"),
