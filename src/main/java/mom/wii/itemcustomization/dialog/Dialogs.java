@@ -336,7 +336,7 @@ public class Dialogs {
                                 if (validated.isSuccess()) {
                                     if (Registries.DATA_COMPONENT_TYPE.containsId(validated.getOrThrow())) {
                                         NbtList hidden = ((NbtList) template.getSettingOrElse("hidden_components", NbtList::new)).copy();
-                                        if (!c.startsWith("minecraft:"))
+                                        if (!c.startsWith("minecraft:") && !c.contains(":"))
                                             c = "minecraft:" + c;
                                         final String component = c;
                                         if (hidden.stream().noneMatch(x -> x.asString().get().equals(component))) {
