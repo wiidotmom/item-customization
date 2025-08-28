@@ -335,20 +335,16 @@ public class Dialogs {
                                 DataResult<Identifier> validated = Identifier.validate(c);
                                 if (validated.isSuccess()) {
                                     if (Registries.DATA_COMPONENT_TYPE.containsId(validated.getOrThrow())) {
-                                        TooltipDisplayComponent oldComponent = stack.getOrDefault(
-                                                DataComponentTypes.TOOLTIP_DISPLAY, new TooltipDisplayComponent(
-                                                        false,
-                                                        new LinkedHashSet<>()
-                                                )
-                                        );
-                                        LinkedHashSet<ComponentType<?>> set = new LinkedHashSet(oldComponent.hiddenComponents());
-                                        ComponentType<?> componentType = Registries.DATA_COMPONENT_TYPE.get(validated.getOrThrow());
-                                        set.add(componentType);
-                                        stack.set(DataComponentTypes.TOOLTIP_DISPLAY, new TooltipDisplayComponent(
-                                                oldComponent.hideTooltip(),
-                                                set
-                                        ));
-                                        HiddenComponentSettings.openRootDialog(player, template);
+                                        NbtList hidden = ((NbtList) template.getSettingOrElse("hidden_components", NbtList::new)).copy();
+                                        if (!c.startsWith("minecraft:"))
+                                            c = "minecraft:" + c;
+                                        final String component = c;
+                                        if (hidden.stream().noneMatch(x -> x.asString().get().equals(component))) {
+                                            hidden.add(NbtString.of(component));
+                                            template.setSetting("hidden_components", hidden);
+                                            HiddenComponentSettings.openRootDialog(player, template);
+                                            return;
+                                        }
                                     }
                                 }
                             }

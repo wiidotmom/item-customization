@@ -30,7 +30,7 @@ import static mom.wii.itemcustomization.dialog.DialogManager.simpleTranslatableM
 
 public class HiddenComponentSettings {
     public static void openRootDialog(ServerPlayerEntity player, SmithingTemplate template) {
-        NbtList hiddenComponents = (NbtList) template.getSettingOrElse("hidden_components", NbtCompound::new);
+        NbtList hiddenComponents = (NbtList) template.getSettingOrElse("hidden_components", NbtList::new);
         StringNbtWriter writer = new StringNbtWriter();
         writer.visitList(hiddenComponents);
         String previewString = writer.getString();
@@ -49,7 +49,7 @@ public class HiddenComponentSettings {
                         List.of()
                 ),
                 List.of(
-                        simpleTranslatableMenuButton("hidden_components.add_component.external_title", "Add Component...", "hidden_components/add_component", 50)
+                        simpleTranslatableMenuButton("hidden_components.add_component.external_title", "Add Component...", "hidden_components/add_component")
                 ),
                 Optional.of(
                         new DialogActionButtonData(
@@ -78,7 +78,7 @@ public class HiddenComponentSettings {
                                 new DialogInput(
                                         "component",
                                         new TextInputControl(
-                                                100,
+                                                200,
                                                 Text.translatableWithFallback("gui.igalaxy_item_customization.hidden_components.component", "Component"),
                                                 true,
                                                 "",

@@ -2,10 +2,12 @@ package mom.wii.itemcustomization.template;
 
 import mom.wii.itemcustomization.ItemCustomization;
 import net.minecraft.component.ComponentMap;
+import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.CustomModelDataComponent;
 import net.minecraft.component.type.EquippableComponent;
 import net.minecraft.component.type.NbtComponent;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.dialog.AfterAction;
 import net.minecraft.dialog.DialogCommonData;
 import net.minecraft.dialog.body.DialogBody;
@@ -19,6 +21,7 @@ import net.minecraft.item.Items;
 import net.minecraft.item.equipment.EquipmentAsset;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.nbt.visitor.StringNbtWriter;
 import net.minecraft.registry.*;
@@ -42,6 +45,9 @@ public class SmithingTemplate {
         put("equipment_model", 6);
         put("camera_overlay", 2);
         put("tooltip_style", 2);
+        put("note_block_sound", 1);
+        put("jukebox_song", 6);
+        put("instrument", 6);
     }};
     private ItemStack itemStack;
     public static final Item ingredient;
@@ -142,6 +148,13 @@ public class SmithingTemplate {
                 String tooltipStyle = ((NbtString) this.getSetting("tooltip_style")).value();
                 tooltip.add(Text.literal(" Tooltip Style").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
                 tooltip.add(Text.literal("  " + tooltipStyle).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
+            }
+            if (this.hasSetting("hidden_components")) {
+                NbtList hiddenComponents = (NbtList) this.getSetting("hidden_components");
+                StringNbtWriter writer = new StringNbtWriter();
+                writer.visitList(hiddenComponents);
+                tooltip.add(Text.literal(" Hidden Components").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
+                tooltip.add(Text.literal("  " + writer.getString()).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
             }
         }
         return tooltip;
@@ -257,6 +270,11 @@ public class SmithingTemplate {
         if (this.hasSetting("tooltip_style")) {
             String style = ((NbtString) this.getSetting("tooltip_style")).value();
             stack.set(DataComponentTypes.TOOLTIP_STYLE, Identifier.of(style));
+        }
+        if (this.hasSetting("hidden_components")) {
+            NbtList list = (NbtList) this.getSetting("hidden_components");
+            LinkedHashSet<ComponentType<?>> hidden = new LinkedHashSet<>(list.stream().map(x -> Registries.DATA_COMPONENT_TYPE.get(Identifier.of(x.asString().orElseThrow()))).toList());
+            stack.set(DataComponentTypes.TOOLTIP_DISPLAY, new TooltipDisplayComponent(false, hidden));
         }
     }
 
