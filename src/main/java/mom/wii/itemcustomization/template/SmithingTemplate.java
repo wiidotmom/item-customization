@@ -1,13 +1,11 @@
 package mom.wii.itemcustomization.template;
 
 import mom.wii.itemcustomization.ItemCustomization;
+import net.minecraft.block.jukebox.JukeboxSong;
 import net.minecraft.component.ComponentMap;
 import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.CustomModelDataComponent;
-import net.minecraft.component.type.EquippableComponent;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.component.type.TooltipDisplayComponent;
+import net.minecraft.component.type.*;
 import net.minecraft.dialog.AfterAction;
 import net.minecraft.dialog.DialogCommonData;
 import net.minecraft.dialog.body.DialogBody;
@@ -25,11 +23,15 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.nbt.visitor.StringNbtWriter;
 import net.minecraft.registry.*;
+import net.minecraft.registry.entry.LazyRegistryEntryReference;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -78,7 +80,7 @@ public class SmithingTemplate {
     public void openDialog(ServerPlayerEntity player) {
         ItemStack previewItem = new ItemStack(Items.PAPER);
         previewItem.set(DataComponentTypes.ITEM_NAME, Text.translatableWithFallback("gui.igalaxy_item_customization.preview_item", "Preview Item"));
-        this.applySettings(previewItem);
+        this.applySettings(previewItem, player.getWorld());
 
         MultiActionDialog dialog = new MultiActionDialog(
                 new DialogCommonData(
@@ -156,6 +158,11 @@ public class SmithingTemplate {
                 tooltip.add(Text.literal(" Hidden Components").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
                 tooltip.add(Text.literal("  " + writer.getString()).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
             }
+            if (this.hasSetting("jukebox_song")) {
+                String jukeboxSong = ((NbtString) this.getSetting("jukebox_song")).value();
+                tooltip.add(Text.literal(" Jukebox Song").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
+                tooltip.add(Text.literal("  " + jukeboxSong).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
+            }
         }
         return tooltip;
     }
@@ -228,7 +235,7 @@ public class SmithingTemplate {
         }
     }
 
-    public void applySettings(ItemStack stack) {
+    public void applySettings(ItemStack stack, World world) {
         if (this.hasSetting("item_model")) {
             Identifier id = Identifier.of(((NbtString) this.getSetting("item_model")).value());
             stack.set(DataComponentTypes.ITEM_MODEL, id);
@@ -276,6 +283,11 @@ public class SmithingTemplate {
             LinkedHashSet<ComponentType<?>> hidden = new LinkedHashSet<>(list.stream().map(x -> Registries.DATA_COMPONENT_TYPE.get(Identifier.of(x.asString().orElseThrow()))).toList());
             stack.set(DataComponentTypes.TOOLTIP_DISPLAY, new TooltipDisplayComponent(false, hidden));
         }
+        if (this.hasSetting("jukebox_song")) {
+            String s = ((NbtString) this.getSetting("jukebox_song")).value();
+            RegistryEntry.Reference<JukeboxSong> song = world.getRegistryManager().getOrThrow(RegistryKeys.JUKEBOX_SONG).getEntry(Identifier.of(s)).get();
+            stack.set(DataComponentTypes.JUKEBOX_PLAYABLE, new JukeboxPlayableComponent(new LazyRegistryEntryReference<>(song)));
+        }
     }
 
     public int getCost() {
@@ -296,6 +308,8 @@ public class SmithingTemplate {
                 this.hasSetting("camera_overlay") &&
                         (!def.contains(DataComponentTypes.EQUIPPABLE) || (def.contains(DataComponentTypes.EQUIPPABLE) && !def.get(DataComponentTypes.EQUIPPABLE).slot().equals(EquipmentSlot.HEAD)))
         )
+            canApply = false;
+        if (this.hasSetting("jukebox_song") && !def.contains(DataComponentTypes.JUKEBOX_PLAYABLE))
             canApply = false;
         return canApply;
     }

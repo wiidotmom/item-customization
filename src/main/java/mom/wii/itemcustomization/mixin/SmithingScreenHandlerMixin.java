@@ -4,7 +4,10 @@ import mom.wii.itemcustomization.template.SmithingTemplate;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.SmithingScreenHandler;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldEvents;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -19,6 +22,8 @@ import java.util.function.Predicate;
 @Mixin(SmithingScreenHandler.class)
 public abstract class SmithingScreenHandlerMixin implements ForgingScreenHandlerAccessor, SmithingScreenHandlerAccessor {
     @Shadow protected abstract List<ItemStack> getInputStacks();
+
+    @Shadow @Final private World world;
 
     @ModifyArg(method = "createForgingSlotsManager", at = @At(value = "INVOKE", target = "Lnet/minecraft/screen/slot/ForgingSlotsManager$Builder;input(IIILjava/util/function/Predicate;)Lnet/minecraft/screen/slot/ForgingSlotsManager$Builder;", ordinal = 0), index = 3)
     private static Predicate<ItemStack> itemCustomization$canUseTemplate(Predicate<ItemStack> canUse) {
@@ -53,7 +58,7 @@ public abstract class SmithingScreenHandlerMixin implements ForgingScreenHandler
                 if (ingredient.isOf(SmithingTemplate.ingredient) && template.canApplyToStack(base) && ingredient.getCount() >= template.getCost()) {
                     ItemStack output = base.copy();
                     output.setCount(1);
-                    template.applySettings(output);
+                    template.applySettings(output, this.world);
                     this.getOutput().setStack(0, output);
                     ci.cancel();
                 }

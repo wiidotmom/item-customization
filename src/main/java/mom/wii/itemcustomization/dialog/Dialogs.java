@@ -8,6 +8,7 @@ import mom.wii.itemcustomization.template.settings.equipment.CameraOverlaySettin
 import mom.wii.itemcustomization.template.settings.equipment.EquipmentModelSettings;
 import mom.wii.itemcustomization.template.settings.equipment.EquipmentSettings;
 import mom.wii.itemcustomization.template.settings.ItemModelSettings;
+import mom.wii.itemcustomization.template.settings.music_and_sounds.JukeboxSongSettings;
 import mom.wii.itemcustomization.template.settings.music_and_sounds.MusicAndSoundsSettings;
 import mom.wii.itemcustomization.template.settings.tooltip.HiddenComponentSettings;
 import mom.wii.itemcustomization.template.settings.tooltip.TooltipSettings;
@@ -301,7 +302,7 @@ public class Dialogs {
                 }
         );
 
-        registerIndexRootAction("tooltip_style", TOOLTIP_STYLE_INDEX, TooltipStyleSettings::openRootDialog, "No useable tooltip styles present in resource pack");
+        registerIndexRootAction("tooltip_style", TOOLTIP_STYLE_INDEX, TooltipStyleSettings::openRootDialog, "No usable tooltip styles present in resource pack");
         registerIndexNamespaceAction("tooltip_style", TOOLTIP_STYLE_INDEX, TooltipStyleSettings::openDialogForNamespace);
         registerIndexSetAction("tooltip_style", TOOLTIP_STYLE_INDEX, Identifier::toString, "Invalid tooltip style");
 
@@ -366,5 +367,9 @@ public class Dialogs {
                     }
                 }
         );
+
+        registerIndexRootAction("jukebox_song", JUKEBOX_SONG_INDEX, JukeboxSongSettings::openRootDialog, "No usable jukebox songs present in data pack");
+        registerIndexNamespaceAction("jukebox_song", JUKEBOX_SONG_INDEX, JukeboxSongSettings::openDialogForNamespace);
+        registerIndexSetAction("jukebox_song", JUKEBOX_SONG_INDEX, Identifier::toString, "Invalid jukebox song");
     }
 }
