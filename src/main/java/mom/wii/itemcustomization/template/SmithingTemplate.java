@@ -299,7 +299,7 @@ public class SmithingTemplate {
         if (this.hasSetting("instrument")) {
             String i = ((NbtString) this.getSetting("instrument")).value();
             RegistryEntry.Reference<Instrument> instrument = world.getRegistryManager().getOrThrow(RegistryKeys.INSTRUMENT).getEntry(Identifier.of(i)).get();
-            stack.set(DataComponentTypes.JUKEBOX_PLAYABLE, new InstrumentComponent());
+            stack.set(DataComponentTypes.INSTRUMENT, new InstrumentComponent(RegistryEntry.of(instrument.value())));
         }
     }
 
