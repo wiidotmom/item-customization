@@ -69,16 +69,15 @@ public class SmithingTemplate {
         put("jukebox_song", new  Pair<>("Jukebox Song", (e) -> e.asString().get()));
         put("instrument", new Pair<>("Instrument", (e) -> e.asString().get()));
     }};
-    public static final HashSet<BiPredicate<SmithingTemplate, ItemStack>> CAN_APPLY_PREDICATES = new HashSet<>() {{
-       add((t, i) -> t.hasSetting("equipment_model") && !i.getDefaultComponents().contains(DataComponentTypes.EQUIPPABLE));
-       add((t, i) -> {
+    public static final HashMap<String, BiPredicate<SmithingTemplate, ItemStack>> CAN_APPLY_PREDICATES = new HashMap<>() {{
+       put("equipment_model", (t, i) -> !i.getDefaultComponents().contains(DataComponentTypes.EQUIPPABLE));
+       put("camera_overlay", (t, i) -> {
            ComponentMap d = i.getDefaultComponents();
-           return t.hasSetting("camera_overlay") &&
-                   (!d.contains(DataComponentTypes.EQUIPPABLE) || (d.contains(DataComponentTypes.EQUIPPABLE) && !d.get(DataComponentTypes.EQUIPPABLE).slot().equals(EquipmentSlot.HEAD)));
+           return (!d.contains(DataComponentTypes.EQUIPPABLE) || (d.contains(DataComponentTypes.EQUIPPABLE) && !d.get(DataComponentTypes.EQUIPPABLE).slot().equals(EquipmentSlot.HEAD)));
        });
-       add((t, i) -> t.hasSetting("note_block_sound") && !(i.getItem() instanceof PlayerHeadItem));
-       add((t, i) -> t.hasSetting("jukebox_song") && !i.getDefaultComponents().contains(DataComponentTypes.JUKEBOX_PLAYABLE));
-       add((t, i) -> t.hasSetting("instrument") && !i.getDefaultComponents().contains(DataComponentTypes.INSTRUMENT));
+       put("note_block_sound", (t, i) -> !(i.getItem() instanceof PlayerHeadItem));
+       put("jukebox_song", (t, i) -> !i.getDefaultComponents().contains(DataComponentTypes.JUKEBOX_PLAYABLE));
+       put("instrument", (t, i) -> !i.getDefaultComponents().contains(DataComponentTypes.INSTRUMENT));
     }};
     public ItemStack itemStack;
     public static final Item ingredient;
@@ -310,7 +309,7 @@ public class SmithingTemplate {
     }
 
     public boolean canApplyToStack(ItemStack stack) {
-        return CAN_APPLY_PREDICATES.stream().noneMatch(x -> x.test(this, stack));
+        return CAN_APPLY_PREDICATES.entrySet().stream().noneMatch(x -> this.hasSetting(x.getKey()) && x.getValue().test(this, stack));
     }
 
     private DialogBody getCostDialogBody() {
