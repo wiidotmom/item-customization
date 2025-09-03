@@ -388,7 +388,7 @@ public class Dialogs {
                             NbtCompound payload = (NbtCompound) packet.payload().get();
                             if (payload.getString("note_block_sound").isPresent()) {
                                 String s = payload.getString("note_block_sound").get().toLowerCase();
-                                DataResult<Identifier> validated = Identifier.validate(sound);
+                                DataResult<Identifier> validated = Identifier.validate(s);
                                 if (validated.isSuccess()) {
                                     Identifier sound = validated.getOrThrow();
                                     SmithingTemplate template = SmithingTemplate.from(stack);
