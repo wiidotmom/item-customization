@@ -33,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -68,7 +69,18 @@ public class SmithingTemplate {
         put("jukebox_song", new  Pair<>("Jukebox Song", (e) -> e.asString().get()));
         put("instrument", new Pair<>("Instrument", (e) -> e.asString().get()));
     }};
-    private ItemStack itemStack;
+    public static final HashSet<BiPredicate<SmithingTemplate, ItemStack>> CAN_APPLY_PREDICATES = new HashSet<>() {{
+       add((t, i) -> t.hasSetting("equipment_model") && !i.getDefaultComponents().contains(DataComponentTypes.EQUIPPABLE));
+       add((t, i) -> {
+           ComponentMap d = i.getDefaultComponents();
+           return t.hasSetting("camera_overlay") &&
+                   (!d.contains(DataComponentTypes.EQUIPPABLE) || (d.contains(DataComponentTypes.EQUIPPABLE) && !d.get(DataComponentTypes.EQUIPPABLE).slot().equals(EquipmentSlot.HEAD)));
+       });
+       add((t, i) -> t.hasSetting("note_block_sound") && !(i.getItem() instanceof PlayerHeadItem));
+       add((t, i) -> t.hasSetting("jukebox_song") && !i.getDefaultComponents().contains(DataComponentTypes.JUKEBOX_PLAYABLE));
+       add((t, i) -> t.hasSetting("instrument") && !i.getDefaultComponents().contains(DataComponentTypes.INSTRUMENT));
+    }};
+    public ItemStack itemStack;
     public static final Item ingredient;
 
 
@@ -298,22 +310,7 @@ public class SmithingTemplate {
     }
 
     public boolean canApplyToStack(ItemStack stack) {
-        boolean canApply = true;
-        ComponentMap def = stack.getDefaultComponents();
-        if (this.hasSetting("equipment_model") && !def.contains(DataComponentTypes.EQUIPPABLE))
-            canApply = false;
-        if (
-                this.hasSetting("camera_overlay") &&
-                        (!def.contains(DataComponentTypes.EQUIPPABLE) || (def.contains(DataComponentTypes.EQUIPPABLE) && !def.get(DataComponentTypes.EQUIPPABLE).slot().equals(EquipmentSlot.HEAD)))
-        )
-            canApply = false;
-        if (this.hasSetting("note_block_sound") && !(stack.getItem() instanceof PlayerHeadItem))
-            canApply = false;
-        if (this.hasSetting("jukebox_song") && !def.contains(DataComponentTypes.JUKEBOX_PLAYABLE))
-            canApply = false;
-        if (this.hasSetting("instrument") && !def.contains(DataComponentTypes.INSTRUMENT))
-            canApply = false;
-        return canApply;
+        return CAN_APPLY_PREDICATES.stream().noneMatch(x -> x.test(this, stack));
     }
 
     private DialogBody getCostDialogBody() {
