@@ -44,6 +44,7 @@ public class ItemCustomization implements ModInitializer {
 	public static final IdentifierIndex CAMERA_OVERLAY_INDEX = new IdentifierIndex();
 	public static final IdentifierIndex TOOLTIP_STYLE_INDEX = new IdentifierIndex();
 	public static final IdentifierIndex JUKEBOX_SONG_INDEX = new IdentifierIndex();
+	public static final IdentifierIndex INSTRUMENT_INDEX = new IdentifierIndex();
 	public static DialogManager DIALOG_MANAGER = new DialogManager();
 
 	@Override
@@ -116,6 +117,11 @@ public class ItemCustomization implements ModInitializer {
 			view.registerEntryAdded(RegistryKeys.JUKEBOX_SONG, (i, id, song) -> {
 				if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(id.getNamespace()))) {
 					JUKEBOX_SONG_INDEX.add(id);
+				}
+			});
+			view.registerEntryAdded(RegistryKeys.INSTRUMENT, (i, id, instrument) -> {
+				if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(id.getNamespace()))) {
+					INSTRUMENT_INDEX.add(id);
 				}
 			});
 		});

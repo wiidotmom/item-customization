@@ -8,8 +8,10 @@ import mom.wii.itemcustomization.template.settings.equipment.CameraOverlaySettin
 import mom.wii.itemcustomization.template.settings.equipment.EquipmentModelSettings;
 import mom.wii.itemcustomization.template.settings.equipment.EquipmentSettings;
 import mom.wii.itemcustomization.template.settings.ItemModelSettings;
+import mom.wii.itemcustomization.template.settings.music_and_sounds.InstrumentSettings;
 import mom.wii.itemcustomization.template.settings.music_and_sounds.JukeboxSongSettings;
 import mom.wii.itemcustomization.template.settings.music_and_sounds.MusicAndSoundsSettings;
+import mom.wii.itemcustomization.template.settings.music_and_sounds.NoteBlockSoundSettings;
 import mom.wii.itemcustomization.template.settings.tooltip.HiddenComponentSettings;
 import mom.wii.itemcustomization.template.settings.tooltip.TooltipSettings;
 import mom.wii.itemcustomization.template.settings.tooltip.TooltipStyleSettings;
@@ -368,8 +370,48 @@ public class Dialogs {
                 }
         );
 
+        DIALOG_MANAGER.register(
+                Identifier.of(MOD_ID, "note_block_sound"),
+                (packet, player) -> {
+                    ItemStack stack = player.getMainHandStack();
+                    if (isItemCustomizationSmithingTemplate(stack)) {
+                        NoteBlockSoundSettings.openRootDialog(player, SmithingTemplate.from(stack));
+                    }
+                }
+        );
+        DIALOG_MANAGER.register(
+                Identifier.of(MOD_ID, "note_block_sound/set"),
+                (packet, player) -> {
+                    ItemStack stack = player.getMainHandStack();
+                    if (isItemCustomizationSmithingTemplate(stack)) {
+                        if (packet.payload().isPresent() && packet.payload().get() instanceof NbtCompound) {
+                            NbtCompound payload = (NbtCompound) packet.payload().get();
+                            if (payload.getString("note_block_sound").isPresent()) {
+                                String s = payload.getString("note_block_sound").get().toLowerCase();
+                                DataResult<Identifier> validated = Identifier.validate(sound);
+                                if (validated.isSuccess()) {
+                                    Identifier sound = validated.getOrThrow();
+                                    SmithingTemplate template = SmithingTemplate.from(stack);
+                                    template.setSetting("note_block_sound", NbtString.of(sound.toString()));
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                    player.openDialog(
+                            RegistryEntry.of(
+                                    DialogManager.simpleNoticeDialog(Text.of("Invalid note block sound"))
+                            )
+                    );
+                }
+        );
+
         registerIndexRootAction("jukebox_song", JUKEBOX_SONG_INDEX, JukeboxSongSettings::openRootDialog, "No usable jukebox songs present in data pack");
         registerIndexNamespaceAction("jukebox_song", JUKEBOX_SONG_INDEX, JukeboxSongSettings::openDialogForNamespace);
         registerIndexSetAction("jukebox_song", JUKEBOX_SONG_INDEX, Identifier::toString, "Invalid jukebox song");
+
+        registerIndexRootAction("instrument", INSTRUMENT_INDEX, InstrumentSettings::openRootDialog, "No usable instruments present in data pack");
+        registerIndexNamespaceAction("instrument", INSTRUMENT_INDEX, InstrumentSettings::openDialogForNamespace);
+        registerIndexSetAction("instrument",  INSTRUMENT_INDEX, Identifier::toString, "Invalid instrument");
     }
 }

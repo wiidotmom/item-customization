@@ -13,9 +13,7 @@ import net.minecraft.dialog.body.ItemDialogBody;
 import net.minecraft.dialog.body.PlainMessageDialogBody;
 import net.minecraft.dialog.type.MultiActionDialog;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.item.*;
 import net.minecraft.item.equipment.EquipmentAsset;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -112,6 +110,11 @@ public class SmithingTemplate {
         player.openDialog(RegistryEntry.of(dialog));
     }
 
+    private static void addToTooltip(ArrayList<Text> tooltip, String title, String value) {
+        tooltip.add(Text.literal(" " + title).styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
+        tooltip.add(Text.literal("  " + value).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
+    }
+
     public List<Text> getTooltip() {
         ArrayList<Text> tooltip = new ArrayList<>(List.of(
                 Text.translatable("item.minecraft.smithing_template").styled(style -> style.withColor(Formatting.GRAY).withItalic(false)),
@@ -126,42 +129,43 @@ public class SmithingTemplate {
             tooltip.add(Text.translatable("potion.whenDrank").styled(style -> style.withItalic(false).withColor(Formatting.GRAY)));
             if (this.hasSetting("item_model")) {
                 String itemModel = ((NbtString) this.getSetting("item_model")).value();
-                tooltip.add(Text.literal(" Item Model").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
-                tooltip.add(Text.literal("  " + itemModel).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
+                addToTooltip(tooltip, "Item Model", itemModel);
             }
             if (this.hasSetting("equipment_model")) {
                 String equipmentModel = ((NbtString) this.getSetting("equipment_model")).value();
-                tooltip.add(Text.literal(" Equipment Model").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
-                tooltip.add(Text.literal("  " + equipmentModel).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
+                addToTooltip(tooltip, "Equipment Model", equipmentModel);
             }
             if (this.hasSetting("camera_overlay")) {
                 String cameraOverlay = ((NbtString) this.getSetting("camera_overlay")).value();
-                tooltip.add(Text.literal(" Camera Overlay").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
-                tooltip.add(Text.literal("  " + cameraOverlay).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
+                addToTooltip(tooltip, "Camera Overlay", cameraOverlay);
             }
             if (this.hasSetting("custom_model_data")) {
                 NbtCompound customModelData = ((NbtCompound) this.getSetting("custom_model_data"));
                 StringNbtWriter writer = new StringNbtWriter();
                 writer.visitCompound(customModelData);
-                tooltip.add(Text.literal(" Custom Model Data").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
-                tooltip.add(Text.literal("  " + writer.getString()).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
+                addToTooltip(tooltip, "Custom Model Data", writer.getString());
             }
             if (this.hasSetting("tooltip_style")) {
                 String tooltipStyle = ((NbtString) this.getSetting("tooltip_style")).value();
-                tooltip.add(Text.literal(" Tooltip Style").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
-                tooltip.add(Text.literal("  " + tooltipStyle).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
+                addToTooltip(tooltip, "Tooltip Style", tooltipStyle);
             }
             if (this.hasSetting("hidden_components")) {
                 NbtList hiddenComponents = (NbtList) this.getSetting("hidden_components");
                 StringNbtWriter writer = new StringNbtWriter();
                 writer.visitList(hiddenComponents);
-                tooltip.add(Text.literal(" Hidden Components").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
-                tooltip.add(Text.literal("  " + writer.getString()).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
+                addToTooltip(tooltip, "Hidden Components", writer.getString());
+            }
+            if (this.hasSetting("note_block_sound")) {
+                String noteBlockSound = ((NbtString) this.getSetting("note_block_sound")).value();
+                addToTooltip(tooltip, "Note Block Sound", noteBlockSound);
             }
             if (this.hasSetting("jukebox_song")) {
                 String jukeboxSong = ((NbtString) this.getSetting("jukebox_song")).value();
-                tooltip.add(Text.literal(" Jukebox Song").styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
-                tooltip.add(Text.literal("  " + jukeboxSong).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
+                addToTooltip(tooltip, "Jukebox Song", jukeboxSong);
+            }
+            if (this.hasSetting("instrument")) {
+                String instrument = ((NbtString) this.getSetting("instrument")).value();
+                addToTooltip(tooltip, "Instrument", instrument);
             }
         }
         return tooltip;
@@ -283,10 +287,19 @@ public class SmithingTemplate {
             LinkedHashSet<ComponentType<?>> hidden = new LinkedHashSet<>(list.stream().map(x -> Registries.DATA_COMPONENT_TYPE.get(Identifier.of(x.asString().orElseThrow()))).toList());
             stack.set(DataComponentTypes.TOOLTIP_DISPLAY, new TooltipDisplayComponent(false, hidden));
         }
+        if (this.hasSetting("note_block_sound")) {
+            String s = ((NbtString) this.getSetting("note_block_sound")).value();
+            stack.set(DataComponentTypes.NOTE_BLOCK_SOUND, Identifier.of(s));
+        }
         if (this.hasSetting("jukebox_song")) {
             String s = ((NbtString) this.getSetting("jukebox_song")).value();
             RegistryEntry.Reference<JukeboxSong> song = world.getRegistryManager().getOrThrow(RegistryKeys.JUKEBOX_SONG).getEntry(Identifier.of(s)).get();
             stack.set(DataComponentTypes.JUKEBOX_PLAYABLE, new JukeboxPlayableComponent(new LazyRegistryEntryReference<>(song)));
+        }
+        if (this.hasSetting("instrument")) {
+            String i = ((NbtString) this.getSetting("instrument")).value();
+            RegistryEntry.Reference<Instrument> instrument = world.getRegistryManager().getOrThrow(RegistryKeys.INSTRUMENT).getEntry(Identifier.of(i)).get();
+            stack.set(DataComponentTypes.JUKEBOX_PLAYABLE, new InstrumentComponent());
         }
     }
 
@@ -309,7 +322,11 @@ public class SmithingTemplate {
                         (!def.contains(DataComponentTypes.EQUIPPABLE) || (def.contains(DataComponentTypes.EQUIPPABLE) && !def.get(DataComponentTypes.EQUIPPABLE).slot().equals(EquipmentSlot.HEAD)))
         )
             canApply = false;
+        if (this.hasSetting("note_block_sound") && !(stack.getItem() instanceof PlayerHeadItem))
+            canApply = false;
         if (this.hasSetting("jukebox_song") && !def.contains(DataComponentTypes.JUKEBOX_PLAYABLE))
+            canApply = false;
+        if (this.hasSetting("instrument") && !def.contains(DataComponentTypes.INSTRUMENT))
             canApply = false;
         return canApply;
     }
