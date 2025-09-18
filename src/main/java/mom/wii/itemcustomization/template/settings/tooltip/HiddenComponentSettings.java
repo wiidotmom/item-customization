@@ -13,7 +13,6 @@ import net.minecraft.dialog.input.TextInputControl;
 import net.minecraft.dialog.type.ConfirmationDialog;
 import net.minecraft.dialog.type.DialogInput;
 import net.minecraft.dialog.type.MultiActionDialog;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.visitor.StringNbtWriter;
 import net.minecraft.registry.entry.RegistryEntry;

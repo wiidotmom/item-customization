@@ -4,7 +4,6 @@ import mom.wii.itemcustomization.template.SmithingTemplate;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.SmithingScreenHandler;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldEvents;
 import org.spongepowered.asm.mixin.Final;

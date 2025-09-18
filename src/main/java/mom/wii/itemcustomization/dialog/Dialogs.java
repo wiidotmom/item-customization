@@ -17,9 +17,7 @@ import mom.wii.itemcustomization.template.settings.tooltip.TooltipSettings;
 import mom.wii.itemcustomization.template.settings.tooltip.TooltipStyleSettings;
 import mom.wii.itemcustomization.util.IdentifierIndex;
 import net.minecraft.component.ComponentMap;
-import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.*;
@@ -29,7 +27,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-import java.util.LinkedHashSet;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
