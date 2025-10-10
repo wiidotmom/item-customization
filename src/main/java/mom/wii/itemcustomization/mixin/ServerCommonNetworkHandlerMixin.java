@@ -32,7 +32,7 @@ public abstract class ServerCommonNetworkHandlerMixin {
         if (ItemCustomization.DIALOG_MANAGER.customClickEvents.containsKey(packet.id())) {
             try {
                 ServerPlayerEntity player;
-                if ((player = server.getPlayerManager().getPlayer(this.getProfile().getId())) != null)
+                if ((player = server.getPlayerManager().getPlayer(this.getProfile().id())) != null)
                     ItemCustomization.DIALOG_MANAGER.customClickEvents.get(packet.id()).accept(packet, player);
             } catch (Exception e) {
                 this.connection.send(new ShowDialogS2CPacket(

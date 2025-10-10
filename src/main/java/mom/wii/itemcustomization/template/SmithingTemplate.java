@@ -30,6 +30,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -101,14 +102,18 @@ public class SmithingTemplate {
         return null;
     }
 
+    public static boolean isItemCustomizationSmithingTemplate(ItemStack itemStack, PacketContext context) {
+        return isItemCustomizationSmithingTemplate(itemStack);
+    }
+
     public static boolean isItemCustomizationSmithingTemplate(ItemStack itemStack) {
-        return itemStack.hasChangedComponent(DataComponentTypes.CUSTOM_DATA) && Objects.requireNonNull(itemStack.get(DataComponentTypes.CUSTOM_DATA)).contains("igalaxy_item_customization:is_customization_template");
+        return itemStack.hasChangedComponent(DataComponentTypes.CUSTOM_DATA) && Objects.requireNonNull(itemStack.get(DataComponentTypes.CUSTOM_DATA)).copyNbt().contains("igalaxy_item_customization:is_customization_template");
     }
 
     public void openDialog(ServerPlayerEntity player) {
         ItemStack previewItem = new ItemStack(Items.PAPER);
         previewItem.set(DataComponentTypes.ITEM_NAME, Text.translatableWithFallback("gui.igalaxy_item_customization.preview_item", "Preview Item"));
-        this.applySettings(previewItem, player.getWorld());
+        this.applySettings(previewItem, player.getEntityWorld());
 
         MultiActionDialog dialog = new MultiActionDialog(
                 new DialogCommonData(
@@ -169,14 +174,14 @@ public class SmithingTemplate {
 
     public boolean hasSettings() {
         if (this.itemStack.hasChangedComponent(DataComponentTypes.CUSTOM_DATA)) {
-            return this.itemStack.get(DataComponentTypes.CUSTOM_DATA).contains("igalaxy_item_customization:settings");
+            return this.itemStack.get(DataComponentTypes.CUSTOM_DATA).copyNbt().contains("igalaxy_item_customization:settings");
         }
         return false;
     }
 
     public boolean hasSetting(String key) {
         if (this.itemStack.hasChangedComponent(DataComponentTypes.CUSTOM_DATA)) {
-            if (this.itemStack.get(DataComponentTypes.CUSTOM_DATA).contains("igalaxy_item_customization:settings")) {
+            if (this.itemStack.get(DataComponentTypes.CUSTOM_DATA).copyNbt().contains("igalaxy_item_customization:settings")) {
                 NbtCompound customData = this.itemStack.get(DataComponentTypes.CUSTOM_DATA).copyNbt();
                 return customData.getCompound("igalaxy_item_customization:settings").isPresent() &&
                         customData.getCompound("igalaxy_item_customization:settings").get().contains(key);
@@ -206,7 +211,7 @@ public class SmithingTemplate {
         if (this.itemStack.hasChangedComponent(DataComponentTypes.CUSTOM_DATA)) {
             NbtComponent customData = this.itemStack.get(DataComponentTypes.CUSTOM_DATA);
             NbtCompound newCustomData = customData.copyNbt();
-            if (this.itemStack.get(DataComponentTypes.CUSTOM_DATA).contains("igalaxy_item_customization:settings")) {
+            if (this.itemStack.get(DataComponentTypes.CUSTOM_DATA).copyNbt().contains("igalaxy_item_customization:settings")) {
                 NbtCompound settings = newCustomData.getCompound("igalaxy_item_customization:settings").get();
                 settings.put(key, value);
                 newCustomData.put("igalaxy_item_customization:settings", settings);
@@ -227,7 +232,7 @@ public class SmithingTemplate {
 
     public void resetSettings() {
         if (itemStack.hasChangedComponent(DataComponentTypes.CUSTOM_DATA)) {
-            if (itemStack.get(DataComponentTypes.CUSTOM_DATA).contains("igalaxy_item_customization:settings")) {
+            if (itemStack.get(DataComponentTypes.CUSTOM_DATA).copyNbt().contains("igalaxy_item_customization:settings")) {
                 NbtCompound newCustomData = itemStack.get(DataComponentTypes.CUSTOM_DATA).copyNbt();
                 newCustomData.remove("igalaxy_item_customization:settings");
                 itemStack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(newCustomData));

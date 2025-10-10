@@ -52,7 +52,7 @@ public class Items {
         PolymerItemGroupUtils.registerPolymerItemGroup(ItemGroups.INGREDIENTS, Registries.ITEM_GROUP.get(ItemGroups.INGREDIENTS));
         PolymerItemGroupUtils.registerPolymerItemGroup(Identifier.of(ItemCustomization.MOD_ID, "item_group"), ITEM_GROUP);
 
-        PolymerItemUtils.ITEM_CHECK.register(SmithingTemplate::isItemCustomizationSmithingTemplate);
+        PolymerItemUtils.CONTEXT_ITEM_CHECK.register(SmithingTemplate::isItemCustomizationSmithingTemplate);
         PolymerItemUtils.ITEM_MODIFICATION_EVENT.register(
                 (original, client, context) -> {
                     if (SmithingTemplate.isItemCustomizationSmithingTemplate(original)) {
