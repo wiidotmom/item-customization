@@ -90,7 +90,7 @@ public abstract class SmithingScreenHandlerMixin implements ForgingScreenHandler
                 this.callDecrementStack(1);
                 this.decrementStackByCount(2, cost);
                 this.getContext().run((world, pos) -> world.syncWorldEvent(WorldEvents.SMITHING_TABLE_USED, pos, 0));
-                ItemCustomization.grantAdvancement((ServerPlayerEntity) player);
+                ItemCustomization.incrementItemsCustomized((ServerPlayerEntity) player, 1);
                 ci.cancel();
             }
         }

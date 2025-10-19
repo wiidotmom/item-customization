@@ -14,10 +14,11 @@ import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistrySetupCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.block.jukebox.JukeboxSong;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.scoreboard.ScoreHolder;
+import net.minecraft.scoreboard.ScoreboardObjective;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.*;
@@ -128,8 +129,14 @@ public class ItemCustomization implements ModInitializer {
 		});
 	}
 
-	public static void grantAdvancement(ServerPlayerEntity player) {
-		AdvancementEntry entry = player.getEntityWorld().getServer().getAdvancementLoader().get(Identifier.of("igalaxy_item_customization:adventure/apply_item_customization_smithing_template"));
-		player.getAdvancementTracker().grantCriterion(entry, "apply_item_customization_smithing_template");
+	public static void incrementItemsCustomized(ServerPlayerEntity player, int amount) {
+		MinecraftServer server = player.getEntityWorld().getServer();
+		ScoreHolder scoreHolder = server.getScoreboard().getKnownScoreHolders().stream().filter(x -> x.getNameForScoreboard().equals(player.getNameForScoreboard())).findFirst().get();
+		ScoreboardObjective objective = server.getScoreboard().getObjectives().stream().filter(x -> x.getName().equals("igy_item_customization_items_customized")).findFirst().get();
+		server.getScoreboard().getOrCreateScore(scoreHolder, objective).incrementScore(amount);
+
+		AdvancementEntry entry = server.getAdvancementLoader().get(Identifier.of("igalaxy_item_customization:adventure/apply_item_customization_smithing_template"));
+		if (!player.getAdvancementTracker().getProgress(entry).isDone())
+			player.getAdvancementTracker().grantCriterion(entry, "apply_item_customization_smithing_template");
 	}
 }
