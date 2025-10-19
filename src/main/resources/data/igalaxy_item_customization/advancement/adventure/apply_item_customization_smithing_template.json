@@ -1,0 +1,27 @@
+{
+  "display": {
+    "icon": {
+      "id": "minecraft:command_block",
+      "components": {
+        "minecraft:item_model": "igalaxy_item_customization:item_customization_smithing_template",
+        "minecraft:custom_data": {
+          "igalaxy_item_customization:is_customization_template": 1
+        }
+      }
+    },
+    "title": {
+      "translate": "igalaxy_item_customization.advancements.adventure.apply_item_customization_smithing_template.title",
+      "fallback": "Artist's Interpretation"
+    },
+    "description": {
+      "translate": "igalaxy_item_customization.advancements.adventure.apply_item_customization_smithing_template.description",
+      "fallback": "Apply an Item Customization Smithing Template at a Smithing Table"
+    }
+  },
+  "parent": "minecraft:adventure/trim_with_any_armor_pattern",
+  "criteria": {
+    "apply_item_customization_smithing_template": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

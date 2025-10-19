@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistrySetupCallback;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.block.jukebox.JukeboxSong;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKeys;
@@ -125,5 +126,10 @@ public class ItemCustomization implements ModInitializer {
 				}
 			});
 		});
+	}
+
+	public static void grantAdvancement(ServerPlayerEntity player) {
+		AdvancementEntry entry = player.getEntityWorld().getServer().getAdvancementLoader().get(Identifier.of("igalaxy_item_customization:adventure/apply_item_customization_smithing_template"));
+		player.getAdvancementTracker().grantCriterion(entry, "apply_item_customization_smithing_template");
 	}
 }

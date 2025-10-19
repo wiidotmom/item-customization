@@ -1,9 +1,11 @@
 package mom.wii.itemcustomization.mixin;
 
+import mom.wii.itemcustomization.ItemCustomization;
 import mom.wii.itemcustomization.template.SmithingTemplate;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.SmithingScreenHandler;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldEvents;
 import org.spongepowered.asm.mixin.Final;
@@ -88,6 +90,7 @@ public abstract class SmithingScreenHandlerMixin implements ForgingScreenHandler
                 this.callDecrementStack(1);
                 this.decrementStackByCount(2, cost);
                 this.getContext().run((world, pos) -> world.syncWorldEvent(WorldEvents.SMITHING_TABLE_USED, pos, 0));
+                ItemCustomization.grantAdvancement((ServerPlayerEntity) player);
                 ci.cancel();
             }
         }
