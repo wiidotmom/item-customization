@@ -63,6 +63,10 @@ public class ItemCustomization implements ModInitializer {
 					new Pair<>(Pattern.compile("^assets/([^/]+)/textures/misc/(.+)\\.png$"), CAMERA_OVERLAY_INDEX),
 					new Pair<>(Pattern.compile("^assets/([^/]+)/textures/gui/sprites/tooltip/(.+)_frame\\.png$"), TOOLTIP_STYLE_INDEX)
 			);
+			for (Pair<Pattern, IdentifierIndex> pair : PATTERN_TO_INDEX) {
+				pair.getRight().clear();
+			}
+
             try {
                 ZipFile zipFile = new ZipFile(RESOURCE_PACK_PATH.toFile());
 

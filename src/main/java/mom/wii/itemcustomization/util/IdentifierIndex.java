@@ -38,4 +38,9 @@ public class IdentifierIndex {
     public boolean isEmpty() {
         return identifiers.isEmpty();
     }
+
+    public void clear() {
+        identifiers.clear();
+        namespaces.clear();
+    }
 }
