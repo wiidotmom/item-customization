@@ -9,8 +9,10 @@ import java.util.stream.Collectors;
 public class IdentifierIndex {
     public HashSet<Identifier> identifiers;
     public HashSet<String> namespaces;
+    public Identifier id;
 
-    public IdentifierIndex() {
+    public IdentifierIndex(Identifier id) {
+        this.id = id;
         identifiers = new HashSet<>();
         namespaces = new HashSet<>();
     }

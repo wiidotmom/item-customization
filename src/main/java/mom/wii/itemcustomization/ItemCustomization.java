@@ -41,12 +41,12 @@ public class ItemCustomization implements ModInitializer {
 			FabricLoader.getInstance().getConfigDir(), "", MOD_ID, Config.class
 	);
 	public static final Path RESOURCE_PACK_PATH = PolymerResourcePackUtils.getMainPath().toAbsolutePath().normalize();
-	public static final IdentifierIndex ITEM_MODEL_INDEX = new IdentifierIndex();
-	public static final IdentifierIndex EQUIPMENT_MODEL_INDEX = new IdentifierIndex();
-	public static final IdentifierIndex CAMERA_OVERLAY_INDEX = new IdentifierIndex();
-	public static final IdentifierIndex TOOLTIP_STYLE_INDEX = new IdentifierIndex();
-	public static final IdentifierIndex JUKEBOX_SONG_INDEX = new IdentifierIndex();
-	public static final IdentifierIndex INSTRUMENT_INDEX = new IdentifierIndex();
+	public static final IdentifierIndex ITEMS_MODEL_INDEX = new IdentifierIndex(Identifier.of(MOD_ID, "items_model"));
+	public static final IdentifierIndex EQUIPMENT_MODEL_INDEX = new IdentifierIndex(Identifier.of(MOD_ID, "equipment_model"));
+	public static final IdentifierIndex CAMERA_OVERLAY_INDEX = new IdentifierIndex(Identifier.of(MOD_ID, "camera_overlay"));
+	public static final IdentifierIndex TOOLTIP_STYLE_INDEX = new IdentifierIndex(Identifier.of(MOD_ID, "tooltip_style"));
+	public static final IdentifierIndex JUKEBOX_SONG_INDEX = new IdentifierIndex(Identifier.of(MOD_ID, "jukebox_song"));
+	public static final IdentifierIndex INSTRUMENT_INDEX = new IdentifierIndex(Identifier.of(MOD_ID, "instrument"));
 	public static DialogManager DIALOG_MANAGER = new DialogManager();
 
 	@Override
@@ -56,43 +56,7 @@ public class ItemCustomization implements ModInitializer {
 		Items.register();
 		Dialogs.register();
 
-		PolymerResourcePackUtils.RESOURCE_PACK_FINISHED_EVENT.register(() -> {
-			Set<Pair<Pattern, IdentifierIndex>> PATTERN_TO_INDEX = Set.of(
-					new Pair<>(Pattern.compile("^assets/([^/]+)/items/(.+)\\.json$"), ITEM_MODEL_INDEX),
-					new Pair<>(Pattern.compile("^assets/([^/]+)/equipment/(.+)\\.json$"), EQUIPMENT_MODEL_INDEX),
-					new Pair<>(Pattern.compile("^assets/([^/]+)/textures/misc/(.+)\\.png$"), CAMERA_OVERLAY_INDEX),
-					new Pair<>(Pattern.compile("^assets/([^/]+)/textures/gui/sprites/tooltip/(.+)_frame\\.png$"), TOOLTIP_STYLE_INDEX)
-			);
-			for (Pair<Pattern, IdentifierIndex> pair : PATTERN_TO_INDEX) {
-				pair.getRight().clear();
-			}
-
-            try {
-                ZipFile zipFile = new ZipFile(RESOURCE_PACK_PATH.toFile());
-
-				Enumeration<? extends ZipEntry> entries = zipFile.entries();
-
-				while (entries.hasMoreElements()) {
-					ZipEntry entry = entries.nextElement();
-					PATTERN_TO_INDEX.forEach(pair -> {
-						Pattern pattern = pair.getLeft();
-						IdentifierIndex index = pair.getRight();
-						if (entry.getName().matches(pattern.pattern())) {
-							Matcher matcher = pattern.matcher(entry.getName());
-							while (matcher.find()) {
-								if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(matcher.group(1)))) {
-									index.add(Identifier.of(matcher.group(1), matcher.group(2)));
-								}
-							}
-						}
-					});
-				}
-
-				zipFile.close();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
+		PolymerResourcePackUtils.RESOURCE_PACK_FINISHED_EVENT.register(ItemCustomization::refreshRuntimeChangeableIndexes);
 
 		UseBlockCallback.EVENT.register(((playerEntity, world, hand, blockHitResult) -> {
 			ItemStack itemStack = playerEntity.getStackInHand(hand);
@@ -122,12 +86,14 @@ public class ItemCustomization implements ModInitializer {
 		DynamicRegistrySetupCallback.EVENT.register(view -> {
 			view.registerEntryAdded(RegistryKeys.JUKEBOX_SONG, (i, id, song) -> {
 				if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(id.getNamespace()))) {
-					JUKEBOX_SONG_INDEX.add(id);
+					if (JUKEBOX_SONG_INDEX.add(id))
+						LOGGER.info("Found new {} : {}", JUKEBOX_SONG_INDEX.id, id);
 				}
 			});
 			view.registerEntryAdded(RegistryKeys.INSTRUMENT, (i, id, instrument) -> {
 				if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(id.getNamespace()))) {
-					INSTRUMENT_INDEX.add(id);
+					if (INSTRUMENT_INDEX.add(id))
+						LOGGER.info("Found new {} : {}", INSTRUMENT_INDEX.id, id);
 				}
 			});
 		});
@@ -142,5 +108,47 @@ public class ItemCustomization implements ModInitializer {
 		AdvancementEntry entry = server.getAdvancementLoader().get(Identifier.of("igalaxy_item_customization:adventure/apply_item_customization_smithing_template"));
 		if (!player.getAdvancementTracker().getProgress(entry).isDone())
 			player.getAdvancementTracker().grantCriterion(entry, "apply_item_customization_smithing_template");
+	}
+
+	public static void refreshRuntimeChangeableIndexes() {
+		Set<Pair<Pattern, IdentifierIndex>> PATTERN_TO_INDEX = Set.of(
+				new Pair<>(Pattern.compile("^assets/([^/]+)/items/(.+)\\.json$"), ITEMS_MODEL_INDEX),
+				new Pair<>(Pattern.compile("^assets/([^/]+)/equipment/(.+)\\.json$"), EQUIPMENT_MODEL_INDEX),
+				new Pair<>(Pattern.compile("^assets/([^/]+)/textures/misc/(.+)\\.png$"), CAMERA_OVERLAY_INDEX),
+				new Pair<>(Pattern.compile("^assets/([^/]+)/textures/gui/sprites/tooltip/(.+)_frame\\.png$"), TOOLTIP_STYLE_INDEX)
+		);
+		for (Pair<Pattern, IdentifierIndex> pair : PATTERN_TO_INDEX) {
+			LOGGER.info("Clearing {} index", pair.getRight().id);
+			pair.getRight().clear();
+		}
+
+		try {
+			ZipFile zipFile = new ZipFile(RESOURCE_PACK_PATH.toFile());
+
+			Enumeration<? extends ZipEntry> entries = zipFile.entries();
+
+			while (entries.hasMoreElements()) {
+				ZipEntry entry = entries.nextElement();
+				PATTERN_TO_INDEX.forEach(pair -> {
+					Pattern pattern = pair.getLeft();
+					IdentifierIndex index = pair.getRight();
+					if (entry.getName().matches(pattern.pattern())) {
+						Matcher matcher = pattern.matcher(entry.getName());
+						while (matcher.find()) {
+							if (CONFIG.excludedNamespaces.stream().noneMatch(namespace -> namespace.equals(matcher.group(1)))) {
+								String namespace = matcher.group(1);
+								String path = matcher.group(2);
+								if (index.add(Identifier.of(namespace, path)))
+									LOGGER.info("Found new {} : {}:{}", index.id, namespace, path);
+							}
+						}
+					}
+				});
+			}
+
+			zipFile.close();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

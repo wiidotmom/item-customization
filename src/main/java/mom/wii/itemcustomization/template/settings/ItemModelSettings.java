@@ -26,7 +26,7 @@ import static mom.wii.itemcustomization.dialog.Dialogs.SEARCH_ICON;
 public class ItemModelSettings {
     public static void openRootDialog(ServerPlayerEntity player) {
         ArrayList<DialogActionButtonData> buttons = new ArrayList<>();
-        ItemCustomization.ITEM_MODEL_INDEX.namespaces.forEach(namespace -> {
+        ItemCustomization.ITEMS_MODEL_INDEX.namespaces.forEach(namespace -> {
             buttons.add(new DialogActionButtonData(
                     new DialogButtonData(
                             Text.of(namespace),
@@ -68,7 +68,7 @@ public class ItemModelSettings {
 
     public static void openDialogForNamespace(ServerPlayerEntity player, String namespace) {
         ArrayList<DialogActionButtonData> buttons = new ArrayList<>();
-        ItemCustomization.ITEM_MODEL_INDEX.getIdentifiersOfNamespace(namespace).forEach(identifier -> {
+        ItemCustomization.ITEMS_MODEL_INDEX.getIdentifiersOfNamespace(namespace).forEach(identifier -> {
             buttons.add(new DialogActionButtonData(
                     new DialogButtonData(
                             Text.literal(identifier.getPath()).append(Text.literal(".json").formatted(Formatting.GRAY)),

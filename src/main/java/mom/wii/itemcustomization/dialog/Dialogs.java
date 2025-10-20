@@ -121,9 +121,9 @@ public class Dialogs {
                 }
         );
 
-        registerIndexRootAction("item_model", ITEM_MODEL_INDEX, ItemModelSettings::openRootDialog, "No usable item models present in resource pack");
-        registerIndexNamespaceAction("item_model", ITEM_MODEL_INDEX, ItemModelSettings::openDialogForNamespace);
-        registerIndexSetAction("item_model", ITEM_MODEL_INDEX, Identifier::toString, "Invalid item model selected");
+        registerIndexRootAction("item_model", ITEMS_MODEL_INDEX, ItemModelSettings::openRootDialog, "No usable item models present in resource pack");
+        registerIndexNamespaceAction("item_model", ITEMS_MODEL_INDEX, ItemModelSettings::openDialogForNamespace);
+        registerIndexSetAction("item_model", ITEMS_MODEL_INDEX, Identifier::toString, "Invalid item model selected");
 
         DIALOG_MANAGER.register(
                 Identifier.of(MOD_ID, "equipment"),
