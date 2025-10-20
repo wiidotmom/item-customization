@@ -26,6 +26,10 @@ public class GrindstoneScreenHandlerMixin {
                 template.resetSettings();
                 cir.setReturnValue(output);
             }
+        } else if (!firstInput.isEmpty() && !secondInput.isEmpty()) {
+            if (SmithingTemplate.isItemCustomizationSmithingTemplate(firstInput) && SmithingTemplate.isItemCustomizationSmithingTemplate(secondInput)) {
+                cir.setReturnValue(ItemStack.EMPTY);
+            }
         }
     }
 }
