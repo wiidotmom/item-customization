@@ -18,7 +18,8 @@ public class IdentifierIndex {
     }
 
     public boolean add(Identifier identifier) {
-        return identifiers.add(identifier) || namespaces.add(identifier.getNamespace());
+        namespaces.add(identifier.getNamespace());
+        return identifiers.add(identifier);
     }
 
     public List<Identifier> getIdentifiersOfNamespace(String namespace) {
