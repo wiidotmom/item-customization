@@ -63,7 +63,7 @@ public class SmithingTemplate {
         put("tooltip_style", new Pair<>("Tooltip Style",  (e) -> e.asString().get()));
         put("hidden_components", new Pair<>("Hidden Components", (e) -> {
             StringNbtWriter writer = new StringNbtWriter();
-            writer.visitCompound(e.asCompound().get());
+            writer.visitList(e.asNbtList().get());
             return writer.getString();
         }));
         put("note_block_sound", new Pair<>("Note Block Sound", (e) -> e.asString().get()));
@@ -283,11 +283,6 @@ public class SmithingTemplate {
             String style = ((NbtString) this.getSetting("tooltip_style")).value();
             stack.set(DataComponentTypes.TOOLTIP_STYLE, Identifier.of(style));
         }
-        if (this.hasSetting("hidden_components")) {
-            NbtList list = (NbtList) this.getSetting("hidden_components");
-            LinkedHashSet<ComponentType<?>> hidden = new LinkedHashSet<>(list.stream().map(x -> Registries.DATA_COMPONENT_TYPE.get(Identifier.of(x.asString().orElseThrow()))).toList());
-            stack.set(DataComponentTypes.TOOLTIP_DISPLAY, new TooltipDisplayComponent(false, hidden));
-        }
         if (this.hasSetting("note_block_sound")) {
             String s = ((NbtString) this.getSetting("note_block_sound")).value();
             stack.set(DataComponentTypes.NOTE_BLOCK_SOUND, Identifier.of(s));
@@ -301,6 +296,17 @@ public class SmithingTemplate {
             String i = ((NbtString) this.getSetting("instrument")).value();
             RegistryEntry.Reference<Instrument> instrument = world.getRegistryManager().getOrThrow(RegistryKeys.INSTRUMENT).getEntry(Identifier.of(i)).get();
             stack.set(DataComponentTypes.INSTRUMENT, new InstrumentComponent(RegistryEntry.of(instrument.value())));
+        }
+        if (this.hasSetting("hidden_components")) {
+            NbtList list = (NbtList) this.getSetting("hidden_components");
+            LinkedHashSet<ComponentType<?>> hidden = new LinkedHashSet<>(
+                    list.stream()
+                            .filter(x -> Registries.DATA_COMPONENT_TYPE.containsId(Identifier.of(x.asString().get())))
+                            .map(x -> Registries.DATA_COMPONENT_TYPE.get(Identifier.of(x.asString().get())))
+                            .filter(x -> stack.getComponents().contains(x))
+                            .toList()
+            );
+            stack.set(DataComponentTypes.TOOLTIP_DISPLAY, new TooltipDisplayComponent(false, hidden));
         }
     }
 
