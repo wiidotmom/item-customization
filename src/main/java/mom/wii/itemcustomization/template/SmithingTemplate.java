@@ -268,6 +268,17 @@ public class SmithingTemplate {
                         ec.allowedEntities(), ec.dispensable(), ec.swappable(), ec.damageOnHurt(), ec.equipOnInteract(), ec.canBeSheared(), ec.shearingSound()
                 );
                 stack.set(DataComponentTypes.EQUIPPABLE, newEquippableComponent);
+
+                if (stack.getComponents().contains(DataComponentTypes.ATTRIBUTE_MODIFIERS) && ItemCustomization.CONFIG.isCustomizedHeadVisibleOnPlayerLocatorBar) {
+                    AttributeModifiersComponent attributeModifiersComponent = stack.get(DataComponentTypes.ATTRIBUTE_MODIFIERS);
+                    AttributeModifiersComponent newAttributeModifiersComponent = new AttributeModifiersComponent(
+                            attributeModifiersComponent.modifiers().stream().filter(x -> !x.modifier().idMatches(Identifier.of("minecraft:waypoint_transmit_range_hide"))).toList()
+                    );
+                    if (!newAttributeModifiersComponent.modifiers().isEmpty())
+                        stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, newAttributeModifiersComponent);
+                    else
+                        stack.remove(DataComponentTypes.ATTRIBUTE_MODIFIERS);
+                }
             }
         }
         if (this.hasSetting("custom_model_data")) {

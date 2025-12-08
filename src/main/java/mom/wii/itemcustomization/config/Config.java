@@ -13,4 +13,7 @@ public class Config extends WrappedConfig {
 
     @Comment("The item to use as the Smithing Table ingredient for Item Customization Smithing Templates")
     public String smithingIngredient = "minecraft:resin_clump";
+
+    @Comment("Whether or not to remove the 'minecraft:waypoint_transmit_range_hide' attribute modifier from Heads/Carved Pumpkins that get their Camera Overlay customized")
+    public Boolean isCustomizedHeadVisibleOnPlayerLocatorBar = true;
 }
