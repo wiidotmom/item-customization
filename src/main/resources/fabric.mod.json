@@ -25,7 +25,7 @@
 		"minecraft": ">=1.21.7",
 		"java": ">=21",
 		"fabric-api": "*",
-		"patched": ">=7.0.0",
+		"datapatched": ">=2.0.2",
 		"polymer-core": ">=0.13.0",
 		"polymer-resource-pack": ">=0.13.0"
 	},

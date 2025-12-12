@@ -23,12 +23,12 @@ public class IdentifierIndex {
     }
 
     public List<Identifier> getIdentifiersOfNamespace(String namespace) {
-        return identifiers.stream().filter(x -> x.getNamespace().equals(namespace)).collect(Collectors.toList());
+        return identifiers.stream().filter(id -> id.getNamespace().equals(namespace)).collect(Collectors.toList());
     }
 
     public boolean remove(Identifier identifier) {
         boolean result = identifiers.remove(identifier);
-        if (identifiers.stream().noneMatch(x -> x.getNamespace().equals(identifier.getNamespace()))) {
+        if (identifiers.stream().noneMatch(id -> id.getNamespace().equals(identifier.getNamespace()))) {
             namespaces.remove(identifier.getNamespace());
         }
         return result;

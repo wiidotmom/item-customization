@@ -13,6 +13,7 @@ import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -60,6 +61,10 @@ public class Items {
                         client.set(DataComponentTypes.LORE, new LoreComponent(template.getTooltip()));
                         client.set(DataComponentTypes.MAX_DAMAGE, 1);
                         client.set(DataComponentTypes.DAMAGE, 0);
+                        client.set(DataComponentTypes.CUSTOM_DATA, client.get(DataComponentTypes.CUSTOM_DATA).apply(nbtCompound -> {
+                            nbtCompound.put("heywiki:identifier", NbtString.of("igalaxy_item_customization:item_customization_smithing_template"));
+                            nbtCompound.put("heywiki:fallback_title", NbtString.of("Item Customization Smithing Template"));
+                        }));
                     }
                     return client;
                 }

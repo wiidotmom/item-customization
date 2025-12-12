@@ -15,5 +15,8 @@ public class Config extends WrappedConfig {
     public String smithingIngredient = "minecraft:resin_clump";
 
     @Comment("Whether or not to remove the 'minecraft:waypoint_transmit_range_hide' attribute modifier from Heads/Carved Pumpkins that get their Camera Overlay customized")
-    public Boolean isCustomizedHeadVisibleOnPlayerLocatorBar = true;
+    public boolean customizedHeadVisibleOnPlayerLocatorBar = true;
+
+    @Comment("Whether or not to remove Equipment Models from head-equippable items when customized with an Item Model")
+    public boolean overrideHeadEquipmentModels = true;
 }

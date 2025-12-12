@@ -1,0 +1,14 @@
+{
+  "namespace": ["igalaxy_item_customization"],
+  "wikis": [
+    {
+      "article_url": "https://codeberg.org/igalaxy/item-customization/src/branch/v2/doc/%s.md",
+      "language": {
+        "wiki_language": "en",
+        "main": true,
+        "default": "en_us",
+        "regex": "^en_.*"
+      }
+    }
+  ]
+}

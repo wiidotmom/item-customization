@@ -244,6 +244,16 @@ public class SmithingTemplate {
         if (this.hasSetting("item_model")) {
             Identifier id = Identifier.of(((NbtString) this.getSetting("item_model")).value());
             stack.set(DataComponentTypes.ITEM_MODEL, id);
+
+            if (ItemCustomization.CONFIG.overrideHeadEquipmentModels && stack.getComponents().contains(DataComponentTypes.EQUIPPABLE)) {
+                EquippableComponent ec = stack.get(DataComponentTypes.EQUIPPABLE);
+                if (ec.slot().equals(EquipmentSlot.HEAD)) {
+                    EquippableComponent newEquippableComponent = new EquippableComponent(
+                            ec.slot(), ec.equipSound(), Optional.empty(), ec.cameraOverlay(), ec.allowedEntities(), ec.dispensable(), ec.swappable(), ec.damageOnHurt(), ec.equipOnInteract(), ec.canBeSheared(), ec.shearingSound()
+                    );
+                    stack.set(DataComponentTypes.EQUIPPABLE, newEquippableComponent);
+                }
+            }
         }
         if (this.hasSetting("equipment_model")) {
             Identifier id = Identifier.of(((NbtString) this.getSetting("equipment_model")).value());
@@ -269,7 +279,7 @@ public class SmithingTemplate {
                 );
                 stack.set(DataComponentTypes.EQUIPPABLE, newEquippableComponent);
 
-                if (stack.getComponents().contains(DataComponentTypes.ATTRIBUTE_MODIFIERS) && ItemCustomization.CONFIG.isCustomizedHeadVisibleOnPlayerLocatorBar) {
+                if (stack.getComponents().contains(DataComponentTypes.ATTRIBUTE_MODIFIERS) && ItemCustomization.CONFIG.customizedHeadVisibleOnPlayerLocatorBar) {
                     AttributeModifiersComponent attributeModifiersComponent = stack.get(DataComponentTypes.ATTRIBUTE_MODIFIERS);
                     AttributeModifiersComponent newAttributeModifiersComponent = new AttributeModifiersComponent(
                             attributeModifiersComponent.modifiers().stream().filter(x -> !x.modifier().idMatches(Identifier.of("minecraft:waypoint_transmit_range_hide"))).toList()

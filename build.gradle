@@ -41,13 +41,13 @@ dependencies {
 	modImplementation "eu.pb4:polymer-core:${project.polymer_version}"
 	modImplementation "eu.pb4:polymer-resource-pack:${project.polymer_version}"
 	modLocalRuntime "eu.pb4:polymer-autohost:${project.polymer_version}"
-	modRuntimeOnly "maven.modrinth:patched:${project.patched_version}-fabric"
+	modRuntimeOnly "maven.modrinth:datapatched:${project.datapatched_version}"
 
 	implementation "folk.sisby:kaleido-config:${project.kaleido_config_version}"
 	include "folk.sisby:kaleido-config:${project.kaleido_config_version}"
 
 	modLocalRuntime "maven.modrinth:spark:${project.spark_version}-fabric"
-	modLocalRuntime "maven.modrinth:fabric-permissions-api:${project.fabric_permissions_api_version}"
+	modLocalRuntime "me.lucko:fabric-permissions-api:${project.fabric_permissions_api_version}"
 }
 
 processResources {
