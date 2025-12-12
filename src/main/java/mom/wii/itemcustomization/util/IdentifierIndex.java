@@ -53,7 +53,7 @@ public class IdentifierIndex {
         return identifier.getPath().endsWith("/");
     }
 
-    public boolean isValidIdentifier(Identifier identifier) {
+    public boolean isValidPath(Identifier identifier) {
         return containsNamespace(identifier.getNamespace()) && identifiers.stream().anyMatch(id -> id.getNamespace().equals(identifier.getNamespace()) && id.getPath().startsWith(identifier.getPath()));
     }
 

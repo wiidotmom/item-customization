@@ -38,6 +38,7 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	modImplementation include("maven.modrinth:admiral:${project.admiral_version}+fabric")
 	modImplementation "eu.pb4:polymer-core:${project.polymer_version}"
 	modImplementation "eu.pb4:polymer-resource-pack:${project.polymer_version}"
 	modLocalRuntime "eu.pb4:polymer-autohost:${project.polymer_version}"

@@ -1,6 +1,8 @@
 package mom.wii.itemcustomization;
 
+import de.maxhenkel.admiral.MinecraftAdmiral;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
+import mom.wii.itemcustomization.command.ItemCustomizationCommand;
 import mom.wii.itemcustomization.config.Config;
 import mom.wii.itemcustomization.dialog.DialogManager;
 import mom.wii.itemcustomization.dialog.Dialogs;
@@ -9,6 +11,7 @@ import mom.wii.itemcustomization.template.SmithingTemplate;
 import mom.wii.itemcustomization.util.IdentifierIndex;
 import net.fabricmc.api.ModInitializer;
 
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistrySetupCallback;
@@ -101,6 +104,13 @@ public class ItemCustomization implements ModInitializer {
 				}
 			});
 		});
+
+		CommandRegistrationCallback.EVENT.register(
+				(commandDispatcher, commandBuildContext, commandSelection) ->
+						MinecraftAdmiral.builder(commandDispatcher, commandBuildContext).addCommandClasses(
+								ItemCustomizationCommand.class
+						).build()
+		);
 	}
 
 	public static void incrementItemsCustomized(ServerPlayer player, int amount) {

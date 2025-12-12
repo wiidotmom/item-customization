@@ -98,7 +98,7 @@ public class Dialogs {
                         DataResult<Identifier> validated = Identifier.read(payload.value());
                         if (validated.isSuccess()) {
                             Identifier entry = validated.getOrThrow();
-                            if (index.isValidIdentifier(entry)) {
+                            if (index.isValidPath(entry)) {
                                 if (entry.getPath().isEmpty() || entry.getPath().endsWith("/")) {
                                     indexBrowseDialog.accept(player, entry.getNamespace(), entry.getPath());
                                     return;

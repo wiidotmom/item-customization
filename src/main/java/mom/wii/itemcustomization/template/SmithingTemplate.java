@@ -114,6 +114,14 @@ public class SmithingTemplate {
         return null;
     }
 
+    public static SmithingTemplate virtual() {
+        ItemStack virtual = new ItemStack(Items.COMMAND_BLOCK);
+        CompoundTag tag = new CompoundTag();
+        tag.putBoolean("igalaxy_item_customization:is_customization_template", true);
+        virtual.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+        return new SmithingTemplate(virtual);
+    }
+
     public static boolean isItemCustomizationSmithingTemplate(ItemStack itemStack, PacketContext context) {
         return isItemCustomizationSmithingTemplate(itemStack);
     }
