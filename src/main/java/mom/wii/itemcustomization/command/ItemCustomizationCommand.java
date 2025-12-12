@@ -104,25 +104,25 @@ public class ItemCustomizationCommand {
 //        customModelDataAdd(context, "colors", value.get(), IntTag::valueOf);
 //    }
 
-    @Command({"customize", "equipment", "equipment-model"})
+    @Command({"customize", "equipment-model"})
     @RequiresPermission("igalaxy_item_customization.customize.equipment_model")
     public void customizeEquipmentModel(CommandContext<CommandSourceStack> context, @Name("equipment-model") Identifier identifier) {
         setFromIdentifierIndex(context, identifier, ItemCustomization.EQUIPMENT_MODEL_INDEX, "equipment_model", false);
     }
 
-    @Command({"customize", "equipment", "camera-overlay"})
+    @Command({"customize", "camera-overlay"})
     @RequiresPermission("igalaxy_item_customization.customize.camera_overlay")
     public void customizeCameraOverlay(CommandContext<CommandSourceStack> context, @Name("camera-overlay") Identifier identifier) {
         setFromIdentifierIndex(context, identifier, ItemCustomization.CAMERA_OVERLAY_INDEX, "camera_overlay", false);
     }
 
-    @Command({"customize", "tooltip", "tooltip-style"})
+    @Command({"customize", "tooltip-style"})
     @RequiresPermission("igalaxy_item_customization.customize.tooltip_style")
     public void customizeTooltipStyle(CommandContext<CommandSourceStack> context, @Name("tooltip-style") Identifier identifier) {
         setFromIdentifierIndex(context, identifier, ItemCustomization.TOOLTIP_STYLE_INDEX, "tooltip_style", false);
     }
 
-    @Command({"customize", "tooltip", "hidden-components", "reset"})
+    @Command({"customize", "hidden-components", "reset"})
     @RequiresPermission("igalaxy_item_customization.customize.hidden_components.reset")
     public void resetHiddenComponents(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
@@ -137,13 +137,13 @@ public class ItemCustomizationCommand {
         } else source.sendFailure(Component.literal("Not a player"));
     }
 
-    @Command({"customize", "music-and-sounds", "instrument"})
+    @Command({"customize", "instrument"})
     @RequiresPermission("igalaxy_item_customization.customize.instrument")
     public void customizeInstrument(CommandContext<CommandSourceStack> context, @Name("instrument") Identifier identifier) {
         setFromIdentifierIndex(context, identifier, ItemCustomization.INSTRUMENT_INDEX, "instrument", true);
     }
 
-    @Command({"customize", "music-and-sounds", "jukebox-song"})
+    @Command({"customize", "jukebox-song"})
     @RequiresPermission("igalaxy_item_customization.customize.jukebox_song")
     public void customizeJukeboxSong(CommandContext<CommandSourceStack> context, @Name("jukebox-song") Identifier identifier) {
         setFromIdentifierIndex(context, identifier, ItemCustomization.JUKEBOX_SONG_INDEX, "jukebox_song", true);

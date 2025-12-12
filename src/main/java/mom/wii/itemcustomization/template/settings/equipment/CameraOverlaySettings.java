@@ -103,7 +103,7 @@ public class CameraOverlaySettings {
                         DialogAction.WAIT_FOR_RESPONSE,
                         List.of(
                                 new ItemBody(SEARCH_ICON, Optional.of(new PlainMessage(Component.translatableWithFallback("gui.igalaxy_item_customization.camera_overlay.select_texture", "Select a camera overlay texture"), 200)), false, false, 16, 16),
-                                new PlainMessage(Component.literal("/assets/").withStyle(ChatFormatting.GRAY).append(Component.literal(namespace).withStyle(ChatFormatting.WHITE).append(Component.literal("/textures/misc/").withStyle(ChatFormatting.GRAY)).append(Component.literal(path).withStyle(ChatFormatting.WHITE))), 200)
+                                new PlainMessage(Component.literal("/assets/").withStyle(ChatFormatting.GRAY).append(Component.literal(namespace).withStyle(ChatFormatting.WHITE).append(Component.literal("/textures/").withStyle(ChatFormatting.GRAY)).append(Component.literal("misc/").withStyle(ChatFormatting.WHITE)).append(Component.literal(path).withStyle(ChatFormatting.WHITE))), 200)
                         ),
                         List.of()
                 ),
