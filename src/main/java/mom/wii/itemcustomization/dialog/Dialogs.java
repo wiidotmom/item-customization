@@ -67,7 +67,7 @@ public class Dialogs {
                     if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
                         if (packet.payload().isPresent() && packet.payload().get() instanceof NbtString) {
                             String namespace = ((NbtString) packet.payload().get()).value();
-                            if (index.namespaces.contains(namespace)) {
+                            if (index.containsNamespace(namespace)) {
                                 openDialogForNamespace.accept(player, namespace);
                                 return;
                             }
@@ -76,6 +76,40 @@ public class Dialogs {
                     player.openDialog(
                             RegistryEntry.of(
                                     DialogManager.simpleNoticeDialog(Text.of("Invalid namespace selected"))
+                            )
+                    );
+                }
+        );
+    }
+
+    @FunctionalInterface
+    interface IndexBrowseDialog {
+        void accept(ServerPlayerEntity player, String namespace, String path);
+    }
+
+    private static void registerIndexBrowseAction(String id, IdentifierIndex index, IndexBrowseDialog indexBrowseDialog) {
+        DIALOG_MANAGER.register(
+                Identifier.of(MOD_ID, id + "/browse"),
+                (packet, player) -> {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack()) &&
+                            packet.payload().isPresent() &&
+                            packet.payload().get() instanceof NbtString
+                    ) {
+                        NbtString payload = (NbtString) packet.payload().get();
+                        DataResult<Identifier> validated = Identifier.validate(payload.value());
+                        if (validated.isSuccess()) {
+                            Identifier entry = validated.getOrThrow();
+                            if (index.isValidIdentifier(entry)) {
+                                if (entry.getPath().isEmpty() || entry.getPath().endsWith("/")) {
+                                    indexBrowseDialog.accept(player, entry.getNamespace(), entry.getPath());
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                    player.openDialog(
+                            RegistryEntry.of(
+                                    DialogManager.simpleNoticeDialog(Text.literal("Not a browsable path"))
                             )
                     );
                 }
@@ -123,6 +157,7 @@ public class Dialogs {
 
         registerIndexRootAction("item_model", ITEMS_MODEL_INDEX, ItemModelSettings::openRootDialog, "No usable item models present in resource pack");
         registerIndexNamespaceAction("item_model", ITEMS_MODEL_INDEX, ItemModelSettings::openDialogForNamespace);
+        registerIndexBrowseAction("item_model", ITEMS_MODEL_INDEX, ItemModelSettings::openDialogForNamespaceAndPath);
         registerIndexSetAction("item_model", ITEMS_MODEL_INDEX, Identifier::toString, "Invalid item model selected");
 
         DIALOG_MANAGER.register(
@@ -136,10 +171,12 @@ public class Dialogs {
 
         registerIndexRootAction("equipment_model", EQUIPMENT_MODEL_INDEX, EquipmentModelSettings::openRootDialog, "No usable equipment models present in resource pack");
         registerIndexNamespaceAction("equipment_model", EQUIPMENT_MODEL_INDEX, EquipmentModelSettings::openDialogForNamespace);
+        registerIndexBrowseAction("equipment_model", EQUIPMENT_MODEL_INDEX, EquipmentModelSettings::openDialogForNamespaceAndPath);
         registerIndexSetAction("equipment_model", EQUIPMENT_MODEL_INDEX, Identifier::toString, "Invalid equipment model selected");
 
         registerIndexRootAction("camera_overlay", CAMERA_OVERLAY_INDEX, CameraOverlaySettings::openRootDialog, "No usable misc textures present in resource pack");
         registerIndexNamespaceAction("camera_overlay", CAMERA_OVERLAY_INDEX, CameraOverlaySettings::openDialogForNamespace);
+        registerIndexBrowseAction("camera_overlay", CAMERA_OVERLAY_INDEX, CameraOverlaySettings::openDialogForNamespaceAndPath);
         registerIndexSetAction("camera_overlay", CAMERA_OVERLAY_INDEX, id -> id.getNamespace() + ":misc/" + id.getPath(), "Invalid camera overlay texture selected");
 
 
@@ -303,6 +340,7 @@ public class Dialogs {
 
         registerIndexRootAction("tooltip_style", TOOLTIP_STYLE_INDEX, TooltipStyleSettings::openRootDialog, "No usable tooltip styles present in resource pack");
         registerIndexNamespaceAction("tooltip_style", TOOLTIP_STYLE_INDEX, TooltipStyleSettings::openDialogForNamespace);
+        registerIndexBrowseAction("tooltip_style", TOOLTIP_STYLE_INDEX, TooltipStyleSettings::openDialogForNamespaceAndPath);
         registerIndexSetAction("tooltip_style", TOOLTIP_STYLE_INDEX, Identifier::toString, "Invalid tooltip style");
 
         DIALOG_MANAGER.register(
@@ -405,10 +443,12 @@ public class Dialogs {
 
         registerIndexRootAction("jukebox_song", JUKEBOX_SONG_INDEX, JukeboxSongSettings::openRootDialog, "No usable jukebox songs present in data pack");
         registerIndexNamespaceAction("jukebox_song", JUKEBOX_SONG_INDEX, JukeboxSongSettings::openDialogForNamespace);
+        registerIndexBrowseAction("jukebox_song", JUKEBOX_SONG_INDEX, JukeboxSongSettings::openDialogForNamespaceAndPath);
         registerIndexSetAction("jukebox_song", JUKEBOX_SONG_INDEX, Identifier::toString, "Invalid jukebox song");
 
         registerIndexRootAction("instrument", INSTRUMENT_INDEX, InstrumentSettings::openRootDialog, "No usable instruments present in data pack");
         registerIndexNamespaceAction("instrument", INSTRUMENT_INDEX, InstrumentSettings::openDialogForNamespace);
+        registerIndexBrowseAction("instrument", INSTRUMENT_INDEX, InstrumentSettings::openDialogForNamespaceAndPath);
         registerIndexSetAction("instrument",  INSTRUMENT_INDEX, Identifier::toString, "Invalid instrument");
     }
 }

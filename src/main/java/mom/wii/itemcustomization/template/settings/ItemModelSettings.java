@@ -1,6 +1,7 @@
 package mom.wii.itemcustomization.template.settings;
 
 import mom.wii.itemcustomization.ItemCustomization;
+import mom.wii.itemcustomization.util.IdentifierIndex;
 import net.minecraft.dialog.AfterAction;
 import net.minecraft.dialog.DialogActionButtonData;
 import net.minecraft.dialog.DialogButtonData;
@@ -13,6 +14,7 @@ import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.ClickEvent;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -33,7 +35,7 @@ public class ItemModelSettings {
                             125
                     ),
                     Optional.of(new SimpleDialogAction(
-                            new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "item_model/namespace"), Optional.of(NbtString.of(namespace)))
+                            new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "item_model/browse"), Optional.of(NbtString.of(Identifier.of(namespace, "").toString())))
                     ))
             ));
         });
@@ -67,18 +69,31 @@ public class ItemModelSettings {
     }
 
     public static void openDialogForNamespace(ServerPlayerEntity player, String namespace) {
+        openDialogForNamespaceAndPath(player, namespace, "");
+    }
+
+    public static void openDialogForNamespaceAndPath(ServerPlayerEntity player, String namespace, String path) {
+        Optional<Identifier> parentDir = IdentifierIndex.getParentDir(Identifier.of(namespace, path));
+
         ArrayList<DialogActionButtonData> buttons = new ArrayList<>();
-        ItemCustomization.ITEMS_MODEL_INDEX.getIdentifiersOfNamespace(namespace).forEach(identifier -> {
+        for (Identifier identifier : ItemCustomization.ITEMS_MODEL_INDEX.getIdentifiersOfNamespaceAndPath(namespace, path)) {
+            boolean isDirectory = identifier.getPath().endsWith("/");
+            String p = identifier.getPath();
+            MutableText text = Text.literal(isDirectory ? p : p.substring(p.lastIndexOf("/") + 1));
+            if (!isDirectory)
+                text = text.append(Text.literal(".json").formatted(Formatting.GRAY));
             buttons.add(new DialogActionButtonData(
                     new DialogButtonData(
-                            Text.literal(identifier.getPath()).append(Text.literal(".json").formatted(Formatting.GRAY)),
+                            text,
                             125
                     ),
                     Optional.of(new SimpleDialogAction(
-                            new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "item_model/set"), Optional.of(NbtString.of(identifier.toString())))
+                            isDirectory ?
+                                    new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "item_model/browse"), Optional.of(NbtString.of(identifier.toString()))) :
+                                    new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "item_model/set"), Optional.of(NbtString.of(identifier.toString())))
                     ))
             ));
-        });
+        }
 
         MultiActionDialog dialog = new MultiActionDialog(
                 new DialogCommonData(
@@ -89,7 +104,7 @@ public class ItemModelSettings {
                         AfterAction.WAIT_FOR_RESPONSE,
                         List.of(
                                 new ItemDialogBody(SEARCH_ICON, Optional.of(new PlainMessageDialogBody(Text.translatableWithFallback("gui.igalaxy_item_customization.item_model.select_model", "Select an item model"), 200)), false, false, 16, 16),
-                                new PlainMessageDialogBody(Text.literal("/assets/").formatted(Formatting.GRAY).append(Text.literal(namespace).formatted(Formatting.WHITE).append(Text.literal("/items/").formatted(Formatting.GRAY))), 200)
+                                new PlainMessageDialogBody(Text.literal("/assets/").formatted(Formatting.GRAY).append(Text.literal(namespace).formatted(Formatting.WHITE).append(Text.literal("/items/").formatted(Formatting.GRAY)).append(Text.literal(path).formatted(Formatting.WHITE))), 200)
                         ),
                         List.of()
                 ),
@@ -98,7 +113,9 @@ public class ItemModelSettings {
                         new DialogActionButtonData(
                                 new DialogButtonData(Text.translatable("gui.back"), 200),
                                 Optional.of(new SimpleDialogAction(
-                                        new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "item_model"), Optional.empty())
+                                        parentDir.isEmpty() ?
+                                                new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "item_model"), Optional.empty()) :
+                                                new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "item_model/browse"), Optional.of(NbtString.of(parentDir.get().toString())))
                                 ))
                         )
                 ),

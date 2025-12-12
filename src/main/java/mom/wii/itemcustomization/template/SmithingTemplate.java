@@ -349,7 +349,7 @@ public class SmithingTemplate {
             return new ItemDialogBody(
                     new ItemStack(ingredient, this.getCost()),
                     Optional.of(new PlainMessageDialogBody(
-                            Text.translatableWithFallback("gui.igalaxy_item_customization.to_apply", " to apply"), 200
+                            Text.translatableWithFallback("gui.igalaxy_item_customization.to_apply", "to apply"), 50
                     )),
                     true, true, 16, 16
             );

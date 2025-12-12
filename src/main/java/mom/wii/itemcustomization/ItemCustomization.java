@@ -146,9 +146,6 @@ public class ItemCustomization implements ModInitializer {
 				});
 			}
 
-			System.out.println(ITEMS_MODEL_INDEX.getIdentifiersOfNamespace("igalaxy"));
-			System.out.println(ITEMS_MODEL_INDEX.getEntriesOfNamespaceAndPath("igalaxy", ""));
-
 			zipFile.close();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
