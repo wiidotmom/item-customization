@@ -352,12 +352,13 @@ public class SmithingTemplate {
     }
 
     public int getCost() {
+        if (!this.hasSettings()) return 0;
         AtomicInteger cost = new AtomicInteger();
         COST_MAP.forEach((key, value) -> {
             if (this.hasSetting(key))
                 cost.addAndGet(value);
         });
-        return cost.get();
+        return Math.max(cost.get(), 1);
     }
 
     public boolean canApplyToStack(ItemStack stack) {
