@@ -2,12 +2,12 @@ package mom.wii.itemcustomization.mixin;
 
 import mom.wii.itemcustomization.ItemCustomization;
 import mom.wii.itemcustomization.template.SmithingTemplate;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.SmithingScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldEvents;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.SmithingMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.LevelEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,13 +20,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 import java.util.function.Predicate;
 
-@Mixin(SmithingScreenHandler.class)
+@Mixin(SmithingMenu.class)
 public abstract class SmithingScreenHandlerMixin implements ForgingScreenHandlerAccessor, SmithingScreenHandlerAccessor {
-    @Shadow protected abstract List<ItemStack> getInputStacks();
+    @Shadow protected abstract List<ItemStack> getRelevantItems();
 
-    @Shadow @Final private World world;
+    @Shadow @Final private Level level;
 
-    @ModifyArg(method = "createForgingSlotsManager", at = @At(value = "INVOKE", target = "Lnet/minecraft/screen/slot/ForgingSlotsManager$Builder;input(IIILjava/util/function/Predicate;)Lnet/minecraft/screen/slot/ForgingSlotsManager$Builder;", ordinal = 0), index = 3)
+    @ModifyArg(method = "createInputSlotDefinitions", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/ItemCombinerMenuSlotDefinition$Builder;withSlot(IIILjava/util/function/Predicate;)Lnet/minecraft/world/inventory/ItemCombinerMenuSlotDefinition$Builder;", ordinal = 0), index = 3)
     private static Predicate<ItemStack> itemCustomization$canUseTemplate(Predicate<ItemStack> canUse) {
         return itemStack -> {
             if (SmithingTemplate.isItemCustomizationSmithingTemplate(itemStack)) {
@@ -36,31 +36,31 @@ public abstract class SmithingScreenHandlerMixin implements ForgingScreenHandler
         };
     }
 
-    @ModifyArg(method = "createForgingSlotsManager", at = @At(value = "INVOKE", target = "Lnet/minecraft/screen/slot/ForgingSlotsManager$Builder;input(IIILjava/util/function/Predicate;)Lnet/minecraft/screen/slot/ForgingSlotsManager$Builder;", ordinal = 1), index = 3)
+    @ModifyArg(method = "createInputSlotDefinitions", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/ItemCombinerMenuSlotDefinition$Builder;withSlot(IIILjava/util/function/Predicate;)Lnet/minecraft/world/inventory/ItemCombinerMenuSlotDefinition$Builder;", ordinal = 1), index = 3)
     private static Predicate<ItemStack> itemCustomization$canUseBase(Predicate<ItemStack> canUse) {
         return itemStack -> true;
     }
 
-    @ModifyArg(method = "createForgingSlotsManager", at = @At(value = "INVOKE", target = "Lnet/minecraft/screen/slot/ForgingSlotsManager$Builder;input(IIILjava/util/function/Predicate;)Lnet/minecraft/screen/slot/ForgingSlotsManager$Builder;", ordinal = 2), index = 3)
+    @ModifyArg(method = "createInputSlotDefinitions", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/ItemCombinerMenuSlotDefinition$Builder;withSlot(IIILjava/util/function/Predicate;)Lnet/minecraft/world/inventory/ItemCombinerMenuSlotDefinition$Builder;", ordinal = 2), index = 3)
     private static Predicate<ItemStack> itemCustomization$canUseAddition(Predicate<ItemStack> canUse) {
         return itemStack -> {
-            if (itemStack.isOf(SmithingTemplate.ingredient)) return true;
+            if (itemStack.is(SmithingTemplate.ingredient)) return true;
             return canUse.test(itemStack);
         };
     }
 
-    @Inject(method = "updateResult", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "createResult", at = @At("HEAD"), cancellable = true)
     private void itemCustomization$updateResult(CallbackInfo ci) {
-        if (SmithingTemplate.isItemCustomizationSmithingTemplate(this.getInput().getStack(0))) {
-            SmithingTemplate template = SmithingTemplate.from(this.getInput().getStack(0));
+        if (SmithingTemplate.isItemCustomizationSmithingTemplate(this.getInputSlots().getItem(0))) {
+            SmithingTemplate template = SmithingTemplate.from(this.getInputSlots().getItem(0));
             if (template.hasSettings()) {
-                ItemStack base = this.getInput().getStack(1);
-                ItemStack ingredient = this.getInput().getStack(2);
-                if (ingredient.isOf(SmithingTemplate.ingredient) && template.canApplyToStack(base) && ingredient.getCount() >= template.getCost()) {
+                ItemStack base = this.getInputSlots().getItem(1);
+                ItemStack ingredient = this.getInputSlots().getItem(2);
+                if (ingredient.is(SmithingTemplate.ingredient) && template.canApplyToStack(base) && ingredient.getCount() >= template.getCost()) {
                     ItemStack output = base.copy();
                     output.setCount(1);
-                    template.applySettings(output, this.world);
-                    this.getOutput().setStack(0, output);
+                    template.applySettings(output, this.level);
+                    this.getResultSlots().setItem(0, output);
                     ci.cancel();
                 }
             }
@@ -69,28 +69,28 @@ public abstract class SmithingScreenHandlerMixin implements ForgingScreenHandler
 
     @Unique
     private void decrementStackByCount(int slot, int count) {
-        ItemStack itemStack = this.getInput().getStack(slot);
+        ItemStack itemStack = this.getInputSlots().getItem(slot);
         if (!itemStack.isEmpty()) {
-            itemStack.decrement(count);
-            this.getInput().setStack(slot, itemStack);
+            itemStack.shrink(count);
+            this.getInputSlots().setItem(slot, itemStack);
         }
     }
 
-    @Inject(method = "onTakeOutput", at = @At("HEAD"), cancellable = true)
-    private void itemCustomization$onTakeOutput(PlayerEntity player, ItemStack stack, CallbackInfo ci) {
-        if (SmithingTemplate.isItemCustomizationSmithingTemplate(this.getInput().getStack(0))) {
-            SmithingTemplate template =  SmithingTemplate.from(this.getInput().getStack(0));
-            ItemStack ingredient = this.getInput().getStack(2);
-            ItemStack base = this.getInput().getStack(1);
+    @Inject(method = "onTake", at = @At("HEAD"), cancellable = true)
+    private void itemCustomization$onTakeOutput(Player player, ItemStack stack, CallbackInfo ci) {
+        if (SmithingTemplate.isItemCustomizationSmithingTemplate(this.getInputSlots().getItem(0))) {
+            SmithingTemplate template =  SmithingTemplate.from(this.getInputSlots().getItem(0));
+            ItemStack ingredient = this.getInputSlots().getItem(2);
+            ItemStack base = this.getInputSlots().getItem(1);
             int cost;
-            if (ingredient.isOf(SmithingTemplate.ingredient) && template.hasSettings() && template.canApplyToStack(base) && ingredient.getCount() >= (cost = template.getCost())) {
-                stack.onCraftByPlayer(player, stack.getCount());
-                this.getOutput().unlockLastRecipe(player, this.getInputStacks());
-                this.callDecrementStack(0);
-                this.callDecrementStack(1);
+            if (ingredient.is(SmithingTemplate.ingredient) && template.hasSettings() && template.canApplyToStack(base) && ingredient.getCount() >= (cost = template.getCost())) {
+                stack.onCraftedBy(player, stack.getCount());
+                this.getResultSlots().awardUsedRecipes(player, this.getRelevantItems());
+                this.callShrinkStackInSlot(0);
+                this.callShrinkStackInSlot(1);
                 this.decrementStackByCount(2, cost);
-                this.getContext().run((world, pos) -> world.syncWorldEvent(WorldEvents.SMITHING_TABLE_USED, pos, 0));
-                ItemCustomization.incrementItemsCustomized((ServerPlayerEntity) player, 1);
+                this.getAccess().execute((world, pos) -> world.levelEvent(LevelEvent.SOUND_SMITHING_TABLE_USED, pos, 0));
+                ItemCustomization.incrementItemsCustomized((ServerPlayer) player, 1);
                 ci.cancel();
             }
         }

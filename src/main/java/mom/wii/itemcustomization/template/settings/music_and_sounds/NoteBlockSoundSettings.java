@@ -2,43 +2,42 @@ package mom.wii.itemcustomization.template.settings.music_and_sounds;
 
 import mom.wii.itemcustomization.ItemCustomization;
 import mom.wii.itemcustomization.template.SmithingTemplate;
-import net.minecraft.dialog.AfterAction;
-import net.minecraft.dialog.DialogActionButtonData;
-import net.minecraft.dialog.DialogButtonData;
-import net.minecraft.dialog.DialogCommonData;
-import net.minecraft.dialog.action.DynamicCustomDialogAction;
-import net.minecraft.dialog.action.SimpleDialogAction;
-import net.minecraft.dialog.input.TextInputControl;
-import net.minecraft.dialog.type.ConfirmationDialog;
-import net.minecraft.dialog.type.DialogInput;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.core.Holder;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.dialog.ActionButton;
+import net.minecraft.server.dialog.CommonButtonData;
+import net.minecraft.server.dialog.CommonDialogData;
+import net.minecraft.server.dialog.ConfirmationDialog;
+import net.minecraft.server.dialog.DialogAction;
+import net.minecraft.server.dialog.Input;
+import net.minecraft.server.dialog.action.CustomAll;
+import net.minecraft.server.dialog.action.StaticAction;
+import net.minecraft.server.dialog.input.TextInput;
+import net.minecraft.server.level.ServerPlayer;
 import java.util.List;
 import java.util.Optional;
 
 public class NoteBlockSoundSettings {
-    public static void openRootDialog(ServerPlayerEntity player, SmithingTemplate template) {
-        String initial = template.getSettingOrElse("note_block_sound", () -> NbtString.of("")).asString().get();
+    public static void openRootDialog(ServerPlayer player, SmithingTemplate template) {
+        String initial = template.getSettingOrElse("note_block_sound", () -> StringTag.valueOf("")).asString().get();
 
         ConfirmationDialog dialog = new ConfirmationDialog(
-                new DialogCommonData(
-                        Text.translatableWithFallback("gui.igalaxy_item_customization.note_block_sound.title", "Note Block Sound"),
+                new CommonDialogData(
+                        Component.translatableWithFallback("gui.igalaxy_item_customization.note_block_sound.title", "Note Block Sound"),
                         Optional.empty(),
                         true,
                         true,
-                        AfterAction.WAIT_FOR_RESPONSE,
+                        DialogAction.WAIT_FOR_RESPONSE,
                         List.of(),
                         List.of(
-                                new DialogInput(
+                                new Input(
                                         "note_block_sound",
-                                        new TextInputControl(
+                                        new TextInput(
                                                 200,
-                                                Text.translatableWithFallback("gui.igalaxy_item_customization.sound_event", "Sound Event"),
+                                                Component.translatableWithFallback("gui.igalaxy_item_customization.sound_event", "Sound Event"),
                                                 true,
                                                 initial,
                                                 32,
@@ -47,20 +46,20 @@ public class NoteBlockSoundSettings {
                                 )
                         )
                 ),
-                new DialogActionButtonData(
-                        new DialogButtonData(Text.translatableWithFallback("gui.submit", "Submit"), 150),
-                        Optional.of(new DynamicCustomDialogAction(
-                                Identifier.of(ItemCustomization.MOD_ID, "note_block_sound/set"), Optional.empty()
+                new ActionButton(
+                        new CommonButtonData(Component.translatableWithFallback("gui.submit", "Submit"), 150),
+                        Optional.of(new CustomAll(
+                                Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, "note_block_sound/set"), Optional.empty()
                         ))
                 ),
-                new DialogActionButtonData(
-                        new DialogButtonData(Text.translatable("gui.back"), 150),
-                        Optional.of(new SimpleDialogAction(
-                                new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "music_and_sounds"), Optional.empty())
+                new ActionButton(
+                        new CommonButtonData(Component.translatable("gui.back"), 150),
+                        Optional.of(new StaticAction(
+                                new ClickEvent.Custom(Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, "music_and_sounds"), Optional.empty())
                         ))
                 )
         );
 
-        player.openDialog(RegistryEntry.of(dialog));
+        player.openDialog(Holder.direct(dialog));
     }
 }

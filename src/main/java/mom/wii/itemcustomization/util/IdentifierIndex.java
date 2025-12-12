@@ -1,10 +1,9 @@
 package mom.wii.itemcustomization.util;
 
-import net.minecraft.util.Identifier;
-
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.minecraft.resources.Identifier;
 
 public class IdentifierIndex {
     public HashSet<Identifier> identifiers;
@@ -31,7 +30,7 @@ public class IdentifierIndex {
         int nextSlash = remaining.indexOf('/');
         String truncatedPath = nextSlash == -1 ?
                 remaining : remaining.substring(0, nextSlash + 1);
-        return Identifier.of(namespace, queryPath + truncatedPath);
+        return Identifier.fromNamespaceAndPath(namespace, queryPath + truncatedPath);
     }
 
     public static Optional<Identifier> getParentDir(Identifier identifier) {
@@ -40,14 +39,18 @@ public class IdentifierIndex {
         String namespace = identifier.getNamespace();
         if (!path.isEmpty()) {
             if (!path.contains("/"))
-                parentDir = Optional.of(Identifier.of(namespace, ""));
+                parentDir = Optional.of(Identifier.fromNamespaceAndPath(namespace, ""));
             else {
                 String parentStr = path.substring(0, path.lastIndexOf('/'));
-                if (!parentStr.contains("/")) parentDir = Optional.of(Identifier.of(namespace, ""));
-                else parentDir = Optional.of(Identifier.of(namespace, parentStr.substring(0, parentStr.lastIndexOf('/') + 1)));
+                if (!parentStr.contains("/")) parentDir = Optional.of(Identifier.fromNamespaceAndPath(namespace, ""));
+                else parentDir = Optional.of(Identifier.fromNamespaceAndPath(namespace, parentStr.substring(0, parentStr.lastIndexOf('/') + 1)));
             }
         }
         return parentDir;
+    }
+
+    public static boolean isDirectory(Identifier identifier) {
+        return identifier.getPath().endsWith("/");
     }
 
     public boolean isValidIdentifier(Identifier identifier) {

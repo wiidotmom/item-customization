@@ -1,22 +1,22 @@
 package mom.wii.itemcustomization.dialog;
 
 import mom.wii.itemcustomization.ItemCustomization;
-import net.minecraft.dialog.AfterAction;
-import net.minecraft.dialog.DialogActionButtonData;
-import net.minecraft.dialog.DialogButtonData;
-import net.minecraft.dialog.DialogCommonData;
-import net.minecraft.dialog.action.SimpleDialogAction;
-import net.minecraft.dialog.body.PlainMessageDialogBody;
-import net.minecraft.dialog.type.Dialog;
-import net.minecraft.dialog.type.NoticeDialog;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.network.packet.c2s.common.CustomClickActionC2SPacket;
-import net.minecraft.network.packet.s2c.common.ShowDialogS2CPacket;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Holder;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.common.ClientboundShowDialogPacket;
+import net.minecraft.network.protocol.common.ServerboundCustomClickActionPacket;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.dialog.ActionButton;
+import net.minecraft.server.dialog.CommonButtonData;
+import net.minecraft.server.dialog.CommonDialogData;
+import net.minecraft.server.dialog.Dialog;
+import net.minecraft.server.dialog.DialogAction;
+import net.minecraft.server.dialog.NoticeDialog;
+import net.minecraft.server.dialog.action.StaticAction;
+import net.minecraft.server.dialog.body.PlainMessage;
+import net.minecraft.server.level.ServerPlayer;
 import org.apache.logging.log4j.util.BiConsumer;
 
 import java.util.HashMap;
@@ -24,28 +24,28 @@ import java.util.List;
 import java.util.Optional;
 
 public class DialogManager {
-    public HashMap<Identifier, BiConsumer<CustomClickActionC2SPacket, ServerPlayerEntity>> customClickEvents = new HashMap<>();
+    public HashMap<Identifier, BiConsumer<ServerboundCustomClickActionPacket, ServerPlayer>> customClickEvents = new HashMap<>();
 
-    public BiConsumer<CustomClickActionC2SPacket, ServerPlayerEntity> register(Identifier identifier, BiConsumer<CustomClickActionC2SPacket, ServerPlayerEntity> handler) {
+    public BiConsumer<ServerboundCustomClickActionPacket, ServerPlayer> register(Identifier identifier, BiConsumer<ServerboundCustomClickActionPacket, ServerPlayer> handler) {
         return this.customClickEvents.put(identifier, handler);
     }
 
-    public static NoticeDialog simpleNoticeDialog(Text message) {
+    public static NoticeDialog simpleNoticeDialog(Component message) {
         return new NoticeDialog(
-                new DialogCommonData(
-                        Text.empty(),
+                new CommonDialogData(
+                        Component.empty(),
                         Optional.empty(),
                         true,
                         true,
-                        AfterAction.CLOSE,
+                        DialogAction.CLOSE,
                         List.of(
-                                new PlainMessageDialogBody(message, 200)
+                                new PlainMessage(message, 200)
                         ),
                         List.of()
                 ),
-                new DialogActionButtonData(
-                        new DialogButtonData(
-                                Text.translatable("gui.ok"),
+                new ActionButton(
+                        new CommonButtonData(
+                                Component.translatable("gui.ok"),
                                 Optional.empty(),
                                 200
                         ),
@@ -54,36 +54,36 @@ public class DialogManager {
         );
     }
 
-    public static DialogActionButtonData simpleTranslatableMenuButton(String translation, String fallback, String action) {
+    public static ActionButton simpleTranslatableMenuButton(String translation, String fallback, String action) {
         return simpleTranslatableMenuButton(translation, fallback, action, 125);
     }
 
-    public static DialogActionButtonData simpleTranslatableMenuButton(String translation, String fallback, String action, int width) {
-        return new DialogActionButtonData(
-                new DialogButtonData(
-                        Text.translatableWithFallback("gui.igalaxy_item_customization." + translation, fallback),
+    public static ActionButton simpleTranslatableMenuButton(String translation, String fallback, String action, int width) {
+        return new ActionButton(
+                new CommonButtonData(
+                        Component.translatableWithFallback("gui.igalaxy_item_customization." + translation, fallback),
                         width
                 ),
-                Optional.of(new SimpleDialogAction(
-                        new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, action), Optional.empty())
+                Optional.of(new StaticAction(
+                        new ClickEvent.Custom(Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, action), Optional.empty())
                 ))
         );
     }
 
-    public static DialogActionButtonData translatableMenuButtonWithTooltip(String labelTranslation, String labelFallback, String tooltipTranslation, String tooltipFallback, String action) {
-        return new DialogActionButtonData(
-                new DialogButtonData(
-                        Text.translatableWithFallback("gui.igalaxy_item_customization." + labelTranslation, labelFallback),
-                        Optional.of(Text.translatableWithFallback("gui.igalaxy_item_customization." + tooltipTranslation, tooltipFallback)),
+    public static ActionButton translatableMenuButtonWithTooltip(String labelTranslation, String labelFallback, String tooltipTranslation, String tooltipFallback, String action) {
+        return new ActionButton(
+                new CommonButtonData(
+                        Component.translatableWithFallback("gui.igalaxy_item_customization." + labelTranslation, labelFallback),
+                        Optional.of(Component.translatableWithFallback("gui.igalaxy_item_customization." + tooltipTranslation, tooltipFallback)),
                         125
                 ),
-                Optional.of(new SimpleDialogAction(
-                        new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, action), Optional.empty())
+                Optional.of(new StaticAction(
+                        new ClickEvent.Custom(Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, action), Optional.empty())
                 ))
         );
     }
 
-    public static class SimpleDialogCustomClickEventHandler implements BiConsumer<CustomClickActionC2SPacket, ServerPlayerEntity> {
+    public static class SimpleDialogCustomClickEventHandler implements BiConsumer<ServerboundCustomClickActionPacket, ServerPlayer> {
         private Identifier id;
 
         public SimpleDialogCustomClickEventHandler(Identifier id) {
@@ -95,28 +95,28 @@ public class DialogManager {
             return this;
         }
 
-        public SimpleDialogAction getAction(Optional<NbtElement> optionalNbtElement) {
-            return new SimpleDialogAction(
+        public StaticAction getAction(Optional<Tag> optionalNbtElement) {
+            return new StaticAction(
                     new ClickEvent.Custom(this.id, optionalNbtElement)
             );
         }
 
-        public Dialog getDialog(CustomClickActionC2SPacket customClickActionC2SPacket, ServerPlayerEntity serverPlayerEntity) {
+        public Dialog getDialog(ServerboundCustomClickActionPacket customClickActionC2SPacket, ServerPlayer serverPlayerEntity) {
             return new NoticeDialog(
-                    new DialogCommonData(
-                            Text.empty(),
+                    new CommonDialogData(
+                            Component.empty(),
                             Optional.empty(),
                             true,
                             false,
-                            AfterAction.CLOSE,
+                            DialogAction.CLOSE,
                             List.of(
-                                    new PlainMessageDialogBody(Text.of("Dialog not found"), 200)
+                                    new PlainMessage(Component.nullToEmpty("Dialog not found"), 200)
                             ),
                             List.of()
                     ),
-                    new DialogActionButtonData(
-                            new DialogButtonData(
-                                Text.translatable("gui.ok"),
+                    new ActionButton(
+                            new CommonButtonData(
+                                Component.translatable("gui.ok"),
                                     Optional.empty(),
                                     150
                             ),
@@ -126,8 +126,8 @@ public class DialogManager {
         }
 
         @Override
-        public void accept(CustomClickActionC2SPacket packet, ServerPlayerEntity player) {
-            player.networkHandler.sendPacket(new ShowDialogS2CPacket(RegistryEntry.of(getDialog(packet, player))));
+        public void accept(ServerboundCustomClickActionPacket packet, ServerPlayer player) {
+            player.connection.send(new ClientboundShowDialogPacket(Holder.direct(getDialog(packet, player))));
         }
     }
 }

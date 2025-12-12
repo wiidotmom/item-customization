@@ -1,18 +1,18 @@
 package mom.wii.itemcustomization.mixin;
 
-import net.minecraft.inventory.CraftingResultInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.screen.ForgingScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.ItemCombinerMenu;
+import net.minecraft.world.inventory.ResultContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ForgingScreenHandler.class)
+@Mixin(ItemCombinerMenu.class)
 public interface ForgingScreenHandlerAccessor {
     @Accessor
-    Inventory  getInput();
+    Container  getInputSlots();
     @Accessor
-    CraftingResultInventory getOutput();
+    ResultContainer getResultSlots();
     @Accessor
-    ScreenHandlerContext getContext();
+    ContainerLevelAccess getAccess();
 }

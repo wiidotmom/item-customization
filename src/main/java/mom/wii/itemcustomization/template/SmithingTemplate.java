@@ -1,34 +1,46 @@
 package mom.wii.itemcustomization.template;
 
 import mom.wii.itemcustomization.ItemCustomization;
-import net.minecraft.block.jukebox.JukeboxSong;
-import net.minecraft.component.ComponentMap;
-import net.minecraft.component.ComponentType;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.*;
-import net.minecraft.dialog.AfterAction;
-import net.minecraft.dialog.DialogCommonData;
-import net.minecraft.dialog.body.DialogBody;
-import net.minecraft.dialog.body.ItemDialogBody;
-import net.minecraft.dialog.body.PlainMessageDialogBody;
-import net.minecraft.dialog.type.MultiActionDialog;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.*;
-import net.minecraft.item.equipment.EquipmentAsset;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.nbt.visitor.StringNbtWriter;
-import net.minecraft.registry.*;
-import net.minecraft.registry.entry.LazyRegistryEntryReference;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.StringTagVisitor;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.dialog.CommonDialogData;
+import net.minecraft.server.dialog.DialogAction;
+import net.minecraft.server.dialog.MultiActionDialog;
+import net.minecraft.server.dialog.body.DialogBody;
+import net.minecraft.server.dialog.body.ItemBody;
+import net.minecraft.server.dialog.body.PlainMessage;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.EitherHolder;
+import net.minecraft.world.item.Instrument;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.JukeboxPlayable;
+import net.minecraft.world.item.JukeboxSong;
+import net.minecraft.world.item.PlayerHeadItem;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.CustomModelData;
+import net.minecraft.world.item.component.InstrumentComponent;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.item.equipment.EquipmentAsset;
+import net.minecraft.world.item.equipment.Equippable;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.packettweaker.PacketContext;
 
@@ -51,34 +63,34 @@ public class SmithingTemplate {
         put("jukebox_song", 6);
         put("instrument", 6);
     }};
-    public static final LinkedHashMap<String, Pair<String, Function<NbtElement, String>>> TOOLTIPS = new LinkedHashMap<>() {{
-        put("item_model", new Pair<>("Item Model", (e) -> e.asString().get()));
-        put("equipment_model", new Pair<>("Equipment Model", (e) ->  e.asString().get()));
-        put("camera_overlay", new Pair<>("Camera Overlay", (e) ->  e.asString().get()));
-        put("custom_model_data", new Pair<>("Custom Model Data", (e) -> {
-            StringNbtWriter writer = new StringNbtWriter();
+    public static final LinkedHashMap<String, Tuple<String, Function<Tag, String>>> TOOLTIPS = new LinkedHashMap<>() {{
+        put("item_model", new Tuple<>("Item Model", (e) -> e.asString().get()));
+        put("equipment_model", new Tuple<>("Equipment Model", (e) ->  e.asString().get()));
+        put("camera_overlay", new Tuple<>("Camera Overlay", (e) ->  e.asString().get()));
+        put("custom_model_data", new Tuple<>("Custom Model Data", (e) -> {
+            StringTagVisitor writer = new StringTagVisitor();
             writer.visitCompound(e.asCompound().get());
-            return writer.getString();
+            return writer.build();
         }));
-        put("tooltip_style", new Pair<>("Tooltip Style",  (e) -> e.asString().get()));
-        put("hidden_components", new Pair<>("Hidden Components", (e) -> {
-            StringNbtWriter writer = new StringNbtWriter();
-            writer.visitList(e.asNbtList().get());
-            return writer.getString();
+        put("tooltip_style", new Tuple<>("Tooltip Style",  (e) -> e.asString().get()));
+        put("hidden_components", new Tuple<>("Hidden Components", (e) -> {
+            StringTagVisitor writer = new StringTagVisitor();
+            writer.visitList(e.asList().get());
+            return writer.build();
         }));
-        put("note_block_sound", new Pair<>("Note Block Sound", (e) -> e.asString().get()));
-        put("jukebox_song", new  Pair<>("Jukebox Song", (e) -> e.asString().get()));
-        put("instrument", new Pair<>("Instrument", (e) -> e.asString().get()));
+        put("note_block_sound", new Tuple<>("Note Block Sound", (e) -> e.asString().get()));
+        put("jukebox_song", new  Tuple<>("Jukebox Song", (e) -> e.asString().get()));
+        put("instrument", new Tuple<>("Instrument", (e) -> e.asString().get()));
     }};
     public static final HashMap<String, BiPredicate<SmithingTemplate, ItemStack>> CAN_APPLY_PREDICATES = new HashMap<>() {{
-       put("equipment_model", (t, i) -> !i.getDefaultComponents().contains(DataComponentTypes.EQUIPPABLE));
+       put("equipment_model", (t, i) -> !i.getPrototype().has(DataComponents.EQUIPPABLE));
        put("camera_overlay", (t, i) -> {
-           ComponentMap d = i.getDefaultComponents();
-           return (!d.contains(DataComponentTypes.EQUIPPABLE) || (d.contains(DataComponentTypes.EQUIPPABLE) && !d.get(DataComponentTypes.EQUIPPABLE).slot().equals(EquipmentSlot.HEAD)));
+           DataComponentMap d = i.getPrototype();
+           return (!d.has(DataComponents.EQUIPPABLE) || (d.has(DataComponents.EQUIPPABLE) && !d.get(DataComponents.EQUIPPABLE).slot().equals(EquipmentSlot.HEAD)));
        });
        put("note_block_sound", (t, i) -> !(i.getItem() instanceof PlayerHeadItem));
-       put("jukebox_song", (t, i) -> !i.getDefaultComponents().contains(DataComponentTypes.JUKEBOX_PLAYABLE));
-       put("instrument", (t, i) -> !i.getDefaultComponents().contains(DataComponentTypes.INSTRUMENT));
+       put("jukebox_song", (t, i) -> !i.getPrototype().has(DataComponents.JUKEBOX_PLAYABLE));
+       put("instrument", (t, i) -> !i.getPrototype().has(DataComponents.INSTRUMENT));
     }};
     public ItemStack itemStack;
     public static final Item ingredient;
@@ -86,9 +98,9 @@ public class SmithingTemplate {
 
     static {
         ItemStack egg = new ItemStack(Items.EGG);
-        egg.applyComponentsFrom(ComponentMap.builder().add(DataComponentTypes.ITEM_MODEL, Identifier.of(ItemCustomization.MOD_ID, "preview_slot")).build());
+        egg.applyComponents(DataComponentMap.builder().set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, "preview_slot")).build());
         PREVIEW_SLOT_ITEMSTACK = egg;
-        ingredient = Registries.ITEM.get(Identifier.of(ItemCustomization.CONFIG.smithingIngredient));
+        ingredient = BuiltInRegistries.ITEM.getValue(Identifier.parse(ItemCustomization.CONFIG.smithingIngredient));
     }
 
     private SmithingTemplate(ItemStack itemStack) {
@@ -107,27 +119,27 @@ public class SmithingTemplate {
     }
 
     public static boolean isItemCustomizationSmithingTemplate(ItemStack itemStack) {
-        return itemStack.hasChangedComponent(DataComponentTypes.CUSTOM_DATA) && Objects.requireNonNull(itemStack.get(DataComponentTypes.CUSTOM_DATA)).copyNbt().contains("igalaxy_item_customization:is_customization_template");
+        return itemStack.hasNonDefault(DataComponents.CUSTOM_DATA) && Objects.requireNonNull(itemStack.get(DataComponents.CUSTOM_DATA)).copyTag().contains("igalaxy_item_customization:is_customization_template");
     }
 
-    public void openDialog(ServerPlayerEntity player) {
+    public void openDialog(ServerPlayer player) {
         ItemStack previewItem = new ItemStack(Items.PAPER);
-        previewItem.set(DataComponentTypes.ITEM_NAME, Text.translatableWithFallback("gui.igalaxy_item_customization.preview_item", "Preview Item"));
-        this.applySettings(previewItem, player.getEntityWorld());
+        previewItem.set(DataComponents.ITEM_NAME, Component.translatableWithFallback("gui.igalaxy_item_customization.preview_item", "Preview Item"));
+        this.applySettings(previewItem, player.level());
 
         MultiActionDialog dialog = new MultiActionDialog(
-                new DialogCommonData(
-                    Text.translatableWithFallback("gui.igalaxy_item_customization.root.title", "Item Customization"),
+                new CommonDialogData(
+                    Component.translatableWithFallback("gui.igalaxy_item_customization.root.title", "Item Customization"),
                     Optional.empty(),
                     true,
                     true,
-                    AfterAction.WAIT_FOR_RESPONSE,
+                    DialogAction.WAIT_FOR_RESPONSE,
                     List.of(
-                            new PlainMessageDialogBody(Text.translatableWithFallback("gui.igalaxy_item_customization.preview", "Preview"), 200),
-                            new ItemDialogBody(PREVIEW_SLOT_ITEMSTACK, Optional.empty(), false, false, 16, 1),
-                            new ItemDialogBody(previewItem, Optional.empty(), false, true, 16, 24),
+                            new PlainMessage(Component.translatableWithFallback("gui.igalaxy_item_customization.preview", "Preview"), 200),
+                            new ItemBody(PREVIEW_SLOT_ITEMSTACK, Optional.empty(), false, false, 16, 1),
+                            new ItemBody(previewItem, Optional.empty(), false, true, 16, 24),
                             this.getCostDialogBody(),
-                            new PlainMessageDialogBody(Text.translatable("options.title"), 200)
+                            new PlainMessage(Component.translatable("options.title"), 200)
                     ),
                     List.of()
                 ),
@@ -142,30 +154,30 @@ public class SmithingTemplate {
                 2
         );
 
-        player.openDialog(RegistryEntry.of(dialog));
+        player.openDialog(Holder.direct(dialog));
     }
 
-    private static void addToTooltip(ArrayList<Text> tooltip, String title, String value) {
-        tooltip.add(Text.literal(" " + title).styled(style -> style.withColor(Formatting.GOLD).withItalic(false)));
-        tooltip.add(Text.literal("  " + value).styled(style -> style.withItalic(false).withColor(Formatting.DARK_GRAY)));
+    private static void addToTooltip(ArrayList<Component> tooltip, String title, String value) {
+        tooltip.add(Component.literal(" " + title).withStyle(style -> style.withColor(ChatFormatting.GOLD).withItalic(false)));
+        tooltip.add(Component.literal("  " + value).withStyle(style -> style.withItalic(false).withColor(ChatFormatting.DARK_GRAY)));
     }
 
-    public List<Text> getTooltip() {
-        ArrayList<Text> tooltip = new ArrayList<>(List.of(
-                Text.translatable("item.minecraft.smithing_template").styled(style -> style.withColor(Formatting.GRAY).withItalic(false)),
-                Text.empty(),
-                Text.translatable("item.minecraft.smithing_template.applies_to").styled(style -> style.withColor(Formatting.GRAY).withItalic(false)),
-                Text.literal(" Any").styled(style -> style.withItalic(false).withColor(Formatting.BLUE)),
-                Text.translatable("item.minecraft.smithing_template.ingredients").styled(style -> style.withItalic(false).withColor(Formatting.GRAY)),
-                Text.literal(" ").append(Text.translatable(this.ingredient.getTranslationKey()).styled(style -> style.withItalic(false).withColor(Formatting.BLUE)))
+    public List<Component> getTooltip() {
+        ArrayList<Component> tooltip = new ArrayList<>(List.of(
+                Component.translatable("item.minecraft.smithing_template").withStyle(style -> style.withColor(ChatFormatting.GRAY).withItalic(false)),
+                Component.empty(),
+                Component.translatable("item.minecraft.smithing_template.applies_to").withStyle(style -> style.withColor(ChatFormatting.GRAY).withItalic(false)),
+                Component.literal(" Any").withStyle(style -> style.withItalic(false).withColor(ChatFormatting.BLUE)),
+                Component.translatable("item.minecraft.smithing_template.ingredients").withStyle(style -> style.withItalic(false).withColor(ChatFormatting.GRAY)),
+                Component.literal(" ").append(Component.translatable(this.ingredient.getDescriptionId()).withStyle(style -> style.withItalic(false).withColor(ChatFormatting.BLUE)))
 
         ));
         if (this.hasSettings()) {
-            tooltip.add(Text.translatable("potion.whenDrank").styled(style -> style.withItalic(false).withColor(Formatting.GRAY)));
+            tooltip.add(Component.translatable("potion.whenDrank").withStyle(style -> style.withItalic(false).withColor(ChatFormatting.GRAY)));
             TOOLTIPS.forEach((id, p) -> {
                 if (this.hasSetting(id)) {
-                    NbtElement e = this.getSetting(id);
-                    addToTooltip(tooltip, p.getLeft(), p.getRight().apply(e));
+                    Tag e = this.getSetting(id);
+                    addToTooltip(tooltip, p.getA(), p.getB().apply(e));
                 }
             });
         }
@@ -173,16 +185,16 @@ public class SmithingTemplate {
     }
 
     public boolean hasSettings() {
-        if (this.itemStack.hasChangedComponent(DataComponentTypes.CUSTOM_DATA)) {
-            return this.itemStack.get(DataComponentTypes.CUSTOM_DATA).copyNbt().contains("igalaxy_item_customization:settings");
+        if (this.itemStack.hasNonDefault(DataComponents.CUSTOM_DATA)) {
+            return this.itemStack.get(DataComponents.CUSTOM_DATA).copyTag().contains("igalaxy_item_customization:settings");
         }
         return false;
     }
 
     public boolean hasSetting(String key) {
-        if (this.itemStack.hasChangedComponent(DataComponentTypes.CUSTOM_DATA)) {
-            if (this.itemStack.get(DataComponentTypes.CUSTOM_DATA).copyNbt().contains("igalaxy_item_customization:settings")) {
-                NbtCompound customData = this.itemStack.get(DataComponentTypes.CUSTOM_DATA).copyNbt();
+        if (this.itemStack.hasNonDefault(DataComponents.CUSTOM_DATA)) {
+            if (this.itemStack.get(DataComponents.CUSTOM_DATA).copyTag().contains("igalaxy_item_customization:settings")) {
+                CompoundTag customData = this.itemStack.get(DataComponents.CUSTOM_DATA).copyTag();
                 return customData.getCompound("igalaxy_item_customization:settings").isPresent() &&
                         customData.getCompound("igalaxy_item_customization:settings").get().contains(key);
             }
@@ -190,144 +202,144 @@ public class SmithingTemplate {
         return false;
     }
 
-    public @Nullable NbtElement getSetting(String key) {
+    public @Nullable Tag getSetting(String key) {
         if (hasSetting(key)) {
-            NbtCompound customData = this.itemStack.get(DataComponentTypes.CUSTOM_DATA).copyNbt();
-            NbtCompound settings = customData.getCompound("igalaxy_item_customization:settings").get();
+            CompoundTag customData = this.itemStack.get(DataComponents.CUSTOM_DATA).copyTag();
+            CompoundTag settings = customData.getCompound("igalaxy_item_customization:settings").get();
             return settings.get(key);
         }
         return null;
     }
 
-    public @Nullable NbtElement getSettingOrElse(String key, Supplier<NbtElement> defaultValue) {
-        NbtElement setting = this.getSetting(key);
+    public @Nullable Tag getSettingOrElse(String key, Supplier<Tag> defaultValue) {
+        Tag setting = this.getSetting(key);
         if (setting == null) {
             return defaultValue.get();
         }
         return setting;
     }
 
-    public NbtComponent setSetting(String key, NbtElement value) {
-        if (this.itemStack.hasChangedComponent(DataComponentTypes.CUSTOM_DATA)) {
-            NbtComponent customData = this.itemStack.get(DataComponentTypes.CUSTOM_DATA);
-            NbtCompound newCustomData = customData.copyNbt();
-            if (this.itemStack.get(DataComponentTypes.CUSTOM_DATA).copyNbt().contains("igalaxy_item_customization:settings")) {
-                NbtCompound settings = newCustomData.getCompound("igalaxy_item_customization:settings").get();
+    public CustomData setSetting(String key, Tag value) {
+        if (this.itemStack.hasNonDefault(DataComponents.CUSTOM_DATA)) {
+            CustomData customData = this.itemStack.get(DataComponents.CUSTOM_DATA);
+            CompoundTag newCustomData = customData.copyTag();
+            if (this.itemStack.get(DataComponents.CUSTOM_DATA).copyTag().contains("igalaxy_item_customization:settings")) {
+                CompoundTag settings = newCustomData.getCompound("igalaxy_item_customization:settings").get();
                 settings.put(key, value);
                 newCustomData.put("igalaxy_item_customization:settings", settings);
             } else {
-                NbtCompound settings = new NbtCompound();
+                CompoundTag settings = new CompoundTag();
                 settings.put(key, value);
                 newCustomData.put("igalaxy_item_customization:settings", settings);
             }
-            return this.itemStack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(newCustomData));
+            return this.itemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(newCustomData));
         } else {
-            NbtCompound customData = new NbtCompound();
-            NbtCompound settings = new NbtCompound();
+            CompoundTag customData = new CompoundTag();
+            CompoundTag settings = new CompoundTag();
             settings.put(key, value);
             customData.put("igalaxy_item_customization:settings", settings);
-            return this.itemStack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(customData));
+            return this.itemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(customData));
         }
     }
 
     public void resetSettings() {
-        if (itemStack.hasChangedComponent(DataComponentTypes.CUSTOM_DATA)) {
-            if (itemStack.get(DataComponentTypes.CUSTOM_DATA).copyNbt().contains("igalaxy_item_customization:settings")) {
-                NbtCompound newCustomData = itemStack.get(DataComponentTypes.CUSTOM_DATA).copyNbt();
+        if (itemStack.hasNonDefault(DataComponents.CUSTOM_DATA)) {
+            if (itemStack.get(DataComponents.CUSTOM_DATA).copyTag().contains("igalaxy_item_customization:settings")) {
+                CompoundTag newCustomData = itemStack.get(DataComponents.CUSTOM_DATA).copyTag();
                 newCustomData.remove("igalaxy_item_customization:settings");
-                itemStack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(newCustomData));
+                itemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(newCustomData));
             }
         }
     }
 
-    public void applySettings(ItemStack stack, World world) {
+    public void applySettings(ItemStack stack, Level world) {
         if (this.hasSetting("item_model")) {
-            Identifier id = Identifier.of(((NbtString) this.getSetting("item_model")).value());
-            stack.set(DataComponentTypes.ITEM_MODEL, id);
+            Identifier id = Identifier.parse(((StringTag) this.getSetting("item_model")).value());
+            stack.set(DataComponents.ITEM_MODEL, id);
 
-            if (ItemCustomization.CONFIG.overrideHeadEquipmentModels && stack.getComponents().contains(DataComponentTypes.EQUIPPABLE)) {
-                EquippableComponent ec = stack.get(DataComponentTypes.EQUIPPABLE);
+            if (ItemCustomization.CONFIG.overrideHeadEquipmentModels && stack.getComponents().has(DataComponents.EQUIPPABLE)) {
+                Equippable ec = stack.get(DataComponents.EQUIPPABLE);
                 if (ec.slot().equals(EquipmentSlot.HEAD)) {
-                    EquippableComponent newEquippableComponent = new EquippableComponent(
+                    Equippable newEquippableComponent = new Equippable(
                             ec.slot(), ec.equipSound(), Optional.empty(), ec.cameraOverlay(), ec.allowedEntities(), ec.dispensable(), ec.swappable(), ec.damageOnHurt(), ec.equipOnInteract(), ec.canBeSheared(), ec.shearingSound()
                     );
-                    stack.set(DataComponentTypes.EQUIPPABLE, newEquippableComponent);
+                    stack.set(DataComponents.EQUIPPABLE, newEquippableComponent);
                 }
             }
         }
         if (this.hasSetting("equipment_model")) {
-            Identifier id = Identifier.of(((NbtString) this.getSetting("equipment_model")).value());
-            if (stack.getDefaultComponents().contains(DataComponentTypes.EQUIPPABLE)) {
-                EquippableComponent ec = stack.get(DataComponentTypes.EQUIPPABLE);
-                RegistryKey<EquipmentAsset> equipmentAsset = RegistryKey.of(RegistryKey.ofRegistry(Identifier.ofVanilla("equipment_asset")), id);
-                EquippableComponent newEquippableComponent = new EquippableComponent(
+            Identifier id = Identifier.parse(((StringTag) this.getSetting("equipment_model")).value());
+            if (stack.getPrototype().has(DataComponents.EQUIPPABLE)) {
+                Equippable ec = stack.get(DataComponents.EQUIPPABLE);
+                ResourceKey<EquipmentAsset> equipmentAsset = ResourceKey.create(ResourceKey.createRegistryKey(Identifier.withDefaultNamespace("equipment_asset")), id);
+                Equippable newEquippableComponent = new Equippable(
                         ec.slot(), ec.equipSound(),
                         Optional.of(equipmentAsset),
                         ec.cameraOverlay(), ec.allowedEntities(), ec.dispensable(), ec.swappable(), ec.damageOnHurt(), ec.equipOnInteract(), ec.canBeSheared(), ec.shearingSound()
                 );
-                stack.set(DataComponentTypes.EQUIPPABLE, newEquippableComponent);
+                stack.set(DataComponents.EQUIPPABLE, newEquippableComponent);
             }
         }
         if (this.hasSetting("camera_overlay")) {
-            Identifier id = Identifier.of(((NbtString) this.getSetting("camera_overlay")).value());
-            if (stack.getDefaultComponents().contains(DataComponentTypes.EQUIPPABLE) && stack.getDefaultComponents().get(DataComponentTypes.EQUIPPABLE).slot().equals(EquipmentSlot.HEAD)) {
-                EquippableComponent ec = stack.get(DataComponentTypes.EQUIPPABLE);
-                EquippableComponent newEquippableComponent = new EquippableComponent(
+            Identifier id = Identifier.parse(((StringTag) this.getSetting("camera_overlay")).value());
+            if (stack.getPrototype().has(DataComponents.EQUIPPABLE) && stack.getPrototype().get(DataComponents.EQUIPPABLE).slot().equals(EquipmentSlot.HEAD)) {
+                Equippable ec = stack.get(DataComponents.EQUIPPABLE);
+                Equippable newEquippableComponent = new Equippable(
                         ec.slot(), ec.equipSound(), ec.assetId(),
                         Optional.of(id),
                         ec.allowedEntities(), ec.dispensable(), ec.swappable(), ec.damageOnHurt(), ec.equipOnInteract(), ec.canBeSheared(), ec.shearingSound()
                 );
-                stack.set(DataComponentTypes.EQUIPPABLE, newEquippableComponent);
+                stack.set(DataComponents.EQUIPPABLE, newEquippableComponent);
 
-                if (stack.getComponents().contains(DataComponentTypes.ATTRIBUTE_MODIFIERS) && ItemCustomization.CONFIG.customizedHeadVisibleOnPlayerLocatorBar) {
-                    AttributeModifiersComponent attributeModifiersComponent = stack.get(DataComponentTypes.ATTRIBUTE_MODIFIERS);
-                    AttributeModifiersComponent newAttributeModifiersComponent = new AttributeModifiersComponent(
-                            attributeModifiersComponent.modifiers().stream().filter(x -> !x.modifier().idMatches(Identifier.of("minecraft:waypoint_transmit_range_hide"))).toList()
+                if (stack.getComponents().has(DataComponents.ATTRIBUTE_MODIFIERS) && ItemCustomization.CONFIG.customizedHeadVisibleOnPlayerLocatorBar) {
+                    ItemAttributeModifiers attributeModifiersComponent = stack.get(DataComponents.ATTRIBUTE_MODIFIERS);
+                    ItemAttributeModifiers newAttributeModifiersComponent = new ItemAttributeModifiers(
+                            attributeModifiersComponent.modifiers().stream().filter(x -> !x.modifier().is(Identifier.parse("minecraft:waypoint_transmit_range_hide"))).toList()
                     );
                     if (!newAttributeModifiersComponent.modifiers().isEmpty())
-                        stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, newAttributeModifiersComponent);
+                        stack.set(DataComponents.ATTRIBUTE_MODIFIERS, newAttributeModifiersComponent);
                     else
-                        stack.remove(DataComponentTypes.ATTRIBUTE_MODIFIERS);
+                        stack.remove(DataComponents.ATTRIBUTE_MODIFIERS);
                 }
             }
         }
         if (this.hasSetting("custom_model_data")) {
-            NbtCompound data = (NbtCompound) this.getSetting("custom_model_data");
+            CompoundTag data = (CompoundTag) this.getSetting("custom_model_data");
             List<Float> floats = data.getListOrEmpty("floats").stream().map(x -> x.asFloat().orElseThrow()).toList();
             List<Boolean> flags = data.getListOrEmpty("flags").stream().map(x -> x.asBoolean().orElseThrow()).toList();
             List<String> strings = data.getListOrEmpty("strings").stream().map(x -> x.asString().orElseThrow()).toList();
             List<Integer> colors = data.getListOrEmpty("colors").stream().map(x -> x.asInt().orElseThrow()).toList();
-            CustomModelDataComponent customModelDataComponent = new CustomModelDataComponent(floats, flags, strings, colors);
-            stack.set(DataComponentTypes.CUSTOM_MODEL_DATA, customModelDataComponent);
+            CustomModelData customModelDataComponent = new CustomModelData(floats, flags, strings, colors);
+            stack.set(DataComponents.CUSTOM_MODEL_DATA, customModelDataComponent);
         }
         if (this.hasSetting("tooltip_style")) {
-            String style = ((NbtString) this.getSetting("tooltip_style")).value();
-            stack.set(DataComponentTypes.TOOLTIP_STYLE, Identifier.of(style));
+            String style = ((StringTag) this.getSetting("tooltip_style")).value();
+            stack.set(DataComponents.TOOLTIP_STYLE, Identifier.parse(style));
         }
         if (this.hasSetting("note_block_sound")) {
-            String s = ((NbtString) this.getSetting("note_block_sound")).value();
-            stack.set(DataComponentTypes.NOTE_BLOCK_SOUND, Identifier.of(s));
+            String s = ((StringTag) this.getSetting("note_block_sound")).value();
+            stack.set(DataComponents.NOTE_BLOCK_SOUND, Identifier.parse(s));
         }
         if (this.hasSetting("jukebox_song")) {
-            String s = ((NbtString) this.getSetting("jukebox_song")).value();
-            RegistryEntry.Reference<JukeboxSong> song = world.getRegistryManager().getOrThrow(RegistryKeys.JUKEBOX_SONG).getEntry(Identifier.of(s)).get();
-            stack.set(DataComponentTypes.JUKEBOX_PLAYABLE, new JukeboxPlayableComponent(new LazyRegistryEntryReference<>(song)));
+            String s = ((StringTag) this.getSetting("jukebox_song")).value();
+            Holder.Reference<JukeboxSong> song = world.registryAccess().lookupOrThrow(Registries.JUKEBOX_SONG).get(Identifier.parse(s)).get();
+            stack.set(DataComponents.JUKEBOX_PLAYABLE, new JukeboxPlayable(new EitherHolder<>(song)));
         }
         if (this.hasSetting("instrument")) {
-            String i = ((NbtString) this.getSetting("instrument")).value();
-            RegistryEntry.Reference<Instrument> instrument = world.getRegistryManager().getOrThrow(RegistryKeys.INSTRUMENT).getEntry(Identifier.of(i)).get();
-            stack.set(DataComponentTypes.INSTRUMENT, new InstrumentComponent(RegistryEntry.of(instrument.value())));
+            String i = ((StringTag) this.getSetting("instrument")).value();
+            Holder.Reference<Instrument> instrument = world.registryAccess().lookupOrThrow(Registries.INSTRUMENT).get(Identifier.parse(i)).get();
+            stack.set(DataComponents.INSTRUMENT, new InstrumentComponent(Holder.direct(instrument.value())));
         }
         if (this.hasSetting("hidden_components")) {
-            NbtList list = (NbtList) this.getSetting("hidden_components");
-            LinkedHashSet<ComponentType<?>> hidden = new LinkedHashSet<>(
+            ListTag list = (ListTag) this.getSetting("hidden_components");
+            LinkedHashSet<DataComponentType<?>> hidden = new LinkedHashSet<>(
                     list.stream()
-                            .filter(x -> Registries.DATA_COMPONENT_TYPE.containsId(Identifier.of(x.asString().get())))
-                            .map(x -> Registries.DATA_COMPONENT_TYPE.get(Identifier.of(x.asString().get())))
-                            .filter(x -> stack.getComponents().contains(x))
+                            .filter(x -> BuiltInRegistries.DATA_COMPONENT_TYPE.containsKey(Identifier.parse(x.asString().get())))
+                            .map(x -> BuiltInRegistries.DATA_COMPONENT_TYPE.getValue(Identifier.parse(x.asString().get())))
+                            .filter(x -> stack.getComponents().has(x))
                             .toList()
             );
-            stack.set(DataComponentTypes.TOOLTIP_DISPLAY, new TooltipDisplayComponent(false, hidden));
+            stack.set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(false, hidden));
         }
     }
 
@@ -346,16 +358,16 @@ public class SmithingTemplate {
 
     private DialogBody getCostDialogBody() {
         if (this.getCost() > 0) {
-            return new ItemDialogBody(
+            return new ItemBody(
                     new ItemStack(ingredient, this.getCost()),
-                    Optional.of(new PlainMessageDialogBody(
-                            Text.translatableWithFallback("gui.igalaxy_item_customization.to_apply", "to apply"), 50
+                    Optional.of(new PlainMessage(
+                            Component.translatableWithFallback("gui.igalaxy_item_customization.to_apply", "to apply"), 50
                     )),
                     true, true, 16, 16
             );
         }
-        return new PlainMessageDialogBody(
-                Text.empty(),
+        return new PlainMessage(
+                Component.empty(),
                 200
         );
     }

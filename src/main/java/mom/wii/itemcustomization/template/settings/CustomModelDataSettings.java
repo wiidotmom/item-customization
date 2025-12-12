@@ -2,50 +2,49 @@ package mom.wii.itemcustomization.template.settings;
 
 import mom.wii.itemcustomization.ItemCustomization;
 import mom.wii.itemcustomization.template.SmithingTemplate;
-import net.minecraft.dialog.AfterAction;
-import net.minecraft.dialog.DialogActionButtonData;
-import net.minecraft.dialog.DialogButtonData;
-import net.minecraft.dialog.DialogCommonData;
-import net.minecraft.dialog.action.DynamicCustomDialogAction;
-import net.minecraft.dialog.action.SimpleDialogAction;
-import net.minecraft.dialog.body.PlainMessageDialogBody;
-import net.minecraft.dialog.input.TextInputControl;
-import net.minecraft.dialog.type.ConfirmationDialog;
-import net.minecraft.dialog.type.DialogInput;
-import net.minecraft.dialog.type.MultiActionDialog;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.nbt.visitor.StringNbtWriter;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.StringTagVisitor;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.dialog.ActionButton;
+import net.minecraft.server.dialog.CommonButtonData;
+import net.minecraft.server.dialog.CommonDialogData;
+import net.minecraft.server.dialog.ConfirmationDialog;
+import net.minecraft.server.dialog.DialogAction;
+import net.minecraft.server.dialog.Input;
+import net.minecraft.server.dialog.MultiActionDialog;
+import net.minecraft.server.dialog.action.CustomAll;
+import net.minecraft.server.dialog.action.StaticAction;
+import net.minecraft.server.dialog.body.PlainMessage;
+import net.minecraft.server.dialog.input.TextInput;
+import net.minecraft.server.level.ServerPlayer;
 import java.util.List;
 import java.util.Optional;
 
 import static mom.wii.itemcustomization.dialog.DialogManager.simpleTranslatableMenuButton;
 
 public class CustomModelDataSettings {
-    public static void openRootDialog(ServerPlayerEntity player, SmithingTemplate template) {
-        NbtCompound customModelData = (NbtCompound) template.getSettingOrElse("custom_model_data", NbtCompound::new);
-        StringNbtWriter writer = new StringNbtWriter();
+    public static void openRootDialog(ServerPlayer player, SmithingTemplate template) {
+        CompoundTag customModelData = (CompoundTag) template.getSettingOrElse("custom_model_data", CompoundTag::new);
+        StringTagVisitor writer = new StringTagVisitor();
         writer.visitCompound(customModelData);
-        String previewString = writer.getString();
+        String previewString = writer.build();
 
         MultiActionDialog dialog = new MultiActionDialog(
-                new DialogCommonData(
-                        Text.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.title", "Custom Model Data"),
+                new CommonDialogData(
+                        Component.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.title", "Custom Model Data"),
                         Optional.empty(),
                         true,
                         true,
-                        AfterAction.WAIT_FOR_RESPONSE,
+                        DialogAction.WAIT_FOR_RESPONSE,
                         List.of(
-                                new PlainMessageDialogBody(Text.translatableWithFallback("gui.igalaxy_item_customization.preview", "Preview"), 200),
-                                new PlainMessageDialogBody(Text.literal(previewString).formatted(Formatting.GRAY), 200),
-                                new PlainMessageDialogBody(Text.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.add_new", "Add New"), 200)
+                                new PlainMessage(Component.translatableWithFallback("gui.igalaxy_item_customization.preview", "Preview"), 200),
+                                new PlainMessage(Component.literal(previewString).withStyle(ChatFormatting.GRAY), 200),
+                                new PlainMessage(Component.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.add_new", "Add New"), 200)
                         ),
                         List.of()
                 ),
@@ -56,97 +55,97 @@ public class CustomModelDataSettings {
                         simpleTranslatableMenuButton("custom_model_data.color.external_title", "Color...", "custom_model_data/color", 50)
                 ),
                 Optional.of(
-                        new DialogActionButtonData(
-                                new DialogButtonData(Text.translatable("gui.back"), 200),
-                                Optional.of(new SimpleDialogAction(
-                                        new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "root"), Optional.empty())
+                        new ActionButton(
+                                new CommonButtonData(Component.translatable("gui.back"), 200),
+                                Optional.of(new StaticAction(
+                                        new ClickEvent.Custom(Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, "root"), Optional.empty())
                                 ))
                         )
                 ),
                 2
         );
 
-        player.openDialog(RegistryEntry.of(dialog));
+        player.openDialog(Holder.direct(dialog));
     }
 
-    public static void openAddNewDialog(ServerPlayerEntity player, String id, String fallback, boolean multiline) {
+    public static void openAddNewDialog(ServerPlayer player, String id, String fallback, boolean multiline) {
         ConfirmationDialog dialog = new ConfirmationDialog(
-                new DialogCommonData(
-                        Text.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.add_new", "Add New"),
+                new CommonDialogData(
+                        Component.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.add_new", "Add New"),
                         Optional.empty(),
                         true,
                         true,
-                        AfterAction.WAIT_FOR_RESPONSE,
+                        DialogAction.WAIT_FOR_RESPONSE,
                         List.of(),
                         List.of(
-                                new DialogInput(id, new TextInputControl(
+                                new Input(id, new TextInput(
                                         multiline ? 200 : 100,
-                                        Text.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data." + id, fallback),
+                                        Component.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data." + id, fallback),
                                         true,
                                         "",
                                         32,
-                                        Optional.ofNullable(multiline ? new TextInputControl.Multiline(
+                                        Optional.ofNullable(multiline ? new TextInput.MultilineOptions(
                                                 Optional.empty(),
                                                 Optional.of(32)
                                         ) : null)
                                 ))
                         )
                 ),
-                new DialogActionButtonData(
-                        new DialogButtonData(Text.translatableWithFallback("gui.submit", "Submit"), 150),
-                        Optional.of(new DynamicCustomDialogAction(
-                                Identifier.of(ItemCustomization.MOD_ID, "custom_model_data/" + id + "/add"), Optional.empty()
+                new ActionButton(
+                        new CommonButtonData(Component.translatableWithFallback("gui.submit", "Submit"), 150),
+                        Optional.of(new CustomAll(
+                                Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, "custom_model_data/" + id + "/add"), Optional.empty()
                         ))
                 ),
-                new DialogActionButtonData(
-                        new DialogButtonData(Text.translatable("gui.back"), 150),
-                        Optional.of(new SimpleDialogAction(
-                                new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "custom_model_data"), Optional.empty())
+                new ActionButton(
+                        new CommonButtonData(Component.translatable("gui.back"), 150),
+                        Optional.of(new StaticAction(
+                                new ClickEvent.Custom(Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, "custom_model_data"), Optional.empty())
                         ))
                 )
         );
 
-        player.openDialog(RegistryEntry.of(dialog));
+        player.openDialog(Holder.direct(dialog));
     }
 
-    public static void openAddNewFlagDialog(ServerPlayerEntity player) {
+    public static void openAddNewFlagDialog(ServerPlayer player) {
         MultiActionDialog dialog = new MultiActionDialog(
-                new DialogCommonData(
-                        Text.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.add_new", "Add New"),
+                new CommonDialogData(
+                        Component.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.add_new", "Add New"),
                         Optional.empty(),
                         true,
                         true,
-                        AfterAction.WAIT_FOR_RESPONSE,
+                        DialogAction.WAIT_FOR_RESPONSE,
                         List.of(
-                                new PlainMessageDialogBody(Text.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.flag", "Flag"), 200)
+                                new PlainMessage(Component.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.flag", "Flag"), 200)
                         ),
                         List.of()
                 ),
                 List.of(
-                        new DialogActionButtonData(
-                                new DialogButtonData(Text.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.flag.true", "true (1b)"), 75),
-                                Optional.of(new SimpleDialogAction(
-                                        new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "custom_model_data/flag/add"), Optional.of(NbtString.of("true")))
+                        new ActionButton(
+                                new CommonButtonData(Component.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.flag.true", "true (1b)"), 75),
+                                Optional.of(new StaticAction(
+                                        new ClickEvent.Custom(Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, "custom_model_data/flag/add"), Optional.of(StringTag.valueOf("true")))
                                 ))
                         ),
-                        new DialogActionButtonData(
-                                new DialogButtonData(Text.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.flag.false", "false (0b)"), 75),
-                                Optional.of(new SimpleDialogAction(
-                                        new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "custom_model_data/flag/add"), Optional.of(NbtString.of("false")))
+                        new ActionButton(
+                                new CommonButtonData(Component.translatableWithFallback("gui.igalaxy_item_customization.custom_model_data.flag.false", "false (0b)"), 75),
+                                Optional.of(new StaticAction(
+                                        new ClickEvent.Custom(Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, "custom_model_data/flag/add"), Optional.of(StringTag.valueOf("false")))
                                 ))
                         )
                 ),
                 Optional.of(
-                        new DialogActionButtonData(
-                                new DialogButtonData(Text.translatable("gui.back"), 200),
-                                Optional.of(new SimpleDialogAction(
-                                        new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "custom_model_data"), Optional.empty())
+                        new ActionButton(
+                                new CommonButtonData(Component.translatable("gui.back"), 200),
+                                Optional.of(new StaticAction(
+                                        new ClickEvent.Custom(Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, "custom_model_data"), Optional.empty())
                                 ))
                         )
                 ),
                 1
         );
 
-        player.openDialog(RegistryEntry.of(dialog));
+        player.openDialog(Holder.direct(dialog));
     }
 }

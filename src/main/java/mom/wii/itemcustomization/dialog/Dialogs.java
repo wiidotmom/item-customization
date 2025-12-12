@@ -16,17 +16,16 @@ import mom.wii.itemcustomization.template.settings.tooltip.HiddenComponentSettin
 import mom.wii.itemcustomization.template.settings.tooltip.TooltipSettings;
 import mom.wii.itemcustomization.template.settings.tooltip.TooltipStyleSettings;
 import mom.wii.itemcustomization.util.IdentifierIndex;
-import net.minecraft.component.ComponentMap;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.*;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -39,34 +38,34 @@ public class Dialogs {
 
     static {
         ItemStack searchIcon = new ItemStack(Items.EGG);
-        searchIcon.applyComponentsFrom(ComponentMap.builder().add(DataComponentTypes.ITEM_MODEL, Identifier.of("igalaxy_item_customization:search_icon")).build());
+        searchIcon.applyComponents(DataComponentMap.builder().set(DataComponents.ITEM_MODEL, Identifier.parse("igalaxy_item_customization:search_icon")).build());
         SEARCH_ICON = searchIcon;
     }
 
-    private static void registerIndexRootAction(String id, IdentifierIndex index, Consumer<ServerPlayerEntity> openRootDialog, String errorMessage) {
+    private static void registerIndexRootAction(String id, IdentifierIndex index, Consumer<ServerPlayer> openRootDialog, String errorMessage) {
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, id),
+                Identifier.fromNamespaceAndPath(MOD_ID, id),
                 (packet, player) -> {
-                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack()) && !index.isEmpty()) {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandItem()) && !index.isEmpty()) {
                         openRootDialog.accept(player);
                         return;
                     }
                     player.openDialog(
-                            RegistryEntry.of(
-                                    DialogManager.simpleNoticeDialog(Text.of(errorMessage))
+                            Holder.direct(
+                                    DialogManager.simpleNoticeDialog(Component.nullToEmpty(errorMessage))
                             )
                     );
                 }
         );
     }
 
-    private static void registerIndexNamespaceAction(String id, IdentifierIndex index, BiConsumer<ServerPlayerEntity, String> openDialogForNamespace) {
+    private static void registerIndexNamespaceAction(String id, IdentifierIndex index, BiConsumer<ServerPlayer, String> openDialogForNamespace) {
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, id + "/namespace"),
+                Identifier.fromNamespaceAndPath(MOD_ID, id + "/namespace"),
                 (packet, player) -> {
-                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
-                        if (packet.payload().isPresent() && packet.payload().get() instanceof NbtString) {
-                            String namespace = ((NbtString) packet.payload().get()).value();
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandItem())) {
+                        if (packet.payload().isPresent() && packet.payload().get() instanceof StringTag) {
+                            String namespace = ((StringTag) packet.payload().get()).value();
                             if (index.containsNamespace(namespace)) {
                                 openDialogForNamespace.accept(player, namespace);
                                 return;
@@ -74,8 +73,8 @@ public class Dialogs {
                         }
                     }
                     player.openDialog(
-                            RegistryEntry.of(
-                                    DialogManager.simpleNoticeDialog(Text.of("Invalid namespace selected"))
+                            Holder.direct(
+                                    DialogManager.simpleNoticeDialog(Component.nullToEmpty("Invalid namespace selected"))
                             )
                     );
                 }
@@ -84,19 +83,19 @@ public class Dialogs {
 
     @FunctionalInterface
     interface IndexBrowseDialog {
-        void accept(ServerPlayerEntity player, String namespace, String path);
+        void accept(ServerPlayer player, String namespace, String path);
     }
 
     private static void registerIndexBrowseAction(String id, IdentifierIndex index, IndexBrowseDialog indexBrowseDialog) {
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, id + "/browse"),
+                Identifier.fromNamespaceAndPath(MOD_ID, id + "/browse"),
                 (packet, player) -> {
-                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack()) &&
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandItem()) &&
                             packet.payload().isPresent() &&
-                            packet.payload().get() instanceof NbtString
+                            packet.payload().get() instanceof StringTag
                     ) {
-                        NbtString payload = (NbtString) packet.payload().get();
-                        DataResult<Identifier> validated = Identifier.validate(payload.value());
+                        StringTag payload = (StringTag) packet.payload().get();
+                        DataResult<Identifier> validated = Identifier.read(payload.value());
                         if (validated.isSuccess()) {
                             Identifier entry = validated.getOrThrow();
                             if (index.isValidIdentifier(entry)) {
@@ -108,8 +107,8 @@ public class Dialogs {
                         }
                     }
                     player.openDialog(
-                            RegistryEntry.of(
-                                    DialogManager.simpleNoticeDialog(Text.literal("Not a browsable path"))
+                            Holder.direct(
+                                    DialogManager.simpleNoticeDialog(Component.literal("Not a browsable path"))
                             )
                     );
                 }
@@ -118,27 +117,27 @@ public class Dialogs {
 
     private static void registerIndexSetAction(String id, IdentifierIndex index, Function<Identifier, String> entryToValue, String errorMessage) {
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, id + "/set"),
+                Identifier.fromNamespaceAndPath(MOD_ID, id + "/set"),
                 (packet, player) -> {
-                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack()) &&
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandItem()) &&
                             packet.payload().isPresent() &&
-                            packet.payload().get() instanceof NbtString
+                            packet.payload().get() instanceof StringTag
                     ) {
-                        NbtString payload = (NbtString) packet.payload().get();
-                        DataResult<Identifier> validated = Identifier.validate(payload.value());
+                        StringTag payload = (StringTag) packet.payload().get();
+                        DataResult<Identifier> validated = Identifier.read(payload.value());
                         if (validated.isSuccess()) {
                             Identifier entry = validated.getOrThrow();
                             if (index.identifiers.stream().anyMatch(entry::equals)) {
-                                SmithingTemplate template = SmithingTemplate.from(player.getMainHandStack());
-                                template.setSetting(id, NbtString.of(entryToValue.apply(entry)));
+                                SmithingTemplate template = SmithingTemplate.from(player.getMainHandItem());
+                                template.setSetting(id, StringTag.valueOf(entryToValue.apply(entry)));
                                 template.openDialog(player);
                                 return;
                             }
                         }
                     }
                     player.openDialog(
-                            RegistryEntry.of(
-                                    DialogManager.simpleNoticeDialog(Text.of(errorMessage))
+                            Holder.direct(
+                                    DialogManager.simpleNoticeDialog(Component.nullToEmpty(errorMessage))
                             )
                     );
                 }
@@ -147,10 +146,10 @@ public class Dialogs {
 
     public static void register() {
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, "root"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "root"),
                 (packet, player) -> {
-                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
-                        SmithingTemplate.from(player.getMainHandStack()).openDialog(player);
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandItem())) {
+                        SmithingTemplate.from(player.getMainHandItem()).openDialog(player);
                     }
                 }
         );
@@ -161,9 +160,9 @@ public class Dialogs {
         registerIndexSetAction("item_model", ITEMS_MODEL_INDEX, Identifier::toString, "Invalid item model selected");
 
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, "equipment"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "equipment"),
                 (packet, player) -> {
-                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandItem())) {
                         EquipmentSettings.openRootDialog(player);
                     }
                 }
@@ -181,36 +180,36 @@ public class Dialogs {
 
 
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, "custom_model_data"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "custom_model_data"),
                 (packet, player) -> {
-                    ItemStack stack = player.getMainHandStack();
+                    ItemStack stack = player.getMainHandItem();
                     if (isItemCustomizationSmithingTemplate(stack)) {
                         CustomModelDataSettings.openRootDialog(player, SmithingTemplate.from(stack));
                     }
                 }
         );
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, "custom_model_data/float"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "custom_model_data/float"),
                 (packet, player) -> {
-                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandItem())) {
                         CustomModelDataSettings.openAddNewDialog(player, "float", "Float", false);
                     }
                 }
         );
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, "custom_model_data/float/add"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "custom_model_data/float/add"),
                 (packet, player) -> {
-                    ItemStack stack = player.getMainHandStack();
+                    ItemStack stack = player.getMainHandItem();
                     if (isItemCustomizationSmithingTemplate(stack)) {
-                        if (packet.payload().isPresent() && packet.payload().get() instanceof NbtCompound) {
-                            NbtCompound payload = (NbtCompound) packet.payload().get();
+                        if (packet.payload().isPresent() && packet.payload().get() instanceof CompoundTag) {
+                            CompoundTag payload = (CompoundTag) packet.payload().get();
                             if (payload.contains("float") && payload.getString("float").isPresent()) {
                                 Float f = Floats.tryParse(payload.getString("float").get());
                                 if (f != null) {
                                     SmithingTemplate template = SmithingTemplate.from(stack);
-                                    NbtCompound newCustomModelData = ((NbtCompound) template.getSettingOrElse("custom_model_data", NbtCompound::new)).copy();
-                                    NbtList floats = newCustomModelData.getListOrEmpty("floats");
-                                    floats.add(NbtFloat.of(f));
+                                    CompoundTag newCustomModelData = ((CompoundTag) template.getSettingOrElse("custom_model_data", CompoundTag::new)).copy();
+                                    ListTag floats = newCustomModelData.getListOrEmpty("floats");
+                                    floats.add(FloatTag.valueOf(f));
                                     newCustomModelData.put("floats", floats);
                                     template.setSetting("custom_model_data", newCustomModelData);
                                     CustomModelDataSettings.openRootDialog(player, template);
@@ -220,31 +219,31 @@ public class Dialogs {
                         }
                     }
                     player.openDialog(
-                            RegistryEntry.of(
-                                    DialogManager.simpleNoticeDialog(Text.of("Invalid float"))
+                            Holder.direct(
+                                    DialogManager.simpleNoticeDialog(Component.nullToEmpty("Invalid float"))
                             )
                     );
                 }
         );
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, "custom_model_data/flag"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "custom_model_data/flag"),
                 (packet, player) -> {
-                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandItem())) {
                         CustomModelDataSettings.openAddNewFlagDialog(player);
                     }
                 }
         );
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, "custom_model_data/flag/add"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "custom_model_data/flag/add"),
                 (packet, player) -> {
-                    ItemStack stack = player.getMainHandStack();
+                    ItemStack stack = player.getMainHandItem();
                     if (isItemCustomizationSmithingTemplate(stack)) {
-                        if (packet.payload().isPresent() && packet.payload().get() instanceof NbtString) {
-                            boolean f = Boolean.parseBoolean(((NbtString) packet.payload().get()).value());
+                        if (packet.payload().isPresent() && packet.payload().get() instanceof StringTag) {
+                            boolean f = Boolean.parseBoolean(((StringTag) packet.payload().get()).value());
                             SmithingTemplate template = SmithingTemplate.from(stack);
-                            NbtCompound newCustomModelData = ((NbtCompound) template.getSettingOrElse("custom_model_data", NbtCompound::new)).copy();
-                            NbtList flags = newCustomModelData.getListOrEmpty("flags");
-                            flags.add(NbtByte.of(f));
+                            CompoundTag newCustomModelData = ((CompoundTag) template.getSettingOrElse("custom_model_data", CompoundTag::new)).copy();
+                            ListTag flags = newCustomModelData.getListOrEmpty("flags");
+                            flags.add(ByteTag.valueOf(f));
                             newCustomModelData.put("flags", flags);
                             template.setSetting("custom_model_data", newCustomModelData);
                             CustomModelDataSettings.openRootDialog(player, template);
@@ -252,33 +251,33 @@ public class Dialogs {
                         }
                     }
                     player.openDialog(
-                            RegistryEntry.of(
-                                    DialogManager.simpleNoticeDialog(Text.of("Invalid flag"))
+                            Holder.direct(
+                                    DialogManager.simpleNoticeDialog(Component.nullToEmpty("Invalid flag"))
                             )
                     );
                 }
         );
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, "custom_model_data/string"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "custom_model_data/string"),
                 (packet, player) -> {
-                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandItem())) {
                         CustomModelDataSettings.openAddNewDialog(player, "string", "String", true);
                     }
                 }
         );
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, "custom_model_data/string/add"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "custom_model_data/string/add"),
                 (packet, player) -> {
-                    ItemStack stack = player.getMainHandStack();
+                    ItemStack stack = player.getMainHandItem();
                     if (isItemCustomizationSmithingTemplate(stack)) {
-                        if (packet.payload().isPresent() && packet.payload().get() instanceof NbtCompound) {
-                            NbtCompound payload = (NbtCompound) packet.payload().get();
+                        if (packet.payload().isPresent() && packet.payload().get() instanceof CompoundTag) {
+                            CompoundTag payload = (CompoundTag) packet.payload().get();
                             if (payload.contains("string") && payload.getString("string").isPresent()) {
                                 String s = payload.getString("string").get();
                                 SmithingTemplate template = SmithingTemplate.from(stack);
-                                NbtCompound newCustomModelData = ((NbtCompound) template.getSettingOrElse("custom_model_data", NbtCompound::new)).copy();
-                                NbtList strings = newCustomModelData.getListOrEmpty("strings");
-                                strings.add(NbtString.of(s));
+                                CompoundTag newCustomModelData = ((CompoundTag) template.getSettingOrElse("custom_model_data", CompoundTag::new)).copy();
+                                ListTag strings = newCustomModelData.getListOrEmpty("strings");
+                                strings.add(StringTag.valueOf(s));
                                 newCustomModelData.put("strings", strings);
                                 template.setSetting("custom_model_data", newCustomModelData);
                                 CustomModelDataSettings.openRootDialog(player, template);
@@ -287,33 +286,33 @@ public class Dialogs {
                         }
                     }
                     player.openDialog(
-                            RegistryEntry.of(
-                                    DialogManager.simpleNoticeDialog(Text.of("Invalid string"))
+                            Holder.direct(
+                                    DialogManager.simpleNoticeDialog(Component.nullToEmpty("Invalid string"))
                             )
                     );
                 }
         );
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, "custom_model_data/color"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "custom_model_data/color"),
                 (packet, player) -> {
-                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandItem())) {
                         CustomModelDataSettings.openAddNewDialog(player, "color", "Color (Decimal)", false);
                     }
                 }
         );
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, "custom_model_data/color/add"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "custom_model_data/color/add"),
                 (packet, player) -> {
-                    ItemStack stack = player.getMainHandStack();
+                    ItemStack stack = player.getMainHandItem();
                     if (isItemCustomizationSmithingTemplate(stack)) {
-                        if (packet.payload().isPresent() && packet.payload().get() instanceof NbtCompound) {
-                            NbtCompound payload = (NbtCompound) packet.payload().get();
+                        if (packet.payload().isPresent() && packet.payload().get() instanceof CompoundTag) {
+                            CompoundTag payload = (CompoundTag) packet.payload().get();
                             if (payload.contains("color") && payload.getString("color").isPresent()) {
                                 int c = Integer.parseInt(payload.getString("color").get());
                                 SmithingTemplate template = SmithingTemplate.from(stack);
-                                NbtCompound newCustomModelData = ((NbtCompound) template.getSettingOrElse("custom_model_data", NbtCompound::new)).copy();
-                                NbtList colors = newCustomModelData.getListOrEmpty("colors");
-                                colors.add(NbtInt.of(c));
+                                CompoundTag newCustomModelData = ((CompoundTag) template.getSettingOrElse("custom_model_data", CompoundTag::new)).copy();
+                                ListTag colors = newCustomModelData.getListOrEmpty("colors");
+                                colors.add(IntTag.valueOf(c));
                                 newCustomModelData.put("colors", colors);
                                 template.setSetting("custom_model_data", newCustomModelData);
                                 CustomModelDataSettings.openRootDialog(player, template);
@@ -322,17 +321,17 @@ public class Dialogs {
                         }
                     }
                     player.openDialog(
-                            RegistryEntry.of(
-                                    DialogManager.simpleNoticeDialog(Text.of("Invalid color"))
+                            Holder.direct(
+                                    DialogManager.simpleNoticeDialog(Component.nullToEmpty("Invalid color"))
                             )
                     );
                 }
         );
 
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, "tooltip"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "tooltip"),
                 (packet, player) -> {
-                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandItem())) {
                         TooltipSettings.openRootDialog(player);
                     }
                 }
@@ -344,41 +343,41 @@ public class Dialogs {
         registerIndexSetAction("tooltip_style", TOOLTIP_STYLE_INDEX, Identifier::toString, "Invalid tooltip style");
 
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, "hidden_components"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "hidden_components"),
                 (packet, player) -> {
-                    ItemStack stack = player.getMainHandStack();
+                    ItemStack stack = player.getMainHandItem();
                     if (isItemCustomizationSmithingTemplate(stack)) {
                         HiddenComponentSettings.openRootDialog(player, SmithingTemplate.from(stack));
                     }
                 }
         );
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, "hidden_components/add_component"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "hidden_components/add_component"),
                 (packet, player) -> {
-                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandItem())) {
                         HiddenComponentSettings.openAddComponentDialog(player);
                     }
                 }
         );
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, "hidden_components/add_component/add"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "hidden_components/add_component/add"),
                 (packet, player) -> {
-                    ItemStack stack = player.getMainHandStack();
+                    ItemStack stack = player.getMainHandItem();
                     if (isItemCustomizationSmithingTemplate(stack)) {
-                        if (packet.payload().isPresent() && packet.payload().get() instanceof NbtCompound) {
-                            NbtCompound payload = (NbtCompound) packet.payload().get();
+                        if (packet.payload().isPresent() && packet.payload().get() instanceof CompoundTag) {
+                            CompoundTag payload = (CompoundTag) packet.payload().get();
                             if (payload.getString("component").isPresent()) {
                                 SmithingTemplate template = SmithingTemplate.from(stack);
                                 String c = payload.getString("component").get().toLowerCase();
-                                DataResult<Identifier> validated = Identifier.validate(c);
+                                DataResult<Identifier> validated = Identifier.read(c);
                                 if (validated.isSuccess()) {
-                                    if (Registries.DATA_COMPONENT_TYPE.containsId(validated.getOrThrow())) {
-                                        NbtList hidden = ((NbtList) template.getSettingOrElse("hidden_components", NbtList::new)).copy();
+                                    if (BuiltInRegistries.DATA_COMPONENT_TYPE.containsKey(validated.getOrThrow())) {
+                                        ListTag hidden = ((ListTag) template.getSettingOrElse("hidden_components", ListTag::new)).copy();
                                         if (!c.startsWith("minecraft:") && !c.contains(":"))
                                             c = "minecraft:" + c;
                                         final String component = c;
                                         if (hidden.stream().noneMatch(x -> x.asString().get().equals(component))) {
-                                            hidden.add(NbtString.of(component));
+                                            hidden.add(StringTag.valueOf(component));
                                             template.setSetting("hidden_components", hidden);
                                             HiddenComponentSettings.openRootDialog(player, template);
                                             return;
@@ -389,53 +388,53 @@ public class Dialogs {
                         }
                     }
                     player.openDialog(
-                            RegistryEntry.of(
-                                    DialogManager.simpleNoticeDialog(Text.of("Invalid component"))
+                            Holder.direct(
+                                    DialogManager.simpleNoticeDialog(Component.nullToEmpty("Invalid component"))
                             )
                     );
                 }
         );
 
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, "music_and_sounds"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "music_and_sounds"),
                 (packet, player) -> {
-                    if (isItemCustomizationSmithingTemplate(player.getMainHandStack())) {
+                    if (isItemCustomizationSmithingTemplate(player.getMainHandItem())) {
                         MusicAndSoundsSettings.openRootDialog(player);
                     }
                 }
         );
 
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, "note_block_sound"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "note_block_sound"),
                 (packet, player) -> {
-                    ItemStack stack = player.getMainHandStack();
+                    ItemStack stack = player.getMainHandItem();
                     if (isItemCustomizationSmithingTemplate(stack)) {
                         NoteBlockSoundSettings.openRootDialog(player, SmithingTemplate.from(stack));
                     }
                 }
         );
         DIALOG_MANAGER.register(
-                Identifier.of(MOD_ID, "note_block_sound/set"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "note_block_sound/set"),
                 (packet, player) -> {
-                    ItemStack stack = player.getMainHandStack();
+                    ItemStack stack = player.getMainHandItem();
                     if (isItemCustomizationSmithingTemplate(stack)) {
-                        if (packet.payload().isPresent() && packet.payload().get() instanceof NbtCompound) {
-                            NbtCompound payload = (NbtCompound) packet.payload().get();
+                        if (packet.payload().isPresent() && packet.payload().get() instanceof CompoundTag) {
+                            CompoundTag payload = (CompoundTag) packet.payload().get();
                             if (payload.getString("note_block_sound").isPresent()) {
                                 String s = payload.getString("note_block_sound").get().toLowerCase();
-                                DataResult<Identifier> validated = Identifier.validate(s);
+                                DataResult<Identifier> validated = Identifier.read(s);
                                 if (validated.isSuccess()) {
                                     Identifier sound = validated.getOrThrow();
                                     SmithingTemplate template = SmithingTemplate.from(stack);
-                                    template.setSetting("note_block_sound", NbtString.of(sound.toString()));
+                                    template.setSetting("note_block_sound", StringTag.valueOf(sound.toString()));
                                     return;
                                 }
                             }
                         }
                     }
                     player.openDialog(
-                            RegistryEntry.of(
-                                    DialogManager.simpleNoticeDialog(Text.of("Invalid note block sound"))
+                            Holder.direct(
+                                    DialogManager.simpleNoticeDialog(Component.nullToEmpty("Invalid note block sound"))
                             )
                     );
                 }

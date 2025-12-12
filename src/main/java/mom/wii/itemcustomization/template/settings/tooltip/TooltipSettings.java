@@ -1,32 +1,31 @@
 package mom.wii.itemcustomization.template.settings.tooltip;
 
 import mom.wii.itemcustomization.ItemCustomization;
-import net.minecraft.dialog.AfterAction;
-import net.minecraft.dialog.DialogActionButtonData;
-import net.minecraft.dialog.DialogButtonData;
-import net.minecraft.dialog.DialogCommonData;
-import net.minecraft.dialog.action.SimpleDialogAction;
-import net.minecraft.dialog.type.MultiActionDialog;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.core.Holder;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.dialog.ActionButton;
+import net.minecraft.server.dialog.CommonButtonData;
+import net.minecraft.server.dialog.CommonDialogData;
+import net.minecraft.server.dialog.DialogAction;
+import net.minecraft.server.dialog.MultiActionDialog;
+import net.minecraft.server.dialog.action.StaticAction;
+import net.minecraft.server.level.ServerPlayer;
 import java.util.List;
 import java.util.Optional;
 
 import static mom.wii.itemcustomization.dialog.DialogManager.simpleTranslatableMenuButton;
 
 public class TooltipSettings {
-    public static void openRootDialog(ServerPlayerEntity player) {
+    public static void openRootDialog(ServerPlayer player) {
         MultiActionDialog dialog = new MultiActionDialog(
-                new DialogCommonData(
-                        Text.translatableWithFallback("gui.igalaxy_item_customization.tooltip.title", "Tooltip"),
+                new CommonDialogData(
+                        Component.translatableWithFallback("gui.igalaxy_item_customization.tooltip.title", "Tooltip"),
                         Optional.empty(),
                         true,
                         true,
-                        AfterAction.WAIT_FOR_RESPONSE,
+                        DialogAction.WAIT_FOR_RESPONSE,
                         List.of(),
                         List.of()
                 ),
@@ -35,16 +34,16 @@ public class TooltipSettings {
                         simpleTranslatableMenuButton("hidden_components.external_title", "Hidden Components...", "hidden_components")
                 ),
                 Optional.of(
-                        new DialogActionButtonData(
-                                new DialogButtonData(Text.translatable("gui.back"), 200),
-                                Optional.of(new SimpleDialogAction(
-                                        new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "root"), Optional.empty())
+                        new ActionButton(
+                                new CommonButtonData(Component.translatable("gui.back"), 200),
+                                Optional.of(new StaticAction(
+                                        new ClickEvent.Custom(Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, "root"), Optional.empty())
                                 ))
                         )
                 ),
                 1
         );
 
-        player.openDialog(RegistryEntry.of(dialog));
+        player.openDialog(Holder.direct(dialog));
     }
 }

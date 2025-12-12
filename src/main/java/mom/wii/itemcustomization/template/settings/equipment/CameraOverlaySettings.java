@@ -2,23 +2,22 @@ package mom.wii.itemcustomization.template.settings.equipment;
 
 import mom.wii.itemcustomization.ItemCustomization;
 import mom.wii.itemcustomization.util.IdentifierIndex;
-import net.minecraft.dialog.AfterAction;
-import net.minecraft.dialog.DialogActionButtonData;
-import net.minecraft.dialog.DialogButtonData;
-import net.minecraft.dialog.DialogCommonData;
-import net.minecraft.dialog.action.SimpleDialogAction;
-import net.minecraft.dialog.body.ItemDialogBody;
-import net.minecraft.dialog.body.PlainMessageDialogBody;
-import net.minecraft.dialog.type.MultiActionDialog;
-import net.minecraft.nbt.NbtString;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.dialog.ActionButton;
+import net.minecraft.server.dialog.CommonButtonData;
+import net.minecraft.server.dialog.CommonDialogData;
+import net.minecraft.server.dialog.DialogAction;
+import net.minecraft.server.dialog.MultiActionDialog;
+import net.minecraft.server.dialog.action.StaticAction;
+import net.minecraft.server.dialog.body.ItemBody;
+import net.minecraft.server.dialog.body.PlainMessage;
+import net.minecraft.server.level.ServerPlayer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,102 +25,102 @@ import java.util.Optional;
 import static mom.wii.itemcustomization.dialog.Dialogs.SEARCH_ICON;
 
 public class CameraOverlaySettings {
-    public static void openRootDialog(ServerPlayerEntity player) {
-        ArrayList<DialogActionButtonData> buttons = new ArrayList<>();
+    public static void openRootDialog(ServerPlayer player) {
+        ArrayList<ActionButton> buttons = new ArrayList<>();
         ItemCustomization.CAMERA_OVERLAY_INDEX.namespaces.forEach(namespace -> {
-            buttons.add(new DialogActionButtonData(
-                    new DialogButtonData(
-                            Text.of(namespace),
+            buttons.add(new ActionButton(
+                    new CommonButtonData(
+                            Component.nullToEmpty(namespace),
                             125
                     ),
-                    Optional.of(new SimpleDialogAction(
-                            new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "camera_overlay/namespace"), Optional.of(NbtString.of(namespace)))
+                    Optional.of(new StaticAction(
+                            new ClickEvent.Custom(Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, "camera_overlay/namespace"), Optional.of(StringTag.valueOf(namespace)))
                     ))
             ));
         });
 
         MultiActionDialog dialog = new MultiActionDialog(
-                new DialogCommonData(
-                        Text.translatableWithFallback("gui.igalaxy_item_customization.camera_overlay.title", "Camera Overlay"),
+                new CommonDialogData(
+                        Component.translatableWithFallback("gui.igalaxy_item_customization.camera_overlay.title", "Camera Overlay"),
                         Optional.empty(),
                         true,
                         true,
-                        AfterAction.WAIT_FOR_RESPONSE,
+                        DialogAction.WAIT_FOR_RESPONSE,
                         List.of(
-                                new ItemDialogBody(SEARCH_ICON, Optional.of(new PlainMessageDialogBody(Text.translatableWithFallback("gui.igalaxy_item_customization.select_namespace", "Select a namespace to browse"), 200)), false, false, 16, 16),
-                                new PlainMessageDialogBody(Text.literal("/assets/").formatted(Formatting.GRAY), 200)
+                                new ItemBody(SEARCH_ICON, Optional.of(new PlainMessage(Component.translatableWithFallback("gui.igalaxy_item_customization.select_namespace", "Select a namespace to browse"), 200)), false, false, 16, 16),
+                                new PlainMessage(Component.literal("/assets/").withStyle(ChatFormatting.GRAY), 200)
                         ),
                         List.of()
                 ),
                 buttons,
                 Optional.of(
-                        new DialogActionButtonData(
-                                new DialogButtonData(Text.translatable("gui.back"), 200),
-                                Optional.of(new SimpleDialogAction(
-                                        new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "equipment"), Optional.empty())
+                        new ActionButton(
+                                new CommonButtonData(Component.translatable("gui.back"), 200),
+                                Optional.of(new StaticAction(
+                                        new ClickEvent.Custom(Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, "equipment"), Optional.empty())
                                 ))
                         )
                 ),
                 3
         );
 
-        player.openDialog(RegistryEntry.of(dialog));
+        player.openDialog(Holder.direct(dialog));
     }
 
-    public static void openDialogForNamespace(ServerPlayerEntity player, String namespace) {
+    public static void openDialogForNamespace(ServerPlayer player, String namespace) {
         openDialogForNamespaceAndPath(player, namespace, "");
     }
 
-    public static void openDialogForNamespaceAndPath(ServerPlayerEntity player, String namespace, String path) {
-        Optional<Identifier> parentDir = IdentifierIndex.getParentDir(Identifier.of(namespace, path));
+    public static void openDialogForNamespaceAndPath(ServerPlayer player, String namespace, String path) {
+        Optional<Identifier> parentDir = IdentifierIndex.getParentDir(Identifier.fromNamespaceAndPath(namespace, path));
 
-        ArrayList<DialogActionButtonData> buttons = new ArrayList<>();
+        ArrayList<ActionButton> buttons = new ArrayList<>();
         for (Identifier identifier : ItemCustomization.CAMERA_OVERLAY_INDEX.getIdentifiersOfNamespaceAndPath(namespace, path)) {
-            boolean isDirectory = identifier.getPath().endsWith("/");
+            boolean isDirectory = IdentifierIndex.isDirectory(identifier);
             String p = identifier.getPath();
-            MutableText text = Text.literal(isDirectory ? p : p.substring(p.lastIndexOf("/") + 1));
+            MutableComponent text = Component.literal(isDirectory ? p : p.substring(p.lastIndexOf("/") + 1));
             if (!isDirectory)
-                text = text.append(Text.literal(".png").formatted(Formatting.GRAY));
-            buttons.add(new DialogActionButtonData(
-                    new DialogButtonData(
+                text = text.append(Component.literal(".png").withStyle(ChatFormatting.GRAY));
+            buttons.add(new ActionButton(
+                    new CommonButtonData(
                             text,
                             125
                     ),
-                    Optional.of(new SimpleDialogAction(
+                    Optional.of(new StaticAction(
                             isDirectory ?
-                                    new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "camera_overlay/browse"), Optional.of(NbtString.of(identifier.toString()))) :
-                                    new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "camera_overlay/set"), Optional.of(NbtString.of(identifier.toString())))
+                                    new ClickEvent.Custom(Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, "camera_overlay/browse"), Optional.of(StringTag.valueOf(identifier.toString()))) :
+                                    new ClickEvent.Custom(Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, "camera_overlay/set"), Optional.of(StringTag.valueOf(identifier.toString())))
                     ))
             ));
         }
 
         MultiActionDialog dialog = new MultiActionDialog(
-                new DialogCommonData(
-                        Text.translatableWithFallback("gui.igalaxy_item_customization.camera_overlay.title", "Camera Overlay"),
+                new CommonDialogData(
+                        Component.translatableWithFallback("gui.igalaxy_item_customization.camera_overlay.title", "Camera Overlay"),
                         Optional.empty(),
                         true,
                         true,
-                        AfterAction.WAIT_FOR_RESPONSE,
+                        DialogAction.WAIT_FOR_RESPONSE,
                         List.of(
-                                new ItemDialogBody(SEARCH_ICON, Optional.of(new PlainMessageDialogBody(Text.translatableWithFallback("gui.igalaxy_item_customization.camera_overlay.select_texture", "Select a camera overlay texture"), 200)), false, false, 16, 16),
-                                new PlainMessageDialogBody(Text.literal("/assets/").formatted(Formatting.GRAY).append(Text.literal(namespace).formatted(Formatting.WHITE).append(Text.literal("/textures/misc/").formatted(Formatting.GRAY)).append(Text.literal(path).formatted(Formatting.WHITE))), 200)
+                                new ItemBody(SEARCH_ICON, Optional.of(new PlainMessage(Component.translatableWithFallback("gui.igalaxy_item_customization.camera_overlay.select_texture", "Select a camera overlay texture"), 200)), false, false, 16, 16),
+                                new PlainMessage(Component.literal("/assets/").withStyle(ChatFormatting.GRAY).append(Component.literal(namespace).withStyle(ChatFormatting.WHITE).append(Component.literal("/textures/misc/").withStyle(ChatFormatting.GRAY)).append(Component.literal(path).withStyle(ChatFormatting.WHITE))), 200)
                         ),
                         List.of()
                 ),
                 buttons,
                 Optional.of(
-                        new DialogActionButtonData(
-                                new DialogButtonData(Text.translatable("gui.back"), 200),
-                                Optional.of(new SimpleDialogAction(
+                        new ActionButton(
+                                new CommonButtonData(Component.translatable("gui.back"), 200),
+                                Optional.of(new StaticAction(
                                         parentDir.isEmpty() ?
-                                                new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "camera_overlay"), Optional.empty()) :
-                                                new ClickEvent.Custom(Identifier.of(ItemCustomization.MOD_ID, "camera_overlay/browse"), Optional.of(NbtString.of(parentDir.get().toString())))
+                                                new ClickEvent.Custom(Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, "camera_overlay"), Optional.empty()) :
+                                                new ClickEvent.Custom(Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, "camera_overlay/browse"), Optional.of(StringTag.valueOf(parentDir.get().toString())))
                                 ))
                         )
                 ),
                 3
         );
 
-        player.openDialog(RegistryEntry.of(dialog));
+        player.openDialog(Holder.direct(dialog));
     }
 }
