@@ -105,12 +105,12 @@ public class ItemCustomization implements ModInitializer {
 			});
 		});
 
-		CommandRegistrationCallback.EVENT.register(
-				(commandDispatcher, commandBuildContext, commandSelection) ->
-						MinecraftAdmiral.builder(commandDispatcher, commandBuildContext).addCommandClasses(
-								ItemCustomizationCommand.class
-						).build()
-		);
+//		CommandRegistrationCallback.EVENT.register(
+//				(commandDispatcher, commandBuildContext, commandSelection) ->
+//						MinecraftAdmiral.builder(commandDispatcher, commandBuildContext).addCommandClasses(
+//								ItemCustomizationCommand.class
+//						).build()
+//		);
 	}
 
 	public static void incrementItemsCustomized(ServerPlayer player, int amount) {
