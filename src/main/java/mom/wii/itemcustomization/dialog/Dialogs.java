@@ -18,6 +18,7 @@ import mom.wii.itemcustomization.template.settings.tooltip.TooltipStyleSettings;
 import mom.wii.itemcustomization.util.IdentifierIndex;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.*;
@@ -25,6 +26,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -34,13 +36,13 @@ import static mom.wii.itemcustomization.ItemCustomization.*;
 import static mom.wii.itemcustomization.template.SmithingTemplate.isItemCustomizationSmithingTemplate;
 
 public class Dialogs {
-    public static final ItemStack SEARCH_ICON;
-
-    static {
-        ItemStack searchIcon = new ItemStack(Items.EGG);
-        searchIcon.applyComponents(DataComponentMap.builder().set(DataComponents.ITEM_MODEL, Identifier.parse("igalaxy_item_customization:search_icon")).build());
-        SEARCH_ICON = searchIcon;
-    }
+    public static final ItemStackTemplate SEARCH_ICON = new ItemStackTemplate(
+            Items.EGG.builtInRegistryHolder(),
+            1,
+            DataComponentPatch.builder()
+                    .set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(MOD_ID, "search_icon"))
+                    .build()
+    );
 
     private static void registerIndexRootAction(String id, IdentifierIndex index, Consumer<ServerPlayer> openRootDialog, String errorMessage) {
         DIALOG_MANAGER.register(

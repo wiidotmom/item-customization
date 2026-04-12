@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 @Mixin(SmithingMenu.class)
-public abstract class SmithingScreenHandlerMixin implements ForgingScreenHandlerAccessor, SmithingScreenHandlerAccessor {
+public abstract class SmithingMenuMixin implements ItemCombinerMenuMixin, SmithingMenuAccessor {
     @Shadow protected abstract List<ItemStack> getRelevantItems();
 
     @Shadow @Final private Level level;

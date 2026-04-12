@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ItemCombinerMenu.class)
-public interface ForgingScreenHandlerAccessor {
+public interface ItemCombinerMenuMixin {
     @Accessor
     Container  getInputSlots();
     @Accessor

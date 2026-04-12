@@ -1,8 +1,6 @@
 package mom.wii.itemcustomization;
 
-import de.maxhenkel.admiral.MinecraftAdmiral;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
-import mom.wii.itemcustomization.command.ItemCustomizationCommand;
 import mom.wii.itemcustomization.config.Config;
 import mom.wii.itemcustomization.dialog.DialogManager;
 import mom.wii.itemcustomization.dialog.Dialogs;
@@ -11,7 +9,7 @@ import mom.wii.itemcustomization.template.SmithingTemplate;
 import mom.wii.itemcustomization.util.IdentifierIndex;
 import net.fabricmc.api.ModInitializer;
 
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLevelEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistrySetupCallback;
@@ -72,7 +70,7 @@ public class ItemCustomization implements ModInitializer {
 					SmithingTemplate.from(itemStack).openDialog((ServerPlayer) playerEntity);
 					return InteractionResult.FAIL;
 				} else {
-					playerEntity.displayClientMessage(Component.translatableWithFallback("igalaxy_item_customization.main_hand_error", "Item Customization Smithing Template can only be used with your Main Hand").withStyle(ChatFormatting.RED), true);
+					playerEntity.sendOverlayMessage(Component.translatableWithFallback("igalaxy_item_customization.main_hand_error", "Item Customization Smithing Template can only be used with your Main Hand").withStyle(ChatFormatting.RED));
 				}
 			}
 			return InteractionResult.PASS;
@@ -84,7 +82,7 @@ public class ItemCustomization implements ModInitializer {
 				if (hand.equals(InteractionHand.MAIN_HAND)) {
 					SmithingTemplate.from(itemStack).openDialog((ServerPlayer) playerEntity);
 				} else {
-					playerEntity.displayClientMessage(Component.translatableWithFallback("igalaxy_item_customization.main_hand_error", "Item Customization Smithing Template can only be used with your Main Hand").withStyle(ChatFormatting.RED), true);
+					playerEntity.sendOverlayMessage(Component.translatableWithFallback("igalaxy_item_customization.main_hand_error", "Item Customization Smithing Template can only be used with your Main Hand").withStyle(ChatFormatting.RED));
 				}
 			}
 			return InteractionResult.PASS;
@@ -124,7 +122,7 @@ public class ItemCustomization implements ModInitializer {
 			player.getAdvancements().award(entry, "apply_item_customization_smithing_template");
 	}
 
-	public static void refreshRuntimeChangeableIndexes() {
+	public static void refreshRuntimeChangeableIndexes(Object object) {
 		Set<Tuple<Pattern, IdentifierIndex>> PATTERN_TO_INDEX = Set.of(
 				new Tuple<>(Pattern.compile("^assets/([^/]+)/items/(.+)\\.json$"), ITEMS_MODEL_INDEX),
 				new Tuple<>(Pattern.compile("^assets/([^/]+)/equipment/(.+)\\.json$"), EQUIPMENT_MODEL_INDEX),

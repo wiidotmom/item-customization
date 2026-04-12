@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(SmithingMenu.class)
-public interface SmithingScreenHandlerAccessor {
+public interface SmithingMenuAccessor {
     @Invoker
     void callShrinkStackInSlot(int slot);
 }

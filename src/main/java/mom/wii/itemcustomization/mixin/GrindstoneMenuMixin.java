@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(GrindstoneMenu.class)
-public class GrindstoneScreenHandlerMixin {
+public class GrindstoneMenuMixin {
     @Inject(method = "computeResult", at = @At("HEAD"), cancellable = true)
     private void itemCustomization$getOutputStack(ItemStack firstInput, ItemStack secondInput, CallbackInfoReturnable<ItemStack> cir) {
         if (!firstInput.isEmpty() && secondInput.isEmpty()) {

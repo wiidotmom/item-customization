@@ -3,12 +3,12 @@
   "package": "mom.wii.itemcustomization.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "ForgingScreenHandlerAccessor",
-    "GrindstoneScreenHandlerMixin",
+    "ItemCombinerMenuMixin",
+    "GrindstoneMenuMixin",
     "ItemStackMixin",
-    "ServerCommonNetworkHandlerMixin",
-    "SmithingScreenHandlerAccessor",
-    "SmithingScreenHandlerMixin"
+    "ServerCommonPacketListenerImplMixin",
+    "SmithingMenuAccessor",
+    "SmithingMenuMixin"
   ],
   "injectors": {
     "defaultRequire": 1

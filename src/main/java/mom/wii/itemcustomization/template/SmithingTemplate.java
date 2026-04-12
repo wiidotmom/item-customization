@@ -1,9 +1,12 @@
 package mom.wii.itemcustomization.template;
 
 import mom.wii.itemcustomization.ItemCustomization;
+import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -25,14 +28,7 @@ import net.minecraft.server.dialog.body.PlainMessage;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.EitherHolder;
-import net.minecraft.world.item.Instrument;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.JukeboxPlayable;
-import net.minecraft.world.item.JukeboxSong;
-import net.minecraft.world.item.PlayerHeadItem;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.InstrumentComponent;
@@ -42,7 +38,6 @@ import net.minecraft.world.item.equipment.EquipmentAsset;
 import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -53,7 +48,6 @@ import java.util.function.Supplier;
 import static mom.wii.itemcustomization.dialog.DialogManager.simpleTranslatableMenuButton;
 
 public class SmithingTemplate {
-    private static final ItemStack PREVIEW_SLOT_ITEMSTACK;
     public static final HashMap<String, Integer> COST_MAP = new HashMap<>() {{
         put("item_model", 1);
         put("equipment_model", 6);
@@ -93,15 +87,14 @@ public class SmithingTemplate {
        put("instrument", (t, i) -> !i.getPrototype().has(DataComponents.INSTRUMENT));
     }};
     public ItemStack itemStack;
-    public static final Item ingredient;
-
-
-    static {
-        ItemStack egg = new ItemStack(Items.EGG);
-        egg.applyComponents(DataComponentMap.builder().set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, "preview_slot")).build());
-        PREVIEW_SLOT_ITEMSTACK = egg;
-        ingredient = BuiltInRegistries.ITEM.getValue(Identifier.parse(ItemCustomization.CONFIG.smithingIngredient));
-    }
+    public static final Item ingredient = BuiltInRegistries.ITEM.getValue(Identifier.parse(ItemCustomization.CONFIG.smithingIngredient));
+    private static final ItemStackTemplate PREVIEW_SLOT_ITEMSTACK_TEMPLATE = new ItemStackTemplate(
+            Items.EGG.builtInRegistryHolder(),
+            1,
+            DataComponentPatch.builder()
+                    .set(DataComponents.ITEM_MODEL, Identifier.fromNamespaceAndPath(ItemCustomization.MOD_ID, "preview_slot"))
+                    .build()
+    );
 
     private SmithingTemplate(ItemStack itemStack) {
         this.itemStack = itemStack;
@@ -122,8 +115,8 @@ public class SmithingTemplate {
         return new SmithingTemplate(virtual);
     }
 
-    public static boolean isItemCustomizationSmithingTemplate(ItemStack itemStack, PacketContext context) {
-        return isItemCustomizationSmithingTemplate(itemStack);
+    public static boolean isItemCustomizationSmithingTemplate(ItemInstance itemInstance, PacketContext context) {
+        return itemInstance.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().contains("igalaxy_item_customization:is_customization_template");
     }
 
     public static boolean isItemCustomizationSmithingTemplate(ItemStack itemStack) {
@@ -132,7 +125,7 @@ public class SmithingTemplate {
 
     public void openDialog(ServerPlayer player) {
         ItemStack previewItem = new ItemStack(Items.PAPER);
-        previewItem.set(DataComponents.ITEM_NAME, Component.translatableWithFallback("gui.igalaxy_item_customization.preview_item", "Preview Item"));
+        previewItem.applyComponents(DataComponentPatch.builder().set(DataComponents.ITEM_NAME, Component.translatableWithFallback("gui.igalaxy_item_customization.preview_item", "Preview Item")).build());
         this.applySettings(previewItem, player.level());
 
         MultiActionDialog dialog = new MultiActionDialog(
@@ -144,8 +137,8 @@ public class SmithingTemplate {
                     DialogAction.WAIT_FOR_RESPONSE,
                     List.of(
                             new PlainMessage(Component.translatableWithFallback("gui.igalaxy_item_customization.preview", "Preview"), 200),
-                            new ItemBody(PREVIEW_SLOT_ITEMSTACK, Optional.empty(), false, false, 16, 1),
-                            new ItemBody(previewItem, Optional.empty(), false, true, 16, 24),
+                            new ItemBody(PREVIEW_SLOT_ITEMSTACK_TEMPLATE, Optional.empty(), false, false, 16, 1),
+                            new ItemBody(ItemStackTemplate.fromNonEmptyStack(previewItem), Optional.empty(), false, true, 16, 24),
                             this.getCostDialogBody(),
                             new PlainMessage(Component.translatable("options.title"), 200)
                     ),
@@ -260,10 +253,10 @@ public class SmithingTemplate {
         }
     }
 
-    public void applySettings(ItemStack stack, Level world) {
+    public void applySettings(ItemStack stack, Level level) {
         if (this.hasSetting("item_model")) {
             Identifier id = Identifier.parse(((StringTag) this.getSetting("item_model")).value());
-            stack.set(DataComponents.ITEM_MODEL, id);
+            stack.applyComponents(DataComponentPatch.builder().set(DataComponents.ITEM_MODEL, id).build());
 
             if (ItemCustomization.CONFIG.overrideHeadEquipmentModels && stack.getComponents().has(DataComponents.EQUIPPABLE)) {
                 Equippable ec = stack.get(DataComponents.EQUIPPABLE);
@@ -271,13 +264,13 @@ public class SmithingTemplate {
                     Equippable newEquippableComponent = new Equippable(
                             ec.slot(), ec.equipSound(), Optional.empty(), ec.cameraOverlay(), ec.allowedEntities(), ec.dispensable(), ec.swappable(), ec.damageOnHurt(), ec.equipOnInteract(), ec.canBeSheared(), ec.shearingSound()
                     );
-                    stack.set(DataComponents.EQUIPPABLE, newEquippableComponent);
+                    stack.applyComponents(DataComponentPatch.builder().set(DataComponents.EQUIPPABLE, newEquippableComponent).build());
                 }
             }
         }
         if (this.hasSetting("equipment_model")) {
             Identifier id = Identifier.parse(((StringTag) this.getSetting("equipment_model")).value());
-            if (stack.getPrototype().has(DataComponents.EQUIPPABLE)) {
+            if (stack.getComponents().has(DataComponents.EQUIPPABLE)) {
                 Equippable ec = stack.get(DataComponents.EQUIPPABLE);
                 ResourceKey<EquipmentAsset> equipmentAsset = ResourceKey.create(ResourceKey.createRegistryKey(Identifier.withDefaultNamespace("equipment_asset")), id);
                 Equippable newEquippableComponent = new Equippable(
@@ -285,29 +278,29 @@ public class SmithingTemplate {
                         Optional.of(equipmentAsset),
                         ec.cameraOverlay(), ec.allowedEntities(), ec.dispensable(), ec.swappable(), ec.damageOnHurt(), ec.equipOnInteract(), ec.canBeSheared(), ec.shearingSound()
                 );
-                stack.set(DataComponents.EQUIPPABLE, newEquippableComponent);
+                stack.applyComponents(DataComponentPatch.builder().set(DataComponents.EQUIPPABLE, newEquippableComponent).build());
             }
         }
         if (this.hasSetting("camera_overlay")) {
             Identifier id = Identifier.parse(((StringTag) this.getSetting("camera_overlay")).value());
-            if (stack.getPrototype().has(DataComponents.EQUIPPABLE) && stack.getPrototype().get(DataComponents.EQUIPPABLE).slot().equals(EquipmentSlot.HEAD)) {
+            if (stack.getComponents().has(DataComponents.EQUIPPABLE) && stack.getComponents().get(DataComponents.EQUIPPABLE).slot().equals(EquipmentSlot.HEAD)) {
                 Equippable ec = stack.get(DataComponents.EQUIPPABLE);
                 Equippable newEquippableComponent = new Equippable(
                         ec.slot(), ec.equipSound(), ec.assetId(),
                         Optional.of(id),
                         ec.allowedEntities(), ec.dispensable(), ec.swappable(), ec.damageOnHurt(), ec.equipOnInteract(), ec.canBeSheared(), ec.shearingSound()
                 );
-                stack.set(DataComponents.EQUIPPABLE, newEquippableComponent);
+                stack.applyComponents(DataComponentPatch.builder().set(DataComponents.EQUIPPABLE, newEquippableComponent).build());
 
-                if (stack.getComponents().has(DataComponents.ATTRIBUTE_MODIFIERS) && ItemCustomization.CONFIG.customizedHeadVisibleOnPlayerLocatorBar) {
+                if (stack.getPrototype().has(DataComponents.ATTRIBUTE_MODIFIERS) && ItemCustomization.CONFIG.customizedHeadVisibleOnPlayerLocatorBar) {
                     ItemAttributeModifiers attributeModifiersComponent = stack.get(DataComponents.ATTRIBUTE_MODIFIERS);
                     ItemAttributeModifiers newAttributeModifiersComponent = new ItemAttributeModifiers(
                             attributeModifiersComponent.modifiers().stream().filter(x -> !x.modifier().is(Identifier.parse("minecraft:waypoint_transmit_range_hide"))).toList()
                     );
                     if (!newAttributeModifiersComponent.modifiers().isEmpty())
-                        stack.set(DataComponents.ATTRIBUTE_MODIFIERS, newAttributeModifiersComponent);
+                        stack.applyComponents(DataComponentPatch.builder().set(DataComponents.ATTRIBUTE_MODIFIERS, newAttributeModifiersComponent).build());
                     else
-                        stack.remove(DataComponents.ATTRIBUTE_MODIFIERS);
+                        stack.applyComponents(DataComponentPatch.builder().remove(DataComponents.ATTRIBUTE_MODIFIERS).build());
                 }
             }
         }
@@ -318,25 +311,27 @@ public class SmithingTemplate {
             List<String> strings = data.getListOrEmpty("strings").stream().map(x -> x.asString().orElseThrow()).toList();
             List<Integer> colors = data.getListOrEmpty("colors").stream().map(x -> x.asInt().orElseThrow()).toList();
             CustomModelData customModelDataComponent = new CustomModelData(floats, flags, strings, colors);
-            stack.set(DataComponents.CUSTOM_MODEL_DATA, customModelDataComponent);
+            stack.applyComponents(DataComponentPatch.builder().set(DataComponents.CUSTOM_MODEL_DATA, customModelDataComponent).build());
         }
         if (this.hasSetting("tooltip_style")) {
             String style = ((StringTag) this.getSetting("tooltip_style")).value();
-            stack.set(DataComponents.TOOLTIP_STYLE, Identifier.parse(style));
+            stack.applyComponents(DataComponentPatch.builder().set(DataComponents.TOOLTIP_STYLE, Identifier.parse(style)).build());
         }
         if (this.hasSetting("note_block_sound")) {
             String s = ((StringTag) this.getSetting("note_block_sound")).value();
-            stack.set(DataComponents.NOTE_BLOCK_SOUND, Identifier.parse(s));
+            stack.applyComponents(DataComponentPatch.builder().set(DataComponents.NOTE_BLOCK_SOUND, Identifier.parse(s)).build());
         }
         if (this.hasSetting("jukebox_song")) {
             String s = ((StringTag) this.getSetting("jukebox_song")).value();
-            Holder.Reference<JukeboxSong> song = world.registryAccess().lookupOrThrow(Registries.JUKEBOX_SONG).get(Identifier.parse(s)).get();
-            stack.set(DataComponents.JUKEBOX_PLAYABLE, new JukeboxPlayable(new EitherHolder<>(song)));
+            Registry<JukeboxSong> jukeboxSongRegistry = level.registryAccess().lookupOrThrow(Registries.JUKEBOX_SONG);
+            JukeboxSong song = jukeboxSongRegistry.getValue(Identifier.parse(s));
+            Holder<JukeboxSong> holder = jukeboxSongRegistry.wrapAsHolder(song);
+            stack.applyComponents(DataComponentPatch.builder().set(DataComponents.JUKEBOX_PLAYABLE, new JukeboxPlayable(holder)).build());
         }
         if (this.hasSetting("instrument")) {
             String i = ((StringTag) this.getSetting("instrument")).value();
-            Holder.Reference<Instrument> instrument = world.registryAccess().lookupOrThrow(Registries.INSTRUMENT).get(Identifier.parse(i)).get();
-            stack.set(DataComponents.INSTRUMENT, new InstrumentComponent(Holder.direct(instrument.value())));
+            Holder.Reference<Instrument> instrument = level.registryAccess().lookupOrThrow(Registries.INSTRUMENT).get(Identifier.parse(i)).get();
+            stack.applyComponents(DataComponentPatch.builder().set(DataComponents.INSTRUMENT, new InstrumentComponent(Holder.direct(instrument.value()))).build());
         }
         if (this.hasSetting("hidden_components")) {
             ListTag list = (ListTag) this.getSetting("hidden_components");
@@ -347,7 +342,7 @@ public class SmithingTemplate {
                             .filter(x -> stack.getComponents().has(x))
                             .toList()
             );
-            stack.set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(false, hidden));
+            stack.applyComponents(DataComponentPatch.builder().set(DataComponents.TOOLTIP_DISPLAY, new TooltipDisplay(false, hidden)).build());
         }
     }
 
@@ -368,7 +363,7 @@ public class SmithingTemplate {
     private DialogBody getCostDialogBody() {
         if (this.getCost() > 0) {
             return new ItemBody(
-                    new ItemStack(ingredient, this.getCost()),
+                    new ItemStackTemplate(ingredient, this.getCost()),
                     Optional.of(new PlainMessage(
                             Component.translatableWithFallback("gui.igalaxy_item_customization.to_apply", "to apply"), 50
                     )),
