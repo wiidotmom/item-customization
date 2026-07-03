@@ -1,5 +1,6 @@
 package mom.wii.itemcustomization.template;
 
+import com.mojang.datafixers.util.Pair;
 import mom.wii.itemcustomization.ItemCustomization;
 import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.minecraft.ChatFormatting;
@@ -26,7 +27,6 @@ import net.minecraft.server.dialog.body.DialogBody;
 import net.minecraft.server.dialog.body.ItemBody;
 import net.minecraft.server.dialog.body.PlainMessage;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.CustomData;
@@ -57,24 +57,24 @@ public class SmithingTemplate {
         put("jukebox_song", 6);
         put("instrument", 6);
     }};
-    public static final LinkedHashMap<String, Tuple<String, Function<Tag, String>>> TOOLTIPS = new LinkedHashMap<>() {{
-        put("item_model", new Tuple<>("Item Model", (e) -> e.asString().get()));
-        put("equipment_model", new Tuple<>("Equipment Model", (e) ->  e.asString().get()));
-        put("camera_overlay", new Tuple<>("Camera Overlay", (e) ->  e.asString().get()));
-        put("custom_model_data", new Tuple<>("Custom Model Data", (e) -> {
+    public static final LinkedHashMap<String, Pair<String, Function<Tag, String>>> TOOLTIPS = new LinkedHashMap<>() {{
+        put("item_model", new Pair<>("Item Model", (e) -> e.asString().get()));
+        put("equipment_model", new Pair<>("Equipment Model", (e) ->  e.asString().get()));
+        put("camera_overlay", new Pair<>("Camera Overlay", (e) ->  e.asString().get()));
+        put("custom_model_data", new Pair<>("Custom Model Data", (e) -> {
             StringTagVisitor writer = new StringTagVisitor();
             writer.visitCompound(e.asCompound().get());
             return writer.build();
         }));
-        put("tooltip_style", new Tuple<>("Tooltip Style",  (e) -> e.asString().get()));
-        put("hidden_components", new Tuple<>("Hidden Components", (e) -> {
+        put("tooltip_style", new Pair<>("Tooltip Style",  (e) -> e.asString().get()));
+        put("hidden_components", new Pair<>("Hidden Components", (e) -> {
             StringTagVisitor writer = new StringTagVisitor();
             writer.visitList(e.asList().get());
             return writer.build();
         }));
-        put("note_block_sound", new Tuple<>("Note Block Sound", (e) -> e.asString().get()));
-        put("jukebox_song", new  Tuple<>("Jukebox Song", (e) -> e.asString().get()));
-        put("instrument", new Tuple<>("Instrument", (e) -> e.asString().get()));
+        put("note_block_sound", new Pair<>("Note Block Sound", (e) -> e.asString().get()));
+        put("jukebox_song", new  Pair<>("Jukebox Song", (e) -> e.asString().get()));
+        put("instrument", new Pair<>("Instrument", (e) -> e.asString().get()));
     }};
     public static final HashMap<String, BiPredicate<SmithingTemplate, ItemStack>> CAN_APPLY_PREDICATES = new HashMap<>() {{
        put("equipment_model", (t, i) -> !i.getPrototype().has(DataComponents.EQUIPPABLE));
@@ -178,7 +178,7 @@ public class SmithingTemplate {
             TOOLTIPS.forEach((id, p) -> {
                 if (this.hasSetting(id)) {
                     Tag e = this.getSetting(id);
-                    addToTooltip(tooltip, p.getA(), p.getB().apply(e));
+                    addToTooltip(tooltip, p.getFirst(), p.getSecond().apply(e));
                 }
             });
         }

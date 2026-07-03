@@ -1,5 +1,6 @@
 package mom.wii.itemcustomization;
 
+import com.mojang.datafixers.util.Pair;
 import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import mom.wii.itemcustomization.config.Config;
 import mom.wii.itemcustomization.dialog.DialogManager;
@@ -9,22 +10,24 @@ import mom.wii.itemcustomization.template.SmithingTemplate;
 import mom.wii.itemcustomization.util.IdentifierIndex;
 import net.fabricmc.api.ModInitializer;
 
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLevelEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.fabricmc.fabric.api.event.registry.DynamicRegistrySetupCallback;
+import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.*;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.functions.FunctionReference;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ScoreHolder;
 import org.slf4j.Logger;
@@ -103,6 +106,19 @@ public class ItemCustomization implements ModInitializer {
 			});
 		});
 
+		LootTableEvents.MODIFY.register((resourceKey, builder, lootTableSource, provider) -> {
+			if (resourceKey.identifier().equals(Identifier.fromNamespaceAndPath("minecraft", "archaeology/trail_ruins_rare"))) {
+				builder.modifyPools(modifier -> {
+					modifier.add(
+							LootItem.lootTableItem(net.minecraft.world.item.Items.COMMAND_BLOCK)
+									.apply(FunctionReference.functionReference(
+											ResourceKey.create(Registries.ITEM_MODIFIER, Identifier.fromNamespaceAndPath(MOD_ID, "customization_template"))
+									))
+					);
+				});
+			}
+		});
+
 //		CommandRegistrationCallback.EVENT.register(
 //				(commandDispatcher, commandBuildContext, commandSelection) ->
 //						MinecraftAdmiral.builder(commandDispatcher, commandBuildContext).addCommandClasses(
@@ -123,15 +139,15 @@ public class ItemCustomization implements ModInitializer {
 	}
 
 	public static void refreshRuntimeChangeableIndexes(Object object) {
-		Set<Tuple<Pattern, IdentifierIndex>> PATTERN_TO_INDEX = Set.of(
-				new Tuple<>(Pattern.compile("^assets/([^/]+)/items/(.+)\\.json$"), ITEMS_MODEL_INDEX),
-				new Tuple<>(Pattern.compile("^assets/([^/]+)/equipment/(.+)\\.json$"), EQUIPMENT_MODEL_INDEX),
-				new Tuple<>(Pattern.compile("^assets/([^/]+)/textures/misc/(.+)\\.png$"), CAMERA_OVERLAY_INDEX),
-				new Tuple<>(Pattern.compile("^assets/([^/]+)/textures/gui/sprites/tooltip/(.+)_frame\\.png$"), TOOLTIP_STYLE_INDEX)
+		Set<Pair<Pattern, IdentifierIndex>> PATTERN_TO_INDEX = Set.of(
+				new Pair<>(Pattern.compile("^assets/([^/]+)/items/(.+)\\.json$"), ITEMS_MODEL_INDEX),
+				new Pair<>(Pattern.compile("^assets/([^/]+)/equipment/(.+)\\.json$"), EQUIPMENT_MODEL_INDEX),
+				new Pair<>(Pattern.compile("^assets/([^/]+)/textures/misc/(.+)\\.png$"), CAMERA_OVERLAY_INDEX),
+				new Pair<>(Pattern.compile("^assets/([^/]+)/textures/gui/sprites/tooltip/(.+)_frame\\.png$"), TOOLTIP_STYLE_INDEX)
 		);
-		for (Tuple<Pattern, IdentifierIndex> pair : PATTERN_TO_INDEX) {
-			LOGGER.info("Clearing {} index", pair.getB().id);
-			pair.getB().clear();
+		for (Pair<Pattern, IdentifierIndex> pair : PATTERN_TO_INDEX) {
+			LOGGER.info("Clearing {} index", pair.getSecond().id);
+			pair.getSecond().clear();
 		}
 
 		try {
@@ -142,8 +158,8 @@ public class ItemCustomization implements ModInitializer {
 			while (entries.hasMoreElements()) {
 				ZipEntry entry = entries.nextElement();
 				PATTERN_TO_INDEX.forEach(pair -> {
-					Pattern pattern = pair.getA();
-					IdentifierIndex index = pair.getB();
+					Pattern pattern = pair.getFirst();
+					IdentifierIndex index = pair.getSecond();
 					if (entry.getName().matches(pattern.pattern())) {
 						Matcher matcher = pattern.matcher(entry.getName());
 						while (matcher.find()) {
