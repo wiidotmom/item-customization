@@ -27,7 +27,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
-import net.minecraft.world.level.storage.loot.functions.FunctionReference;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ScoreHolder;
 import org.slf4j.Logger;
@@ -111,8 +110,10 @@ public class ItemCustomization implements ModInitializer {
 				builder.modifyPools(modifier -> {
 					modifier.add(
 							LootItem.lootTableItem(net.minecraft.world.item.Items.COMMAND_BLOCK)
-									.apply(FunctionReference.functionReference(
-											ResourceKey.create(Registries.ITEM_MODIFIER, Identifier.fromNamespaceAndPath(MOD_ID, "customization_template"))
+									.apply(provider.lookupOrThrow(Registries.ITEM_MODIFIER).getOrThrow(
+											ResourceKey.create(
+													Registries.ITEM_MODIFIER, Identifier.fromNamespaceAndPath(MOD_ID, "customization_template")
+											)
 									))
 					);
 				});

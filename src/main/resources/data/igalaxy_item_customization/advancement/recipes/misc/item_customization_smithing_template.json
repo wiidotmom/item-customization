@@ -17,7 +17,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "igalaxy_item_customization:item_customization_smithing_template"
+        "recipes": "igalaxy_item_customization:item_customization_smithing_template"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

@@ -45,7 +45,7 @@ dependencies {
 	implementation "folk.sisby:kaleido-config:${project.kaleido_config_version}"
 	include "folk.sisby:kaleido-config:${project.kaleido_config_version}"
 
-	localRuntime "maven.modrinth:spark:${project.spark_version}-fabric"
+//	localRuntime "maven.modrinth:spark:${project.spark_version}-fabric"
 }
 
 processResources {
